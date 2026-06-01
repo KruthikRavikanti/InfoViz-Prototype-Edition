@@ -17,28 +17,40 @@ type CompareDrawerProps = {
   onCompareModeChange: (enabled: boolean) => void;
 };
 
-function formatScore(score: number | null): string {
-  return score === null ? 'Unavailable' : score.toFixed(3);
+function fmt(score: number | null) { return score === null ? '—' : score.toFixed(3); }
+function fmtDiff(v: number | null) {
+  if (v === null) return '—';
+  return `${v >= 0 ? '+' : ''}${v.toFixed(3)}`;
 }
 
-function formatDifference(value: number | null): string {
-  if (value === null) {
-    return 'Unavailable';
-  }
-
-  return `${value >= 0 ? '+' : ''}${value.toFixed(3)}`;
+function ImageModal({ image, onClose }: { image: EvidenceImage; onClose: () => void }) {
+  const [missing, setMissing] = useState(false);
+  return (
+    <div className="image-modal-backdrop" role="presentation" onClick={onClose}>
+      <div className="image-modal" role="dialog" aria-modal="true" aria-label={image.imageName}
+           onClick={(e) => e.stopPropagation()}>
+        <div className="image-modal-header">
+          <div>
+            <h3>{image.imageName}</h3>
+            <p>{image.valueLabel ?? `Value: ${image.value.toFixed(3)}`}</p>
+          </div>
+          <button type="button" onClick={onClose}>Close</button>
+        </div>
+        {missing
+          ? <span className="modal-missing-image">Image unavailable</span>
+          : <img src={image.imageUrl} alt={image.imageName} onError={() => setMissing(true)} />}
+      </div>
+    </div>
+  );
 }
 
-function CompareCellCard({
-  label,
-  cell,
-  onOpenImage,
-  evidenceView,
+function CellCard({
+  label, cell, evidenceView, onOpenImage,
 }: {
   label: 'A' | 'B';
   cell: SelectedHeatmapCell;
-  onOpenImage: (image: EvidenceImage) => void;
   evidenceView: ReturnType<typeof buildEvidenceView>;
+  onOpenImage: (i: EvidenceImage) => void;
 }) {
   return (
     <article className="compare-cell-card">
@@ -47,19 +59,19 @@ function CompareCellCard({
         <div>
           <h3>{cell.model}</h3>
           <p>
-            {cell.roi} <span className="model-tag">{inferModelCategory(cell.model)}</span>
+            <span style={{ textTransform: 'uppercase', fontWeight: 700 }}>{cell.roi}</span>
+            {' · '}
+            <span className="model-tag">{inferModelCategory(cell.model)}</span>
           </p>
         </div>
       </div>
       <dl className="compare-metrics">
-        <div>
-          <dt>Aggregate</dt>
-          <dd>{formatScore(cell.score)}</dd>
-        </div>
+        <div><dt>Score</dt><dd>{fmt(cell.score)}</dd></div>
+        <div><dt>ROI rank</dt><dd>{cell.rankWithinRoi === null ? '—' : `#${cell.rankWithinRoi}`}</dd></div>
       </dl>
       {evidenceView ? (
         <>
-          <ImageGrid title={`Top ${label}`} images={evidenceView.topImages} onOpenImage={onOpenImage} compact />
+          <ImageGrid title={`Top ${label}`}    images={evidenceView.topImages}    onOpenImage={onOpenImage} compact />
           <ImageGrid title={`Bottom ${label}`} images={evidenceView.bottomImages} onOpenImage={onOpenImage} compact />
         </>
       ) : (
@@ -69,42 +81,12 @@ function CompareCellCard({
   );
 }
 
-function ImageModal({ image, onClose }: { image: EvidenceImage; onClose: () => void }) {
-  const [imageMissing, setImageMissing] = useState(false);
-
-  return (
-    <div className="image-modal-backdrop" role="presentation" onClick={onClose}>
-      <div className="image-modal" role="dialog" aria-modal="true" aria-label={image.imageName} onClick={(event) => event.stopPropagation()}>
-        <div className="image-modal-header">
-          <div>
-            <h3>{image.imageName}</h3>
-            <p>{image.valueLabel ?? `Value: ${image.value.toFixed(3)}`}</p>
-          </div>
-          <button type="button" onClick={onClose}>
-            Close
-          </button>
-        </div>
-        {imageMissing ? (
-          <span className="modal-missing-image">Image unavailable</span>
-        ) : (
-          <img src={image.imageUrl} alt={image.imageName} onError={() => setImageMissing(true)} />
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function CompareDrawer({
-  compareMode,
-  compareCells,
-  heatmapCells,
-  rows,
-  modelRoiColumns,
-  topK,
-  onCompareModeChange,
+  compareMode, compareCells, heatmapCells, rows, modelRoiColumns, topK, onCompareModeChange,
 }: CompareDrawerProps) {
   const [modalImage, setModalImage] = useState<EvidenceImage | null>(null);
   const [cellA, cellB] = compareCells;
+
   const evidenceA = useMemo(
     () => (cellA ? buildEvidenceView(cellA, rows, modelRoiColumns, topK) : null),
     [cellA, modelRoiColumns, rows, topK],
@@ -113,57 +95,31 @@ export function CompareDrawer({
     () => (cellB ? buildEvidenceView(cellB, rows, modelRoiColumns, topK) : null),
     [cellB, modelRoiColumns, rows, topK],
   );
-  const compareSummary = cellA && cellB ? buildCompareSummary(cellA, evidenceA, cellB, evidenceB) : null;
-  const similarNeighbors = useMemo(
-    () =>
-      cellA && cellB
-        ? findSharedCompareNeighbors(cellA, evidenceA, cellB, evidenceB, heatmapCells, rows, modelRoiColumns, topK)
-        : [],
+  const summary = cellA && cellB ? buildCompareSummary(cellA, evidenceA, cellB, evidenceB) : null;
+
+  // kept for future use
+  const _neighbors = useMemo(
+    () => (cellA && cellB ? findSharedCompareNeighbors(cellA, evidenceA, cellB, evidenceB, heatmapCells, rows, modelRoiColumns, topK) : []),
     [cellA, cellB, evidenceA, evidenceB, heatmapCells, modelRoiColumns, rows, topK],
   );
 
   useEffect(() => {
-    if (!cellA || !cellB) {
-      return;
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onCompareModeChange(false);
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    if (!cellA || !cellB) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onCompareModeChange(false); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, [cellA, cellB, onCompareModeChange]);
 
-  function handleExportCompare() {
-    if (!cellA || !cellB || !compareSummary) {
-      return;
-    }
-
+  function handleExport() {
+    if (!cellA || !cellB || !summary) return;
     downloadJson('compare-summary.json', {
-      cellA: {
-        roi: cellA.roi,
-        model: cellA.model,
-        modelCategory: inferModelCategory(cellA.model),
-        aggregateScore: cellA.score,
-        evidence: evidenceA,
-      },
-      cellB: {
-        roi: cellB.roi,
-        model: cellB.model,
-        modelCategory: inferModelCategory(cellB.model),
-        aggregateScore: cellB.score,
-        evidence: evidenceB,
-      },
-      summary: compareSummary,
+      cellA: { roi: cellA.roi, model: cellA.model, modelCategory: inferModelCategory(cellA.model), aggregateScore: cellA.score, evidence: evidenceA },
+      cellB: { roi: cellB.roi, model: cellB.model, modelCategory: inferModelCategory(cellB.model), aggregateScore: cellB.score, evidence: evidenceB },
+      summary,
     });
   }
 
-  if (!compareMode || !cellA || !cellB) {
-    return null;
-  }
+  if (!compareMode || !cellA || !cellB) return null;
 
   return (
     <div className="compare-modal-backdrop" role="presentation" onClick={() => onCompareModeChange(false)}>
@@ -172,93 +128,69 @@ export function CompareDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Compare two cells"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
+        {/* Heading */}
         <div className="compare-drawer-heading">
           <div>
-            <h2>Compare cells</h2>
-            <p>Review image-level overlap and score differences for the two selected cells.</p>
+            <h2>Compare</h2>
+            <p>Image overlap and score differences between the two selected cells.</p>
           </div>
           <button className="compare-close-button" type="button" onClick={() => onCompareModeChange(false)}>
-            Close
+            Close &thinsp; <kbd style={{ fontFamily: 'inherit', fontSize: '.72rem', opacity: .7 }}>Esc</kbd>
           </button>
         </div>
 
         <div className="compare-drawer-body">
-          <p className="compare-selection-note">{compareCells.length}/2 cells selected</p>
+          <p className="compare-selection-note">{compareCells.length} / 2 cells selected</p>
 
+          {/* Side-by-side cards */}
           <div className="compare-card-grid">
-            <CompareCellCard
-              label="A"
-              cell={cellA}
-              onOpenImage={setModalImage}
-              evidenceView={evidenceA}
-            />
-            <CompareCellCard
-              label="B"
-              cell={cellB}
-              onOpenImage={setModalImage}
-              evidenceView={evidenceB}
-            />
+            <CellCard label="A" cell={cellA} evidenceView={evidenceA} onOpenImage={setModalImage} />
+            <CellCard label="B" cell={cellB} evidenceView={evidenceB} onOpenImage={setModalImage} />
           </div>
 
-          {compareSummary ? (
+          {/* Overlap section */}
+          {summary ? (
             <section className="compare-overlap-section">
               <div className="compare-badge-row">
-                <span>Top overlap: {compareSummary.top.overlap.length}</span>
-                <span>Bottom overlap: {compareSummary.bottom.overlap.length}</span>
-                <span>Aggregate diff A-B: {formatDifference(compareSummary.aggregateScoreDifference)}</span>
-                <span>Mean diff A-B: {formatDifference(compareSummary.imageMeanDifference)}</span>
+                <span>Top overlap: {summary.top.overlap.length}</span>
+                <span>Bottom overlap: {summary.bottom.overlap.length}</span>
+                <span>Score diff A–B: {fmtDiff(summary.aggregateScoreDifference)}</span>
+                <span>Mean diff A–B: {fmtDiff(summary.imageMeanDifference)}</span>
               </div>
+
               <p className="compare-summary-note">
-                {compareSummary.top.overlap.length > 0 || compareSummary.bottom.overlap.length > 0 ? (
+                {summary.top.overlap.length > 0 || summary.bottom.overlap.length > 0 ? (
                   <>
-                    These selections already share <strong>{compareSummary.top.overlap.length}</strong> top images
-                    and <strong>{compareSummary.bottom.overlap.length}</strong> bottom images inside the active
-                    evidence window, which makes them useful candidates for "same evidence, different score"
-                    inspection.
+                    These cells share <strong>{summary.top.overlap.length}</strong> top images
+                    and <strong>{summary.bottom.overlap.length}</strong> bottom images — useful for
+                    "same evidence, different score" inspection.
                   </>
                 ) : (
-                  <>
-                    The two selections are not surfacing the same top or bottom images inside the active evidence
-                    window, so any aggregate similarity is likely coming from different stimuli.
-                  </>
+                  'No shared images in the current evidence window. Any aggregate similarity likely comes from different stimuli.'
                 )}
               </p>
+
               <div className="panel-action-row">
-                <button type="button" onClick={handleExportCompare}>
-                  Export compare JSON
-                </button>
+                <button type="button" onClick={handleExport}>Export JSON</button>
+              </div>
+
+              <div className="compare-overlap-grid">
+                <ImageGrid title="Overlapping top"    images={summary.top.overlap}   onOpenImage={setModalImage} compact />
+                <ImageGrid title="Unique to A (top)"  images={summary.top.uniqueA}   onOpenImage={setModalImage} compact />
+                <ImageGrid title="Unique to B (top)"  images={summary.top.uniqueB}   onOpenImage={setModalImage} compact />
               </div>
               <div className="compare-overlap-grid">
-                <ImageGrid title="Overlapping top images" images={compareSummary.top.overlap} onOpenImage={setModalImage} compact />
-                <ImageGrid title="Unique top images for A" images={compareSummary.top.uniqueA} onOpenImage={setModalImage} compact />
-                <ImageGrid title="Unique top images for B" images={compareSummary.top.uniqueB} onOpenImage={setModalImage} compact />
+                <ImageGrid title="Overlapping bottom"    images={summary.bottom.overlap}  onOpenImage={setModalImage} compact />
+                <ImageGrid title="Unique to A (bottom)"  images={summary.bottom.uniqueA}  onOpenImage={setModalImage} compact />
+                <ImageGrid title="Unique to B (bottom)"  images={summary.bottom.uniqueB}  onOpenImage={setModalImage} compact />
               </div>
-              <div className="compare-overlap-grid">
-                <ImageGrid
-                  title="Overlapping bottom images"
-                  images={compareSummary.bottom.overlap}
-                  onOpenImage={setModalImage}
-                  compact
-                />
-                <ImageGrid
-                  title="Unique bottom images for A"
-                  images={compareSummary.bottom.uniqueA}
-                  onOpenImage={setModalImage}
-                  compact
-                />
-                <ImageGrid
-                  title="Unique bottom images for B"
-                  images={compareSummary.bottom.uniqueB}
-                  onOpenImage={setModalImage}
-                  compact
-                />
-              </div>
-              {/* Most similar other intersections section removed as requested */}
             </section>
           ) : (
-            <p className="compare-empty">Both selected cells need matching CSV columns before overlaps can be computed.</p>
+            <p className="compare-empty">
+              Both cells need matching CSV columns before image overlap can be computed.
+            </p>
           )}
         </div>
 

@@ -8,24 +8,24 @@ export function Header({ imageCount, modelCount, roiCount }: HeaderProps) {
   return (
     <header className="app-header">
       <div>
-        <h1>Vision-AI Performance Visualization</h1>
+        <p className="eyebrow">Murty Lab · Vision AI</p>
+        <h1>Model Performance Dashboard</h1>
         <p className="lede">
-          Compare aggregate model alignment scores across cortical regions, then inspect the image-level evidence that
-          drives each ROI/model cell.
+          Aggregate alignment scores across cortical regions — click any cell to inspect image-level evidence.
         </p>
       </div>
       <dl className="summary-stats" aria-label="Dataset summary">
         <div>
           <dt>Images</dt>
-          <dd>{imageCount || '-'}</dd>
+          <dd>{imageCount || '—'}</dd>
         </div>
         <div>
           <dt>Models</dt>
-          <dd>{modelCount || '-'}</dd>
+          <dd>{modelCount || '—'}</dd>
         </div>
         <div>
           <dt>ROIs</dt>
-          <dd>{roiCount || '-'}</dd>
+          <dd>{roiCount || '—'}</dd>
         </div>
       </dl>
     </header>

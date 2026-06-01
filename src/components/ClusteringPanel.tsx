@@ -8,122 +8,83 @@ type ClusteringPanelProps = {
   onOpenImage: (image: EvidenceImage) => void;
 };
 
-const clusterColors = ['#256f77', '#b23a48', '#7c5d13', '#496d2f', '#5b55a0', '#a24b2a', '#315f9f', '#7a4776'];
+// Muted, harmonious palette — reads well on the warm off-white surface
+const CLUSTER_COLORS = [
+  '#4F5FA6', // slate-indigo
+  '#C0392B', // warm red
+  '#2A7D5B', // forest green
+  '#B45309', // amber
+  '#6B5EA8', // soft violet
+  '#1A7FA3', // steel blue
+  '#8B5E3C', // warm brown
+  '#3D7A6A', // teal
+];
 
-function formatNumber(value: number | null | undefined): string {
-  return value === null || value === undefined ? 'Unavailable' : value.toFixed(3);
-}
+function fmtN(v: number | null | undefined) { return v == null ? '—' : v.toFixed(3); }
+function fmtI(v: number | null | undefined) { return v == null ? '—' : String(v); }
 
-function formatInteger(value: number | null | undefined): string {
-  return value === null || value === undefined ? 'Unavailable' : String(value);
-}
-
-function getPointCoordinates(point: ClusterPoint, mode: ClusterView['coordinateMode']): { x: number; y: number } | null {
-  if (mode === 'plot' && point.plotX !== null && point.plotY !== null) {
-    return { x: point.plotX, y: point.plotY };
-  }
-
-  if (mode === 'pca' && point.pcaX !== null && point.pcaY !== null) {
-    return { x: point.pcaX, y: point.pcaY };
-  }
-
-  if (mode === 'tsne' && point.tsneX !== null && point.tsneY !== null) {
-    return { x: point.tsneX, y: point.tsneY };
-  }
-
+function coords(point: ClusterPoint, mode: ClusterView['coordinateMode']): { x: number; y: number } | null {
+  if (mode === 'plot' && point.plotX !== null && point.plotY !== null) return { x: point.plotX, y: point.plotY };
+  if (mode === 'pca'  && point.pcaX  !== null && point.pcaY  !== null) return { x: point.pcaX,  y: point.pcaY  };
+  if (mode === 'tsne' && point.tsneX !== null && point.tsneY !== null) return { x: point.tsneX, y: point.tsneY };
   return null;
 }
 
 function ClusterScatter({ view }: { view: ClusterView }) {
   if (!view.coordinateMode) {
-    return <p className="cluster-empty-note">No projection coordinates were found for this clustering output.</p>;
+    return <p className="cluster-empty-note">No projection coordinates available.</p>;
   }
 
-  const drawablePoints = view.points
-    .map((point) => {
-      const coordinates = getPointCoordinates(point, view.coordinateMode);
-      return coordinates ? { point, ...coordinates } : null;
-    })
-    .filter((point): point is { point: ClusterPoint; x: number; y: number } => point !== null);
+  const pts = view.points
+    .map((p) => { const c = coords(p, view.coordinateMode); return c ? { p, ...c } : null; })
+    .filter((d): d is { p: ClusterPoint; x: number; y: number } => d !== null);
 
-  if (drawablePoints.length === 0) {
-    return <p className="cluster-empty-note">No complete coordinate pairs were found for this clustering output.</p>;
-  }
+  if (pts.length === 0) return <p className="cluster-empty-note">No coordinate pairs found.</p>;
 
-  const xValues = drawablePoints.map((point) => point.x);
-  const yValues = drawablePoints.map((point) => point.y);
-  const minX = Math.min(...xValues);
-  const maxX = Math.max(...xValues);
-  const minY = Math.min(...yValues);
-  const maxY = Math.max(...yValues);
-  const width = 520;
-  const height = 320;
-  const padding = 24;
+  const xs = pts.map((d) => d.x);
+  const ys = pts.map((d) => d.y);
+  const [minX, maxX] = [Math.min(...xs), Math.max(...xs)];
+  const [minY, maxY] = [Math.min(...ys), Math.max(...ys)];
+  const W = 520, H = 300, pad = 20;
   const xSpan = maxX - minX || 1;
   const ySpan = maxY - minY || 1;
 
   return (
     <figure className="cluster-scatter">
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${view.coordinateMode.toUpperCase()} cluster scatter plot`}>
-        <rect x="0" y="0" width={width} height={height} rx="8" />
-        {drawablePoints.map(({ point, x, y }) => {
-          const labelIndex = Number(point.clusterLabel);
-          const color = clusterColors[Number.isFinite(labelIndex) ? labelIndex % clusterColors.length : 0];
-          const cx = padding + ((x - minX) / xSpan) * (width - padding * 2);
-          const cy = height - padding - ((y - minY) / ySpan) * (height - padding * 2);
-
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${view.coordinateMode.toUpperCase()} scatter`}>
+        <rect x="0" y="0" width={W} height={H} rx="10" />
+        {pts.map(({ p, x, y }) => {
+          const idx = Number(p.clusterLabel);
+          const fill = CLUSTER_COLORS[Number.isFinite(idx) ? idx % CLUSTER_COLORS.length : 0];
+          const cx = pad + ((x - minX) / xSpan) * (W - pad * 2);
+          const cy = H - pad - ((y - minY) / ySpan) * (H - pad * 2);
           return (
-            <circle key={`${point.imageName}-${point.clusterLabel}`} cx={cx} cy={cy} r="4.2" fill={color}>
-              <title>{`${point.imageName} | cluster ${point.clusterLabel}`}</title>
+            <circle key={`${p.imageName}-${p.clusterLabel}`} cx={cx} cy={cy} r="3.8" fill={fill}>
+              <title>{p.imageName} · cluster {p.clusterLabel}</title>
             </circle>
           );
         })}
       </svg>
-      <figcaption>{view.coordinateMode.toUpperCase()} projection, colored by cluster.</figcaption>
+      <figcaption>{view.coordinateMode.toUpperCase()} projection, coloured by cluster.</figcaption>
     </figure>
   );
 }
 
-function ClusterSummaryMetrics({ summary }: { summary: ClusterSummary | null }) {
-  if (!summary) {
-    return null;
-  }
-
+function Metrics({ summary }: { summary: ClusterSummary | null }) {
+  if (!summary) return null;
   return (
     <dl className="summary-card-grid cluster-summary-grid">
-      <div>
-        <dt>Clusters</dt>
-        <dd>{formatInteger(summary.bestK)}</dd>
-      </div>
-      <div>
-        <dt>Silhouette</dt>
-        <dd>{formatNumber(summary.silhouette)}</dd>
-      </div>
-      <div>
-        <dt>Images</dt>
-        <dd>{formatInteger(summary.nImages)}</dd>
-      </div>
-      {summary.nVoxels !== undefined && (
-        <div>
-          <dt>Voxels</dt>
-          <dd>{formatInteger(summary.nVoxels)}</dd>
-        </div>
-      )}
+      <div><dt>Clusters</dt><dd>{fmtI(summary.bestK)}</dd></div>
+      <div><dt>Silhouette</dt><dd>{fmtN(summary.silhouette)}</dd></div>
+      <div><dt>Images</dt><dd>{fmtI(summary.nImages)}</dd></div>
+      {summary.nVoxels !== undefined && <div><dt>Voxels</dt><dd>{fmtI(summary.nVoxels)}</dd></div>}
     </dl>
   );
 }
 
-function ClusterViewSection({
-  title,
-  view,
-  emptyMessage,
-  onOpenImage,
-}: {
-  title: string;
-  view: ClusterView | null;
-  emptyMessage: string;
-  onOpenImage: (image: EvidenceImage) => void;
-}) {
+function ClusterSection({
+  title, view, emptyMessage, onOpenImage,
+}: { title: string; view: ClusterView | null; emptyMessage: string; onOpenImage: (i: EvidenceImage) => void }) {
   if (!view) {
     return (
       <section className="cluster-section">
@@ -138,23 +99,19 @@ function ClusterViewSection({
       <div className="cluster-section-heading">
         <div>
           <h3>{title}</h3>
-          <p>
-            {view.groups.length} clusters across {view.points.length} images
-          </p>
+          <p>{view.groups.length} clusters · {view.points.length} images</p>
         </div>
       </div>
-
-      <ClusterSummaryMetrics summary={view.summary} />
+      <Metrics summary={view.summary} />
       <ClusterScatter view={view} />
-
       <div className="cluster-group-list">
-        {view.groups.map((group) => (
-          <section className="cluster-group" key={`${title}-${group.label}`}>
+        {view.groups.map((g) => (
+          <section className="cluster-group" key={`${title}-${g.label}`}>
             <div className="cluster-group-heading">
-              <h4>Cluster {group.label}</h4>
-              <span>{group.size} images</span>
+              <h4>Cluster {g.label}</h4>
+              <span>{g.size} images</span>
             </div>
-            <ImageGrid title={`Cluster ${group.label} representatives`} images={group.images} onOpenImage={onOpenImage} compact />
+            <ImageGrid title={`Cluster ${g.label}`} images={g.images} onOpenImage={onOpenImage} compact />
           </section>
         ))}
       </div>
@@ -168,25 +125,24 @@ export function ClusteringPanel({ voxelView, voxelStatus, visualView, onOpenImag
       {voxelStatus === 'loading' ? (
         <section className="cluster-section">
           <h3>Voxel clustering</h3>
-          <p className="cluster-empty-note">Loading voxel clusters for this cell.</p>
+          <p className="cluster-empty-note">Loading…</p>
         </section>
       ) : (
-        <ClusterViewSection
+        <ClusterSection
           title="Voxel clustering"
           view={voxelStatus === 'error' ? null : voxelView}
           emptyMessage={
             voxelStatus === 'error'
-              ? 'Voxel clustering exists for this cell, but the cluster CSV could not be loaded.'
-              : 'No voxel clustering output was found for this model and ROI.'
+              ? 'Cluster CSV could not be loaded.'
+              : 'No voxel clustering found for this model and ROI.'
           }
           onOpenImage={onOpenImage}
         />
       )}
-
-      <ClusterViewSection
+      <ClusterSection
         title="Visual clustering"
         view={visualView}
-        emptyMessage="No visual clustering output was found."
+        emptyMessage="No visual clustering output found."
         onOpenImage={onOpenImage}
       />
     </div>

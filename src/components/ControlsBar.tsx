@@ -38,37 +38,41 @@ export function ControlsBar({
         <input
           type="search"
           value={modelSearch}
-          placeholder="clip, resnet, taskonomy..."
+          placeholder="clip, resnet, vit…"
           onChange={(event) => onModelSearchChange(event.target.value)}
         />
       </label>
+
       <label>
-        Ranking System
+        Ranking
         <select value={rankingSystem} onChange={(event) => onRankingSystemChange(event.target.value as RankingSystem)}>
-          <option value="overall">Overall Ranking</option>
-          <option value="roi">ROI Ranking</option>
+          <option value="overall">Overall</option>
+          <option value="roi">By ROI</option>
         </select>
       </label>
+
       {rankingSystem === 'roi' && (
         <label>
-          ROIs
+          ROI
           <select value={selectedRankingRoi} onChange={(event) => onSelectedRankingRoiChange(event.target.value)}>
             {rois.map((roi) => (
               <option key={roi} value={roi}>
-                {roi}
+                {roi.toUpperCase()}
               </option>
             ))}
           </select>
         </label>
       )}
+
       <label className="toggle-control">
         <input
           type="checkbox"
           checked={showScoreLabels}
           onChange={(event) => onShowScoreLabelsChange(event.target.checked)}
         />
-        Show cell labels
+        Show labels
       </label>
+
       <label className="toggle-control">
         <input
           type="checkbox"
@@ -77,11 +81,13 @@ export function ControlsBar({
         />
         Compare mode
       </label>
+
       <div className={`compare-status${compareMode ? ' active' : ''}`} aria-live="polite">
-        {compareMode ? `${compareSelectionCount}/2 cells selected for compare` : 'Compare mode off'}
+        {compareMode ? `${compareSelectionCount} / 2 selected` : 'Compare off'}
       </div>
+
       <button className="reset-controls-button" type="button" onClick={onResetControls}>
-        Reset controls
+        Reset
       </button>
     </section>
   );
