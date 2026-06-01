@@ -100,7 +100,7 @@ export default function App() {
         <div className="status-panel">
           <p className="eyebrow">Loading</p>
           <h1>Reading model response data</h1>
-          <p>Loading CSV rows and aggregate ROI scores from `public/data`.</p>
+          <p>Loading CSV rows, aggregate ROI scores, and clustering outputs from `public/data`.</p>
         </div>
       </main>
     );
@@ -138,6 +138,7 @@ export default function App() {
       <section className="tab-panel" hidden={activeTab !== 'visualization'} aria-label="Visualization view">
         <VisualizationView
           rows={data.rows}
+          clustering={data.clustering}
           modelRoiColumns={data.modelRoiColumns}
           heatmapRois={heatmapRois}
           heatmapCells={heatmapCells}

@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_clip_rn101_random_nsd_1000_eba_20260408183536743Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn101_random_nsd_1000_eba_20260408183536743Z_clusters.csv",
+  "model": "clip_rn101_random",
+  "roi": "eba",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.4480494681354379,
+  "cluster_sizes": {
+    "0": 102,
+    "1": 83
+  },
+  "explained_variance_ratio_first10": [
+    0.820150160948504,
+    0.12008898164252721,
+    0.054753869846292366,
+    0.004840181663613925,
+    9.005057602453813e-05,
+    4.453993894526818e-05,
+    1.0469104155020621e-05,
+    5.348124509670433e-06,
+    3.5483566358705742e-06,
+    3.178592320587169e-06
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_efficient_net_nsd_1000_ffa_20260410230328651Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_efficient_net_nsd_1000_ffa_20260410230328651Z_clusters.csv",
+  "model": "efficient_net",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.5502859968032435,
+  "cluster_sizes": {
+    "0": 52,
+    "1": 133
+  },
+  "explained_variance_ratio_first10": [
+    0.8982361976739921,
+    0.05226348825513271,
+    0.019061605369986818,
+    0.00967861994085485,
+    0.0060311079540247585,
+    0.004095092829219176,
+    0.0027294294091751,
+    0.002306913319793341,
+    0.0015786315461294414,
+    0.0009806127005860333
+  ]
+}

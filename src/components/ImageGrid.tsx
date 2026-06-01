@@ -31,7 +31,7 @@ function ImageCard({ image, onOpenImage }: ImageCardProps) {
       </button>
       <div className="image-card-meta">
         <span>{image.imageName}</span>
-        <strong>{formatValue(image.value)}</strong>
+        <strong>{image.valueLabel ?? formatValue(image.value)}</strong>
       </div>
     </article>
   );

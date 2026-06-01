@@ -5,6 +5,7 @@ import { Heatmap } from './Heatmap';
 import { HelpBox } from './HelpBox';
 import type {
   AggregateHeatmapCell,
+  ClusteringData,
   ModelRoiColumn,
   RankingSystem,
   Roi,
@@ -15,6 +16,7 @@ import type {
 
 type VisualizationViewProps = {
   rows: WideCsvRow[];
+  clustering: ClusteringData;
   modelRoiColumns: ModelRoiColumn[];
   heatmapRois: Roi[];
   heatmapCells: AggregateHeatmapCell[];
@@ -40,6 +42,7 @@ type VisualizationViewProps = {
 
 export function VisualizationView({
   rows,
+  clustering,
   modelRoiColumns,
   heatmapRois,
   heatmapCells,
@@ -98,6 +101,7 @@ export function VisualizationView({
         <DetailsPanel
           heatmapCells={heatmapCells}
           imageCount={rows.length}
+          clustering={clustering}
           modelRoiColumns={modelRoiColumns}
           onSelectCell={onSelectCell}
           rows={rows}

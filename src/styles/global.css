@@ -769,6 +769,32 @@ dd {
   min-height: 42px;
 }
 
+.detail-subtabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.detail-subtabs button {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: var(--surface);
+  color: #43564c;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.detail-subtabs button:hover {
+  border-color: var(--border-strong);
+}
+
+.detail-subtabs button.active {
+  border-color: var(--accent);
+  background: #e8f3ef;
+  color: var(--accent-strong);
+}
+
 .evidence-column-note {
   margin: -6px 0 0;
   color: #607168;
@@ -784,6 +810,94 @@ dd {
 
 .evidence-empty-state p {
   margin-bottom: 0;
+}
+
+.clustering-panel {
+  display: grid;
+  gap: 22px;
+}
+
+.cluster-section {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid #e3ebe6;
+  padding-top: 16px;
+}
+
+.cluster-section:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.cluster-section-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cluster-section-heading h3,
+.cluster-section-heading p,
+.cluster-group-heading h4 {
+  margin: 0;
+}
+
+.cluster-section-heading p,
+.cluster-empty-note,
+.cluster-scatter figcaption {
+  color: #607168;
+  font-size: 0.78rem;
+}
+
+.cluster-summary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cluster-scatter {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.cluster-scatter svg {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-muted);
+}
+
+.cluster-scatter rect {
+  fill: #f7faf8;
+}
+
+.cluster-scatter circle {
+  opacity: 0.82;
+  stroke: #ffffff;
+  stroke-width: 1.2px;
+}
+
+.cluster-group-list {
+  display: grid;
+  gap: 16px;
+}
+
+.cluster-group {
+  display: grid;
+  gap: 10px;
+}
+
+.cluster-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cluster-group-heading span {
+  color: #66766e;
+  font-size: 0.74rem;
+  font-weight: 760;
 }
 
 .insights-panel {

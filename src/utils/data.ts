@@ -7,6 +7,7 @@ import type {
   VisualizationData,
   WideCsvRow,
 } from '../types/data';
+import { loadClusteringData } from './clustering';
 
 const DEFAULT_ROI_FALLBACK: Roi[] = ['ffa', 'ppa', 'eba'];
 
@@ -135,12 +136,13 @@ export async function loadScores(path = SCORES_PATH): Promise<JsonScoreObject> {
 }
 
 export async function loadVisualizationData(): Promise<VisualizationData> {
-  const [rows, scores] = await Promise.all([loadCsvRows(), loadScores()]);
+  const [rows, scores, clustering] = await Promise.all([loadCsvRows(), loadScores(), loadClusteringData()]);
   const modelRoiColumns = inferModelRoiColumns(rows, Object.keys(scores));
 
   return {
     rows,
     scores,
     modelRoiColumns,
+    clustering,
   };
 }

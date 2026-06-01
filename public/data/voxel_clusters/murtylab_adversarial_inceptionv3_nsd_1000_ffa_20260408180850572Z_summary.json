@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_adversarial_inceptionv3_nsd_1000_ffa_20260408180850572Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_adversarial_inceptionv3_nsd_1000_ffa_20260408180850572Z_clusters.csv",
+  "model": "adversarial_inceptionv3",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.6080431708221641,
+  "cluster_sizes": {
+    "0": 117,
+    "1": 68
+  },
+  "explained_variance_ratio_first10": [
+    0.9047298566479038,
+    0.04865720639270384,
+    0.020815643682987394,
+    0.006467083246431982,
+    0.0058445062430126865,
+    0.00416000859674697,
+    0.003088616166184753,
+    0.002122838444204266,
+    0.0016571785731750157,
+    0.0008432373153914185
+  ]
+}

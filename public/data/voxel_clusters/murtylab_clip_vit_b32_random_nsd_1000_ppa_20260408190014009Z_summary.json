@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_clip_vit_b32_random_nsd_1000_ppa_20260408190014009Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_ppa_20260408190014009Z_clusters.csv",
+  "model": "clip_vit_b32_random",
+  "roi": "ppa",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.447749748930161,
+  "cluster_sizes": {
+    "0": 95,
+    "1": 90
+  },
+  "explained_variance_ratio_first10": [
+    0.8183026143837147,
+    0.09014770967979659,
+    0.016868450368386675,
+    0.014705586712989783,
+    0.012431457208166557,
+    0.00853025549187142,
+    0.006174213827308854,
+    0.004825332009336529,
+    0.0034047487705771437,
+    0.0029161735748548853
+  ]
+}

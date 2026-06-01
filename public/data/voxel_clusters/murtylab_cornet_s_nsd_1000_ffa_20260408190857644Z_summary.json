@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_cornet_s_nsd_1000_ffa_20260408190857644Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_s_nsd_1000_ffa_20260408190857644Z_clusters.csv",
+  "model": "cornet_s",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.5767043368015599,
+  "cluster_sizes": {
+    "0": 68,
+    "1": 117
+  },
+  "explained_variance_ratio_first10": [
+    0.9097767406085503,
+    0.046329404401144046,
+    0.01756549083837265,
+    0.008260378480869678,
+    0.005502958552132269,
+    0.004270598309645478,
+    0.002764423817290583,
+    0.001384406710732248,
+    0.0008093895667003767,
+    0.0006661376741839709
+  ]
+}

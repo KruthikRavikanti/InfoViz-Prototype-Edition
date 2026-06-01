@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_cross_vit_nsd_1000_ffa_20260410224222356Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cross_vit_nsd_1000_ffa_20260410224222356Z_clusters.csv",
+  "model": "cross_vit",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.4836969635752307,
+  "cluster_sizes": {
+    "0": 113,
+    "1": 72
+  },
+  "explained_variance_ratio_first10": [
+    0.8364586088236036,
+    0.05416603221525474,
+    0.017006361969433927,
+    0.012324648349107861,
+    0.00795261288076101,
+    0.006744274626663402,
+    0.005210049568448807,
+    0.004273603318099574,
+    0.003966793268786786,
+    0.0034320808975634113
+  ]
+}

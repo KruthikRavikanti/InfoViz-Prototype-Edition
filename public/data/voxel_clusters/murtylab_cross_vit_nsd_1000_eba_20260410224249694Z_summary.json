@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_cross_vit_nsd_1000_eba_20260410224249694Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cross_vit_nsd_1000_eba_20260410224249694Z_clusters.csv",
+  "model": "cross_vit",
+  "roi": "eba",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.48353475200565654,
+  "cluster_sizes": {
+    "0": 82,
+    "1": 103
+  },
+  "explained_variance_ratio_first10": [
+    0.8088700859821456,
+    0.11893250397926924,
+    0.03689037453958766,
+    0.016736425780399484,
+    0.008613482912131291,
+    0.003232277361392956,
+    0.0025516752196368883,
+    0.0018939473337204833,
+    0.0008635696461293886,
+    0.0003539226046336013
+  ]
+}

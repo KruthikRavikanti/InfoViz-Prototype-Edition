@@ -25,6 +25,7 @@ export type VisualizationData = {
   rows: WideCsvRow[];
   scores: JsonScoreObject;
   modelRoiColumns: ModelRoiColumn[];
+  clustering: ClusteringData;
 };
 
 export type RankingSystem = 'overall' | 'roi';
@@ -45,7 +46,60 @@ export type EvidenceImage = {
   imageName: string;
   imageUrl: string;
   value: number;
+  valueLabel?: string;
   rank: number;
+};
+
+export type ClusterSummary = {
+  sourceFile?: string;
+  resultCsv?: string;
+  model?: string;
+  roi?: Roi;
+  nImages: number | null;
+  nVoxels?: number | null;
+  pcaDimUsed?: number | null;
+  bestK: number | null;
+  silhouette: number | null;
+  clusterSizes: Record<string, number>;
+  explainedVarianceRatioFirst10?: number[];
+  featureSet?: string;
+  projectionUsedForClustering?: string;
+  filePath?: string;
+};
+
+export type ClusterPoint = {
+  imageName: string;
+  imageUrl: string;
+  clusterLabel: string;
+  value: number;
+  rank: number;
+  pcaX: number | null;
+  pcaY: number | null;
+  tsneX: number | null;
+  tsneY: number | null;
+  plotX: number | null;
+  plotY: number | null;
+  distanceToCentroid: number | null;
+};
+
+export type ClusterGroup = {
+  label: string;
+  size: number;
+  images: EvidenceImage[];
+  points: ClusterPoint[];
+};
+
+export type ClusterView = {
+  summary: ClusterSummary | null;
+  points: ClusterPoint[];
+  groups: ClusterGroup[];
+  coordinateMode: 'plot' | 'pca' | 'tsne' | null;
+};
+
+export type ClusteringData = {
+  voxelSummaries: ClusterSummary[];
+  visualSummary: ClusterSummary | null;
+  visualView: ClusterView | null;
 };
 
 export type EvidenceStats = {

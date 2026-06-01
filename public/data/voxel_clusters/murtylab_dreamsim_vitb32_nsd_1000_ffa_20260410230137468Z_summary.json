@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_dreamsim_vitb32_nsd_1000_ffa_20260410230137468Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_ffa_20260410230137468Z_clusters.csv",
+  "model": "dreamsim_vitb32",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.4355868947950752,
+  "cluster_sizes": {
+    "0": 120,
+    "1": 65
+  },
+  "explained_variance_ratio_first10": [
+    0.8238641496537866,
+    0.060226999304140445,
+    0.0314449444438806,
+    0.017286573997592473,
+    0.01192957715515007,
+    0.007514818326877142,
+    0.006548143732697202,
+    0.005968007128765627,
+    0.0044826691128344864,
+    0.0037886973957300864
+  ]
+}

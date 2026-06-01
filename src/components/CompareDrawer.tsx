@@ -78,7 +78,7 @@ function ImageModal({ image, onClose }: { image: EvidenceImage; onClose: () => v
         <div className="image-modal-header">
           <div>
             <h3>{image.imageName}</h3>
-            <p>Value: {image.value.toFixed(3)}</p>
+            <p>{image.valueLabel ?? `Value: ${image.value.toFixed(3)}`}</p>
           </div>
           <button type="button" onClick={onClose}>
             Close
