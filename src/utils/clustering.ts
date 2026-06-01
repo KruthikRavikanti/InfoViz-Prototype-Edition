@@ -1,9 +1,10 @@
 import { csv, json } from 'd3';
-import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringData, EvidenceImage, Roi, SelectedHeatmapCell } from '../types/data';
+import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringData, EvidenceImage, ImageCategory, Roi, SelectedHeatmapCell } from '../types/data';
 
 const VOXEL_SUMMARY_PATH = '/data/voxel_clusters/voxel_cluster_summary.json';
 const VISUAL_SUMMARY_PATH = '/data/visual_clusters/visual_cluster_summary.json';
 const VISUAL_CLUSTERS_PATH = '/data/visual_clusters/visual_clusters.csv';
+const IMAGE_CATEGORIES_PATH = '/data/murty185Classification.csv';
 const IMAGE_BASE_PATH = '/images';
 
 type RawClusterSummary = {
@@ -230,12 +231,34 @@ async function loadVisualClusterView(): Promise<{ summary: ClusterSummary | null
   }
 }
 
+async function loadImageCategories(): Promise<Map<string, ImageCategory>> {
+  const map = new Map<string, ImageCategory>();
+  try {
+    const text = await fetch(IMAGE_CATEGORIES_PATH).then((r) => r.text());
+    for (const line of text.split('\n')) {
+      const comma = line.indexOf(',');
+      if (comma === -1) continue;
+      const name = line.slice(0, comma).trim();
+      const cat = line.slice(comma + 1).trim() as ImageCategory;
+      if (name) map.set(name, cat);
+    }
+  } catch {
+    // non-fatal — scatter just won't have category highlighting
+  }
+  return map;
+}
+
 export async function loadClusteringData(): Promise<ClusteringData> {
-  const [voxelSummaries, visualClusters] = await Promise.all([loadVoxelSummaries(), loadVisualClusterView()]);
+  const [voxelSummaries, visualClusters, imageCategories] = await Promise.all([
+    loadVoxelSummaries(),
+    loadVisualClusterView(),
+    loadImageCategories(),
+  ]);
 
   return {
     voxelSummaries,
     visualSummary: visualClusters.summary,
     visualView: visualClusters.view,
+    imageCategories,
   };
 }

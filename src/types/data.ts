@@ -96,10 +96,13 @@ export type ClusterView = {
   coordinateMode: 'plot' | 'pca' | 'tsne' | null;
 };
 
+export type ImageCategory = 'Faces' | 'Places' | 'Body Part';
+
 export type ClusteringData = {
   voxelSummaries: ClusterSummary[];
   visualSummary: ClusterSummary | null;
   visualView: ClusterView | null;
+  imageCategories: Map<string, ImageCategory>;
 };
 
 export type EvidenceStats = {

@@ -1,12 +1,20 @@
 import { useState } from 'react';
 import { ImageGrid } from './ImageGrid';
-import type { ClusterPoint, ClusterSummary, ClusterView, EvidenceImage } from '../types/data';
+import type { ClusterPoint, ClusterSummary, ClusterView, EvidenceImage, ImageCategory } from '../types/data';
 
 type ClusteringPanelProps = {
   voxelView: ClusterView | null;
   voxelStatus: 'idle' | 'loading' | 'error';
   visualView: ClusterView | null;
+  imageCategories: Map<string, ImageCategory>;
   onOpenImage: (image: EvidenceImage) => void;
+};
+
+// Category highlight colors — distinct, accessible
+const CATEGORY_COLORS: Record<ImageCategory, { fill: string; stroke: string }> = {
+  'Faces':     { fill: '#E05252', stroke: '#7F1D1D' },
+  'Places':    { fill: '#3B82F6', stroke: '#1E3A8A' },
+  'Body Part': { fill: '#16A34A', stroke: '#14532D' },
 };
 
 // Muted, harmonious palette — reads well on the warm off-white surface
@@ -38,11 +46,13 @@ type DotTooltip = {
 };
 
 function ClusterScatter({
-  view, onOpenImage, searchQuery,
+  view, onOpenImage, searchQuery, categoryHighlight, imageCategories,
 }: {
   view: ClusterView;
   onOpenImage: (i: EvidenceImage) => void;
   searchQuery: string;
+  categoryHighlight: ImageCategory | null;
+  imageCategories: Map<string, ImageCategory>;
 }) {
   const [dotTooltip, setDotTooltip] = useState<DotTooltip | null>(null);
 
@@ -66,8 +76,10 @@ function ClusterScatter({
 
   const needle = searchQuery.trim().toLowerCase();
   const hasSearch = needle.length > 0;
+  const hasCategoryHighlight = categoryHighlight !== null;
 
-  function isMatch(name: string) { return hasSearch && name.toLowerCase().includes(needle); }
+  function isSearchMatch(name: string) { return hasSearch && name.toLowerCase().includes(needle); }
+  function isCategoryMatch(name: string) { return hasCategoryHighlight && imageCategories.get(name) === categoryHighlight; }
 
   function handleDotClick(p: ClusterPoint) {
     onOpenImage({ imageName: p.imageName, imageUrl: p.imageUrl, value: p.value, rank: p.rank });
@@ -84,17 +96,38 @@ function ClusterScatter({
             const cx = pad + ((x - minX) / xSpan) * (W - pad * 2);
             const cy = H - pad - ((y - minY) / ySpan) * (H - pad * 2);
             const isHovered = dotTooltip?.point.imageName === p.imageName;
-            const matched = isMatch(p.imageName);
-            const dimmed = hasSearch && !matched;
+            const searchMatched = isSearchMatch(p.imageName);
+            const catMatched = isCategoryMatch(p.imageName);
+            const anyFilter = hasSearch || hasCategoryHighlight;
+            const highlighted = searchMatched || catMatched;
+            const dimmed = anyFilter && !highlighted;
+
+            let fill = baseColor;
+            let stroke = 'var(--surface-raised)';
+            let strokeWidth = 1;
+            let r = isHovered ? 5.5 : 3.8;
+
+            if (searchMatched) {
+              fill = '#F59E0B';
+              stroke = '#92400E';
+              strokeWidth = 1.5;
+              r = 7;
+            } else if (catMatched && categoryHighlight) {
+              const colors = CATEGORY_COLORS[categoryHighlight];
+              fill = colors.fill;
+              stroke = colors.stroke;
+              strokeWidth = 1.5;
+              r = isHovered ? 7 : 6;
+            }
+
             return (
               <circle
                 key={`${p.imageName}-${p.clusterLabel}`}
-                cx={cx} cy={cy}
-                r={matched ? 7 : isHovered ? 6 : 3.8}
-                fill={matched ? '#F59E0B' : baseColor}
-                opacity={dimmed ? 0.15 : 0.82}
-                stroke={matched ? '#92400E' : 'var(--surface-raised)'}
-                strokeWidth={matched ? 1.5 : 1}
+                cx={cx} cy={cy} r={r}
+                fill={fill}
+                opacity={dimmed ? 0.12 : 0.85}
+                stroke={stroke}
+                strokeWidth={strokeWidth}
                 style={{ cursor: 'pointer' }}
                 onMouseEnter={() => setDotTooltip({ point: p, svgX: cx, svgY: cy })}
                 onClick={() => handleDotClick(p)}
@@ -138,10 +171,25 @@ function Metrics({ summary }: { summary: ClusterSummary | null }) {
   );
 }
 
+const CATEGORIES: ImageCategory[] = ['Faces', 'Places', 'Body Part'];
+
+const CATEGORY_LABELS: Record<ImageCategory, string> = {
+  'Faces': 'Faces',
+  'Places': 'Places',
+  'Body Part': 'Body parts',
+};
+
 function ClusterSection({
-  title, view, emptyMessage, onOpenImage,
-}: { title: string; view: ClusterView | null; emptyMessage: string; onOpenImage: (i: EvidenceImage) => void }) {
+  title, view, emptyMessage, onOpenImage, imageCategories,
+}: {
+  title: string;
+  view: ClusterView | null;
+  emptyMessage: string;
+  onOpenImage: (i: EvidenceImage) => void;
+  imageCategories: Map<string, ImageCategory>;
+}) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryHighlight, setCategoryHighlight] = useState<ImageCategory | null>(null);
 
   if (!view) {
     return (
@@ -154,6 +202,10 @@ function ClusterSection({
 
   const needle = searchQuery.trim().toLowerCase();
   const matchCount = needle ? view.points.filter((p) => p.imageName.toLowerCase().includes(needle)).length : 0;
+
+  function toggleCategory(cat: ImageCategory) {
+    setCategoryHighlight((prev) => (prev === cat ? null : cat));
+  }
 
   return (
     <section className="cluster-section">
@@ -181,7 +233,28 @@ function ClusterSection({
         )}
       </div>
 
-      <ClusterScatter view={view} onOpenImage={onOpenImage} searchQuery={searchQuery} />
+      <div className="scatter-category-row" role="group" aria-label="Highlight by image category">
+        <span className="scatter-category-label">Highlight:</span>
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            className={`scatter-category-btn scatter-category-btn--${cat.toLowerCase().replace(' ', '-')} ${categoryHighlight === cat ? 'active' : ''}`}
+            onClick={() => toggleCategory(cat)}
+            aria-pressed={categoryHighlight === cat}
+          >
+            {CATEGORY_LABELS[cat]}
+          </button>
+        ))}
+      </div>
+
+      <ClusterScatter
+        view={view}
+        onOpenImage={onOpenImage}
+        searchQuery={searchQuery}
+        categoryHighlight={categoryHighlight}
+        imageCategories={imageCategories}
+      />
       <div className="cluster-group-list">
         {view.groups.map((g) => (
           <section className="cluster-group" key={`${title}-${g.label}`}>
@@ -197,7 +270,7 @@ function ClusterSection({
   );
 }
 
-export function ClusteringPanel({ voxelView, voxelStatus, visualView, onOpenImage }: ClusteringPanelProps) {
+export function ClusteringPanel({ voxelView, voxelStatus, visualView, imageCategories, onOpenImage }: ClusteringPanelProps) {
   return (
     <div className="clustering-panel">
       {voxelStatus === 'loading' ? (
@@ -214,6 +287,7 @@ export function ClusteringPanel({ voxelView, voxelStatus, visualView, onOpenImag
               ? 'Cluster CSV could not be loaded.'
               : 'No voxel clustering found for this model and ROI.'
           }
+          imageCategories={imageCategories}
           onOpenImage={onOpenImage}
         />
       )}
@@ -221,6 +295,7 @@ export function ClusteringPanel({ voxelView, voxelStatus, visualView, onOpenImag
         title="Visual clustering"
         view={visualView}
         emptyMessage="No visual clustering output found."
+        imageCategories={imageCategories}
         onOpenImage={onOpenImage}
       />
     </div>
