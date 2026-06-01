@@ -98,9 +98,9 @@ export default function App() {
     return (
       <main className="app-shell">
         <div className="status-panel">
-          <p className="eyebrow">Loading</p>
-          <h1>Reading model response data</h1>
-          <p>Loading CSV rows, aggregate ROI scores, and clustering outputs from `public/data`.</p>
+          <p className="eyebrow">Initializing</p>
+          <h1>Loading dataset</h1>
+          <p>Reading CSV rows, aggregate ROI scores, and clustering outputs from public/data…</p>
         </div>
       </main>
     );
