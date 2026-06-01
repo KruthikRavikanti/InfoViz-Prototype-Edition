@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_aimv2_nsd_1000_ffa_20260408181105090Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_aimv2_nsd_1000_ffa_20260408181105090Z_clusters.csv",
+  "model": "aimv2",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.5600018544382269,
+  "cluster_sizes": {
+    "0": 141,
+    "1": 44
+  },
+  "explained_variance_ratio_first10": [
+    0.8375497599991664,
+    0.055266644846832455,
+    0.03903631223323292,
+    0.013121597870988246,
+    0.011412193686403543,
+    0.007266873879014373,
+    0.005318208188731805,
+    0.004248192927701538,
+    0.00321498617622142,
+    0.002890379729347724
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_alexnet_nsd_1000_ffa_20260408181517551Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_alexnet_nsd_1000_ffa_20260408181517551Z_clusters.csv",
+  "model": "alexnet",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.5012187328598635,
+  "cluster_sizes": {
+    "0": 48,
+    "1": 137
+  },
+  "explained_variance_ratio_first10": [
+    0.8282224673916099,
+    0.06354720404087345,
+    0.03147513751785346,
+    0.012807122599443348,
+    0.011098720116857027,
+    0.008933214594961323,
+    0.006151992867133689,
+    0.005553876374636796,
+    0.00447271031188228,
+    0.0034497677785864725
+  ]
+}

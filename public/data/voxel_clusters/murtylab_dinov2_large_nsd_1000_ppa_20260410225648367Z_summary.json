@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_dinov2_large_nsd_1000_ppa_20260410225648367Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dinov2_large_nsd_1000_ppa_20260410225648367Z_clusters.csv",
+  "model": "dinov2_large",
+  "roi": "ppa",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.5382906065327259,
+  "cluster_sizes": {
+    "0": 128,
+    "1": 57
+  },
+  "explained_variance_ratio_first10": [
+    0.8759517574156649,
+    0.07260298142238605,
+    0.01607178574460733,
+    0.00775667453222294,
+    0.005763667196603292,
+    0.003909080990294236,
+    0.0030423419766857827,
+    0.0023058807774963344,
+    0.0019685326441650675,
+    0.0015676056124203329
+  ]
+}

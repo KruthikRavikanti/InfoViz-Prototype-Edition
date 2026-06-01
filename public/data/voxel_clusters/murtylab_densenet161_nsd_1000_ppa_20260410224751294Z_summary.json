@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_densenet161_nsd_1000_ppa_20260410224751294Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet161_nsd_1000_ppa_20260410224751294Z_clusters.csv",
+  "model": "densenet161",
+  "roi": "ppa",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.5003942833881191,
+  "cluster_sizes": {
+    "0": 73,
+    "1": 112
+  },
+  "explained_variance_ratio_first10": [
+    0.8943057230276904,
+    0.06591916862660174,
+    0.019172097315899816,
+    0.007720625291676317,
+    0.005398464598502985,
+    0.0034223719234103807,
+    0.001872345744866757,
+    0.0009332370368245523,
+    0.0004911372437769274,
+    0.0001687405327135264
+  ]
+}

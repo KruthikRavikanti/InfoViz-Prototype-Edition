@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_densenet169_nsd_1000_eba_20260410224911251Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet169_nsd_1000_eba_20260410224911251Z_clusters.csv",
+  "model": "densenet169",
+  "roi": "eba",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.4454498403386954,
+  "cluster_sizes": {
+    "0": 77,
+    "1": 108
+  },
+  "explained_variance_ratio_first10": [
+    0.7271688318929338,
+    0.118671335030678,
+    0.06982429711120931,
+    0.024642872044862995,
+    0.013832279197998534,
+    0.010908740416497463,
+    0.009001035556468634,
+    0.006515387036439922,
+    0.004793768884955614,
+    0.002893871114389815
+  ]
+}

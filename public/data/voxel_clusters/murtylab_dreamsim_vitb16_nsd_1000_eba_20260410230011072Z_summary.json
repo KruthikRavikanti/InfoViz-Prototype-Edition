@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_dreamsim_vitb16_nsd_1000_eba_20260410230011072Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dreamsim_vitb16_nsd_1000_eba_20260410230011072Z_clusters.csv",
+  "model": "dreamsim_vitb16",
+  "roi": "eba",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.3359162758600516,
+  "cluster_sizes": {
+    "0": 65,
+    "1": 120
+  },
+  "explained_variance_ratio_first10": [
+    0.6242684099621534,
+    0.11998207162575321,
+    0.059471056453846594,
+    0.031763330110404574,
+    0.017191912760659303,
+    0.015369381792632723,
+    0.01392271440851032,
+    0.011192070969582992,
+    0.009217438890885117,
+    0.007154456959141215
+  ]
+}

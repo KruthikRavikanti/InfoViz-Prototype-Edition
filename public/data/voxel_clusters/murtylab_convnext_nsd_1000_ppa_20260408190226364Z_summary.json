@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_convnext_nsd_1000_ppa_20260408190226364Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_convnext_nsd_1000_ppa_20260408190226364Z_clusters.csv",
+  "model": "convnext",
+  "roi": "ppa",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.49005109031451294,
+  "cluster_sizes": {
+    "0": 104,
+    "1": 81
+  },
+  "explained_variance_ratio_first10": [
+    0.8757879151917745,
+    0.05731354352859085,
+    0.007072411541930954,
+    0.0060008533414967575,
+    0.0043889292344419985,
+    0.0035869639041943633,
+    0.0029569587383018766,
+    0.0028140111879198315,
+    0.002258954015417135,
+    0.0020039192820601104
+  ]
+}

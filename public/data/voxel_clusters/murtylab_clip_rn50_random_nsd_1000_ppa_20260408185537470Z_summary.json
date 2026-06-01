@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_clip_rn50_random_nsd_1000_ppa_20260408185537470Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn50_random_nsd_1000_ppa_20260408185537470Z_clusters.csv",
+  "model": "clip_rn50_random",
+  "roi": "ppa",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.3997921228624542,
+  "cluster_sizes": {
+    "0": 137,
+    "1": 48
+  },
+  "explained_variance_ratio_first10": [
+    0.5634910342639434,
+    0.27478706008584985,
+    0.12124087331042456,
+    0.029223832970314466,
+    0.00357877650113851,
+    0.0030836967637758493,
+    0.001179701502656387,
+    0.0010051349785717729,
+    0.000715129185197036,
+    0.00046906605078451247
+  ]
+}

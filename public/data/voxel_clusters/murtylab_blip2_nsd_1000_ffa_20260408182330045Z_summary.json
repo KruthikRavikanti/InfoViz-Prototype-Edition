@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_blip2_nsd_1000_ffa_20260408182330045Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_blip2_nsd_1000_ffa_20260408182330045Z_clusters.csv",
+  "model": "blip2",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.48988114893574913,
+  "cluster_sizes": {
+    "0": 54,
+    "1": 131
+  },
+  "explained_variance_ratio_first10": [
+    0.8415317227228635,
+    0.055641022642276376,
+    0.0443306680140044,
+    0.015360763354818013,
+    0.011386374940466685,
+    0.006720750867793092,
+    0.004362309966235736,
+    0.0040098832458081235,
+    0.0029380746093206275,
+    0.0028466994799626042
+  ]
+}

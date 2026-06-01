@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_aimv2_nsd_1000_eba_20260408181142880Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_aimv2_nsd_1000_eba_20260408181142880Z_clusters.csv",
+  "model": "aimv2",
+  "roi": "eba",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.4566649837510778,
+  "cluster_sizes": {
+    "0": 72,
+    "1": 113
+  },
+  "explained_variance_ratio_first10": [
+    0.7468301958802485,
+    0.1027728114548038,
+    0.06642572686402887,
+    0.02169162140653077,
+    0.013946183778712637,
+    0.012489560289381217,
+    0.007649458831961083,
+    0.004603401698230209,
+    0.0035891289599848304,
+    0.0031742430629816544
+  ]
+}

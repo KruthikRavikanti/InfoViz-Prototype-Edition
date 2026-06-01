@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_beit_nsd_1000_ffa_20260408181916663Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_beit_nsd_1000_ffa_20260408181916663Z_clusters.csv",
+  "model": "beit",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.5125680061226983,
+  "cluster_sizes": {
+    "0": 112,
+    "1": 73
+  },
+  "explained_variance_ratio_first10": [
+    0.80600397661476,
+    0.06789824260238338,
+    0.019527401138853758,
+    0.01627433041725902,
+    0.011801934779565837,
+    0.009196925610568646,
+    0.0075119108107603106,
+    0.00567034722044281,
+    0.005587353151702712,
+    0.00412856252993173
+  ]
+}

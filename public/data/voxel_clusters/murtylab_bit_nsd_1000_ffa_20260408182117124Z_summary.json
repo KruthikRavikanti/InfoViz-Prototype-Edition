@@ -1,0 +1,27 @@
+{
+  "source_file": "murtylab_bit_nsd_1000_ffa_20260408182117124Z.csv",
+  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_bit_nsd_1000_ffa_20260408182117124Z_clusters.csv",
+  "model": "bit",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.417994132520697,
+  "cluster_sizes": {
+    "0": 65,
+    "1": 120
+  },
+  "explained_variance_ratio_first10": [
+    0.6918016721594624,
+    0.05362415153879419,
+    0.03481921373777559,
+    0.027573531955660945,
+    0.01815323476253978,
+    0.01200638126265138,
+    0.009899656587197995,
+    0.009210381822400972,
+    0.007541152082080086,
+    0.007344296698936037
+  ]
+}
