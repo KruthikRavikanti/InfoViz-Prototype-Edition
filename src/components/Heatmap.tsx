@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent } from 'react';
-import { extent, scaleBand, scaleSequential } from 'd3';
+import { extent, interpolateViridis, scaleBand, scaleSequential } from 'd3';
 import type { AggregateHeatmapCell, Roi, SelectedHeatmapCell, SortDirection } from '../types/data';
 import { inferModelCategory } from '../utils/modelTags';
 
@@ -25,39 +25,10 @@ type TooltipState = {
   y: number;
 };
 
-const margin = { top: 120, right: 28, bottom: 62, left: 190 };
+const margin = { top: 120, right: 28, bottom: 62, left: 190 }; // Further increased top margin for more legend space
 const roiColumnWidth = 96;
 const modelRowHeight = 28;
 const sortToggleBoxSize = 34;
-
-// Custom dark-theme color scale: deep blue → teal → green → yellow
-// Maps 0→1 range through a perceptually uniform dark-friendly ramp
-function darkHeatColor(t: number): string {
-  // Clamp
-  const s = Math.max(0, Math.min(1, t));
-
-  // Control points: dark navy → deep teal → cyan-green → bright yellow-green
-  const stops = [
-    { t: 0.0, r: 15, g: 25, b: 55 },
-    { t: 0.25, r: 20, g: 80, b: 120 },
-    { t: 0.5, r: 30, g: 150, b: 140 },
-    { t: 0.75, r: 95, g: 208, b: 165 },
-    { t: 1.0, r: 240, g: 230, b: 80 },
-  ];
-
-  let i = 0;
-  while (i < stops.length - 2 && s > stops[i + 1].t) i++;
-
-  const a = stops[i];
-  const b = stops[i + 1];
-  const local = (s - a.t) / (b.t - a.t);
-
-  const r = Math.round(a.r + (b.r - a.r) * local);
-  const g = Math.round(a.g + (b.g - a.g) * local);
-  const bl = Math.round(a.b + (b.b - a.b) * local);
-
-  return `rgb(${r},${g},${bl})`;
-}
 
 function formatScore(score: number | null): string {
   return score === null ? 'NA' : score.toFixed(3);
@@ -77,14 +48,16 @@ function cellAriaLabel(cell: AggregateHeatmapCell, compareMode: boolean): string
 
 function tooltipScore(cell: AggregateHeatmapCell, compareMode: boolean, isComparable: boolean): string {
   if (compareMode && !isComparable) {
-    return 'No image-level data available';
+    return 'No image-level data available for comparison';
   }
 
   return formatScore(cell.score);
 }
 
-function scoreTextColor(normalized: number): string {
-  return normalized < 0.55 ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.85)';
+function scoreTextColor(score: number, minValue: number, maxValue: number): string {
+  const range = maxValue - minValue;
+  const normalized = range === 0 ? 1 : (score - minValue) / range;
+  return normalized < 0.58 ? '#ffffff' : '#152018';
 }
 
 export function Heatmap({
@@ -108,10 +81,7 @@ export function Heatmap({
   const scoredCells = useMemo(() => cells.filter((cell) => cell.score !== null), [cells]);
   const [minScore = 0, maxScore = 1] = extent(scoredCells, (cell) => cell.score ?? undefined);
   const adjustedMaxScore = minScore === maxScore ? maxScore + 1 : maxScore;
-
-  const colorScale = scaleSequential<string>()
-    .domain([minScore, adjustedMaxScore])
-    .interpolator((t) => darkHeatColor(t));
+  const color = scaleSequential<string>().domain([minScore, adjustedMaxScore]).interpolator(interpolateViridis);
 
   const width = Math.max(560, margin.left + margin.right + rois.length * roiColumnWidth);
   const heatmapHeight = Math.max(220, models.length * modelRowHeight);
@@ -169,18 +139,12 @@ export function Heatmap({
     }
   }
 
-  const roiLabelColors: Record<string, string> = {
-    ffa: '#8b5cf6',
-    ppa: '#14b8a6',
-    eba: '#f59e0b',
-  };
-
   return (
     <section className="heatmap-area" aria-label="Heatmap area" ref={containerRef}>
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Overview</p>
-          <h2>Aggregate score by model &amp; ROI</h2>
+          <p className="eyebrow">Heatmap</p>
+          <h2>Aggregate score by model and ROI</h2>
         </div>
         <span>{cells.length} cells</span>
       </div>
@@ -188,16 +152,15 @@ export function Heatmap({
         {cells.length === 0 ? (
           <div className="heatmap-empty-state">
             <h3>No models match the current search</h3>
-            <p>Clear the search field or reset controls to restore the heatmap.</p>
+            <p>Clear the search field or reset the controls to restore the full heatmap.</p>
           </div>
         ) : (
           <svg className="heatmap-svg" viewBox={`0 0 ${width} ${height}`} role="img">
             <title>Model by ROI aggregate score heatmap</title>
-
-            {/* Legend top */}
+            {/* Move the color scale legend to the top, just below the heading */}
             <g className="heatmap-legend" transform={`translate(${margin.left},${margin.top - 70})`}>
               {legendSteps.map((value, index) => (
-                <rect key={value} x={index * 4} y={0} width={4} height={10} fill={colorScale(value)} />
+                <rect key={value} x={index * 4} y={0} width={4} height={10} fill={color(value)} />
               ))}
               {legendValues.map((value, index) => (
                 <text key={value} x={index * 94} y={30} textAnchor={index === 2 ? 'end' : 'start'}>
@@ -216,13 +179,11 @@ export function Heatmap({
                 </g>
               )}
             </g>
-
-            {/* Sort toggle button */}
             <g
               className="heatmap-corner-sort"
               role="button"
               tabIndex={0}
-              aria-label={`Sort direction: ${sortDirection === 'desc' ? 'descending' : 'ascending'}. Click to toggle.`}
+              aria-label={`Ranking direction is ${sortDirection === 'desc' ? 'descending' : 'ascending'}. Activate to switch direction.`}
               transform={`translate(${sortToggleX},${sortToggleY})`}
               onClick={onSortDirectionToggle}
               onKeyDown={handleSortToggleKeyDown}
@@ -244,29 +205,30 @@ export function Heatmap({
                 strokeWidth={2}
               />
             </g>
-
             <g transform={`translate(${margin.left},${margin.top})`}>
 
-              {/* ROI column highlight when ROI ranking is active */}
+              {/* Highlight ROI column if ROI ranking is active and a ROI is selected */}
+
               {selectedRankingRoi && (
                 <g className="roi-column-highlight-group" style={{ pointerEvents: 'none' }}>
+                  {/* Make highlight a bit bigger by offsetting x/y and increasing width/height */}
                   <rect
                     className="roi-column-highlight"
                     x={(x(selectedRankingRoi) ?? 0) - 3}
                     y={-3}
                     width={(x.bandwidth() || 0) + 6}
                     height={heatmapHeight + 6}
-                    fill="rgba(242, 198, 109, 0.08)"
-                    fillOpacity={1}
+                    fill="#ffe9b3"
+                    fillOpacity={0.55}
                   />
-                  <circle cx={(x(selectedRankingRoi) ?? 0) - 3} cy={-3} r="5" className="roi-corner-dot" />
-                  <circle cx={(x(selectedRankingRoi) ?? 0) - 3} cy={heatmapHeight + 3} r="5" className="roi-corner-dot" />
-                  <circle cx={(x(selectedRankingRoi) ?? 0) + (x.bandwidth() || 0) + 3} cy={-3} r="5" className="roi-corner-dot" />
-                  <circle cx={(x(selectedRankingRoi) ?? 0) + (x.bandwidth() || 0) + 3} cy={heatmapHeight + 3} r="5" className="roi-corner-dot" />
+                  {/* Four corner dots */}
+                  <circle cx={(x(selectedRankingRoi) ?? 0) - 3} cy={-3} r="6" className="roi-corner-dot" />
+                  <circle cx={(x(selectedRankingRoi) ?? 0) - 3} cy={heatmapHeight + 3} r="6" className="roi-corner-dot" />
+                  <circle cx={(x(selectedRankingRoi) ?? 0) + (x.bandwidth() || 0) + 3} cy={-3} r="6" className="roi-corner-dot" />
+                  <circle cx={(x(selectedRankingRoi) ?? 0) + (x.bandwidth() || 0) + 3} cy={heatmapHeight + 3} r="6" className="roi-corner-dot" />
                 </g>
               )}
 
-              {/* Cross-hair highlight on hover */}
               {hoveredCell && (
                 <>
                   <rect className="heatmap-highlight" x={0} y={y(hoveredCell.model) ?? 0} width={innerWidth} height={y.bandwidth()} />
@@ -274,7 +236,6 @@ export function Heatmap({
                 </>
               )}
 
-              {/* Heatmap cells */}
               {cells.map((cell) => {
                 const xPosition = x(cell.roi) ?? 0;
                 const yPosition = y(cell.model) ?? 0;
@@ -283,8 +244,7 @@ export function Heatmap({
                 const isSelected = !compareMode && selectedCell?.id === cell.id;
                 const isComparable = comparableCellIds.has(cell.id);
                 const isCompareDisabled = compareMode && !isComparable;
-                const fill = cell.score === null ? 'rgba(255,255,255,0.04)' : colorScale(cell.score);
-                const normalized = cell.score === null ? 0 : (cell.score - minScore) / (adjustedMaxScore - minScore);
+                const fill = cell.score === null ? '#eef1ed' : color(cell.score);
 
                 return (
                   <g key={cell.id}>
@@ -302,7 +262,7 @@ export function Heatmap({
                       y={yPosition}
                       width={x.bandwidth()}
                       height={y.bandwidth()}
-                      rx={5}
+                      rx={4}
                       fill={fill}
                       onMouseEnter={(event) => updateTooltip(cell, event)}
                       onMouseMove={(event) => updateTooltip(cell, event)}
@@ -321,7 +281,7 @@ export function Heatmap({
                         className="cell-score-label"
                         x={xPosition + x.bandwidth() / 2}
                         y={yPosition + y.bandwidth() / 2}
-                        fill={scoreTextColor(normalized)}
+                        fill={scoreTextColor(cell.score, minScore, adjustedMaxScore)}
                         style={{ fontSize: `${scoreLabelFontSize}px` }}
                       >
                         {cell.score.toFixed(2)}
@@ -331,7 +291,6 @@ export function Heatmap({
                 );
               })}
 
-              {/* Y-axis model labels */}
               <g className="axis-labels y-axis-labels">
                 {models.map((model) => (
                   <text key={model} x={-16} y={(y(model) ?? 0) + y.bandwidth() / 2} textAnchor="end" dominantBaseline="middle">
@@ -340,7 +299,6 @@ export function Heatmap({
                 ))}
               </g>
 
-              {/* X-axis ROI labels with color coding */}
               <g className="axis-labels x-axis-labels">
                 {rois.map((roi) => (
                   <text
@@ -348,18 +306,16 @@ export function Heatmap({
                     x={(x(roi) ?? 0) + x.bandwidth() / 2}
                     y={-14}
                     textAnchor="middle"
-                    fill={roiLabelColors[roi.toLowerCase()] ?? undefined}
                   >
-                    {roi.toUpperCase()}
+                    {roi}
                   </text>
                 ))}
               </g>
             </g>
 
-            {/* Legend bottom */}
             <g className="heatmap-legend" transform={`translate(${margin.left},${height - 42})`}>
               {legendSteps.map((value, index) => (
-                <rect key={value} x={index * 4} y={0} width={4} height={10} fill={colorScale(value)} />
+                <rect key={value} x={index * 4} y={0} width={4} height={10} fill={color(value)} />
               ))}
               {legendValues.map((value, index) => (
                 <text key={value} x={index * 94} y={30} textAnchor={index === 2 ? 'end' : 'start'}>
@@ -387,13 +343,12 @@ export function Heatmap({
           <dl>
             <div>
               <dt>ROI</dt>
-              <dd>{tooltip.cell.roi.toUpperCase()}</dd>
+              <dd>{tooltip.cell.roi}</dd>
             </div>
             <div>
               <dt>Model</dt>
               <dd>
-                {tooltip.cell.model}{' '}
-                <span className="model-tag">{inferModelCategory(tooltip.cell.model)}</span>
+                {tooltip.cell.model} <span className="model-tag">{inferModelCategory(tooltip.cell.model)}</span>
               </dd>
             </div>
             <div>

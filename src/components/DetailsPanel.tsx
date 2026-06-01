@@ -21,17 +21,11 @@ const topKOptions = [6, 9, 12];
 type DetailTab = 'evidence' | 'clustering';
 
 function formatScore(score: number | null): string {
-  return score === null ? '—' : score.toFixed(3);
+  return score === null ? 'Unavailable' : score.toFixed(3);
 }
 
 function formatValue(value: number): string {
   return value.toFixed(3);
-}
-
-function roiChipClass(roi: string): string {
-  const lower = roi.toLowerCase();
-  if (lower === 'ffa' || lower === 'ppa' || lower === 'eba') return `roi-chip ${lower}`;
-  return 'model-tag';
 }
 
 function ImageModal({ image, onClose }: { image: EvidenceImage; onClose: () => void }) {
@@ -161,9 +155,9 @@ export function DetailsPanel({
 
     try {
       await copyText(JSON.stringify(payload, null, 2));
-      setActionMessage('Copied to clipboard');
+      setActionMessage('Copied selected metadata.');
     } catch {
-      setActionMessage('Clipboard unavailable');
+      setActionMessage('Clipboard access is unavailable.');
     }
   }
 
@@ -175,20 +169,17 @@ export function DetailsPanel({
     }
 
     downloadJson(`selected-${payload.model}-${payload.roi}.json`, payload);
-    setActionMessage('Exported JSON');
+    setActionMessage('Exported selected summary.');
   }
 
   if (!selectedCell) {
     return (
       <aside className="details-panel" aria-label="Details panel">
-        <p className="eyebrow">Details</p>
-        <h2>Cell Inspector</h2>
-        <p style={{ marginTop: 8, marginBottom: 16, fontSize: '0.82rem' }}>
-          Click a heatmap cell to rank images by the matching CSV response column.
-        </p>
+        <h2>Details</h2>
+        <p>Select a heatmap cell to rank images by the matching CSV response column.</p>
         <div className="empty-state-card">
           <h3>No cell selected</h3>
-          <p>Use the heatmap to choose one ROI/model cell, or enable compare mode to select two cells.</p>
+          <p>Use the heatmap to choose one ROI/model cell, or turn on compare mode to select two cells.</p>
         </div>
         <dl className="details-list">
           <div>
@@ -208,19 +199,18 @@ export function DetailsPanel({
     <aside className="details-panel evidence-panel" aria-label="Details panel">
       <div className="evidence-panel-header">
         <p className="eyebrow">Selected cell</p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span className={roiChipClass(selectedCell.roi)}>{selectedCell.roi.toUpperCase()}</span>
-          <span className="model-tag">{inferModelCategory(selectedCell.model)}</span>
-        </div>
-        <h2>{selectedCell.model}</h2>
+        <h2>
+          {selectedCell.roi} / {selectedCell.model}
+        </h2>
+        <span className="model-tag">{inferModelCategory(selectedCell.model)}</span>
         <dl className="selected-score-strip">
           <div>
-            <dt>Score</dt>
+            <dt>Aggregate score</dt>
             <dd>{formatScore(selectedCell.score)}</dd>
           </div>
           <div>
             <dt>ROI rank</dt>
-            <dd>{selectedCell.rankWithinRoi === null ? '—' : `#${selectedCell.rankWithinRoi}`}</dd>
+            <dd>{selectedCell.rankWithinRoi === null ? 'Unavailable' : `#${selectedCell.rankWithinRoi}`}</dd>
           </div>
           <div>
             <dt>Overall</dt>
@@ -240,11 +230,11 @@ export function DetailsPanel({
       </div>
 
       <label className="evidence-control">
-        Images per tier
+        Top-k / bottom-k
         <select value={topK} onChange={(event) => setTopK(Number(event.target.value))}>
           {topKOptions.map((option) => (
             <option key={option} value={option}>
-              Top / bottom {option}
+              {option} images
             </option>
           ))}
         </select>
@@ -274,9 +264,9 @@ export function DetailsPanel({
       <section hidden={activeDetailTab !== 'evidence'} aria-label="Image evidence">
         {!evidenceView ? (
           <div className="evidence-empty-state">
-            <h3>No image-level evidence</h3>
+            <h3>No image-level evidence found</h3>
             <p>
-              The aggregate JSON contains this score, but the CSV has no matching column for{' '}
+              The aggregate JSON contains this model/ROI score, but the CSV does not include a matching column for{' '}
               <strong>
                 {selectedCell.model}_{selectedCell.roi}
               </strong>
@@ -285,19 +275,19 @@ export function DetailsPanel({
           </div>
         ) : (
           <>
-            <dl className="summary-card-grid" style={{ marginBottom: 12 }}>
+            <dl className="summary-card-grid">
               <div>
-                <dt>Max value</dt>
+                <dt>Max image value</dt>
                 <dd>{formatValue(evidenceView.stats.max)}</dd>
               </div>
               <div>
-                <dt>Min value</dt>
+                <dt>Min image value</dt>
                 <dd>{formatValue(evidenceView.stats.min)}</dd>
               </div>
             </dl>
 
-            <p className="evidence-column-note" style={{ marginBottom: 12 }}>
-              Column: <strong>{evidenceView.columnName}</strong>
+            <p className="evidence-column-note">
+              CSV column: <strong>{evidenceView.columnName}</strong>
             </p>
 
             <ImageGrid title="Top images" images={evidenceView.topImages} onOpenImage={setModalImage} />
@@ -314,6 +304,8 @@ export function DetailsPanel({
           onOpenImage={setModalImage}
         />
       </section>
+
+      {/* <SelectionInsights ... /> removed as per requirements */}
 
       {modalImage && <ImageModal image={modalImage} onClose={() => setModalImage(null)} />}
     </aside>

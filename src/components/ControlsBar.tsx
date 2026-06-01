@@ -38,24 +38,24 @@ export function ControlsBar({
         <input
           type="search"
           value={modelSearch}
-          placeholder="clip, resnet, vit..."
+          placeholder="clip, resnet, taskonomy..."
           onChange={(event) => onModelSearchChange(event.target.value)}
         />
       </label>
       <label>
-        Ranking
+        Ranking System
         <select value={rankingSystem} onChange={(event) => onRankingSystemChange(event.target.value as RankingSystem)}>
-          <option value="overall">Overall</option>
-          <option value="roi">By ROI</option>
+          <option value="overall">Overall Ranking</option>
+          <option value="roi">ROI Ranking</option>
         </select>
       </label>
       {rankingSystem === 'roi' && (
         <label>
-          ROI
+          ROIs
           <select value={selectedRankingRoi} onChange={(event) => onSelectedRankingRoiChange(event.target.value)}>
             {rois.map((roi) => (
               <option key={roi} value={roi}>
-                {roi.toUpperCase()}
+                {roi}
               </option>
             ))}
           </select>
@@ -67,7 +67,7 @@ export function ControlsBar({
           checked={showScoreLabels}
           onChange={(event) => onShowScoreLabelsChange(event.target.checked)}
         />
-        Show labels
+        Show cell labels
       </label>
       <label className="toggle-control">
         <input
@@ -78,10 +78,10 @@ export function ControlsBar({
         Compare mode
       </label>
       <div className={`compare-status${compareMode ? ' active' : ''}`} aria-live="polite">
-        {compareMode ? `${compareSelectionCount}/2 selected` : 'Compare off'}
+        {compareMode ? `${compareSelectionCount}/2 cells selected for compare` : 'Compare mode off'}
       </div>
       <button className="reset-controls-button" type="button" onClick={onResetControls}>
-        Reset
+        Reset controls
       </button>
     </section>
   );

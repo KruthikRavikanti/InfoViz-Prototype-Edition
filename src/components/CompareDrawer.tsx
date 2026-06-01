@@ -18,15 +18,55 @@ type CompareDrawerProps = {
 };
 
 function formatScore(score: number | null): string {
-  return score === null ? '—' : score.toFixed(3);
+  return score === null ? 'Unavailable' : score.toFixed(3);
 }
 
 function formatDifference(value: number | null): string {
   if (value === null) {
-    return '—';
+    return 'Unavailable';
   }
 
   return `${value >= 0 ? '+' : ''}${value.toFixed(3)}`;
+}
+
+function CompareCellCard({
+  label,
+  cell,
+  onOpenImage,
+  evidenceView,
+}: {
+  label: 'A' | 'B';
+  cell: SelectedHeatmapCell;
+  onOpenImage: (image: EvidenceImage) => void;
+  evidenceView: ReturnType<typeof buildEvidenceView>;
+}) {
+  return (
+    <article className="compare-cell-card">
+      <div className="compare-card-heading">
+        <span>{label}</span>
+        <div>
+          <h3>{cell.model}</h3>
+          <p>
+            {cell.roi} <span className="model-tag">{inferModelCategory(cell.model)}</span>
+          </p>
+        </div>
+      </div>
+      <dl className="compare-metrics">
+        <div>
+          <dt>Aggregate</dt>
+          <dd>{formatScore(cell.score)}</dd>
+        </div>
+      </dl>
+      {evidenceView ? (
+        <>
+          <ImageGrid title={`Top ${label}`} images={evidenceView.topImages} onOpenImage={onOpenImage} compact />
+          <ImageGrid title={`Bottom ${label}`} images={evidenceView.bottomImages} onOpenImage={onOpenImage} compact />
+        </>
+      ) : (
+        <p className="compare-empty">No matching CSV column found.</p>
+      )}
+    </article>
+  );
 }
 
 function ImageModal({ image, onClose }: { image: EvidenceImage; onClose: () => void }) {
@@ -51,50 +91,6 @@ function ImageModal({ image, onClose }: { image: EvidenceImage; onClose: () => v
         )}
       </div>
     </div>
-  );
-}
-
-function CompareCellCard({
-  label,
-  cell,
-  onOpenImage,
-  evidenceView,
-}: {
-  label: 'A' | 'B';
-  cell: SelectedHeatmapCell;
-  onOpenImage: (image: EvidenceImage) => void;
-  evidenceView: ReturnType<typeof buildEvidenceView>;
-}) {
-  return (
-    <article className="compare-cell-card">
-      <div className="compare-card-heading">
-        <span>{label}</span>
-        <div>
-          <h3>{cell.model}</h3>
-          <p>
-            {cell.roi.toUpperCase()} &middot; <span className="model-tag">{inferModelCategory(cell.model)}</span>
-          </p>
-        </div>
-      </div>
-      <dl className="compare-metrics">
-        <div>
-          <dt>Aggregate</dt>
-          <dd>{formatScore(cell.score)}</dd>
-        </div>
-        <div>
-          <dt>ROI rank</dt>
-          <dd>{cell.rankWithinRoi === null ? '—' : `#${cell.rankWithinRoi}`}</dd>
-        </div>
-      </dl>
-      {evidenceView ? (
-        <>
-          <ImageGrid title={`Top ${label}`} images={evidenceView.topImages} onOpenImage={onOpenImage} compact />
-          <ImageGrid title={`Bottom ${label}`} images={evidenceView.bottomImages} onOpenImage={onOpenImage} compact />
-        </>
-      ) : (
-        <p className="compare-empty">No matching CSV column found.</p>
-      )}
-    </article>
   );
 }
 
@@ -125,9 +121,6 @@ export function CompareDrawer({
         : [],
     [cellA, cellB, evidenceA, evidenceB, heatmapCells, modelRoiColumns, rows, topK],
   );
-
-  // suppress unused warning — kept for future feature
-  void similarNeighbors;
 
   useEffect(() => {
     if (!cellA || !cellB) {
@@ -183,11 +176,11 @@ export function CompareDrawer({
       >
         <div className="compare-drawer-heading">
           <div>
-            <h2>Compare mode</h2>
-            <p>Image-level overlap and score differences for the two selected cells.</p>
+            <h2>Compare cells</h2>
+            <p>Review image-level overlap and score differences for the two selected cells.</p>
           </div>
           <button className="compare-close-button" type="button" onClick={() => onCompareModeChange(false)}>
-            Close &nbsp;Esc
+            Close
           </button>
         </div>
 
@@ -214,40 +207,55 @@ export function CompareDrawer({
               <div className="compare-badge-row">
                 <span>Top overlap: {compareSummary.top.overlap.length}</span>
                 <span>Bottom overlap: {compareSummary.bottom.overlap.length}</span>
-                <span>Score diff A–B: {formatDifference(compareSummary.aggregateScoreDifference)}</span>
-                <span>Mean diff A–B: {formatDifference(compareSummary.imageMeanDifference)}</span>
+                <span>Aggregate diff A-B: {formatDifference(compareSummary.aggregateScoreDifference)}</span>
+                <span>Mean diff A-B: {formatDifference(compareSummary.imageMeanDifference)}</span>
               </div>
-
               <p className="compare-summary-note">
                 {compareSummary.top.overlap.length > 0 || compareSummary.bottom.overlap.length > 0 ? (
                   <>
-                    Selections share <strong style={{ color: 'var(--compare)' }}>{compareSummary.top.overlap.length}</strong> top
-                    and <strong style={{ color: 'var(--compare)' }}>{compareSummary.bottom.overlap.length}</strong> bottom images,
-                    making them useful "same evidence, different score" candidates.
+                    These selections already share <strong>{compareSummary.top.overlap.length}</strong> top images
+                    and <strong>{compareSummary.bottom.overlap.length}</strong> bottom images inside the active
+                    evidence window, which makes them useful candidates for "same evidence, different score"
+                    inspection.
                   </>
                 ) : (
                   <>
-                    No shared top or bottom images in the current evidence window — aggregate similarity likely comes from different stimuli.
+                    The two selections are not surfacing the same top or bottom images inside the active evidence
+                    window, so any aggregate similarity is likely coming from different stimuli.
                   </>
                 )}
               </p>
-
               <div className="panel-action-row">
                 <button type="button" onClick={handleExportCompare}>
                   Export compare JSON
                 </button>
               </div>
-
               <div className="compare-overlap-grid">
-                <ImageGrid title="Overlapping top" images={compareSummary.top.overlap} onOpenImage={setModalImage} compact />
-                <ImageGrid title="Unique top A" images={compareSummary.top.uniqueA} onOpenImage={setModalImage} compact />
-                <ImageGrid title="Unique top B" images={compareSummary.top.uniqueB} onOpenImage={setModalImage} compact />
+                <ImageGrid title="Overlapping top images" images={compareSummary.top.overlap} onOpenImage={setModalImage} compact />
+                <ImageGrid title="Unique top images for A" images={compareSummary.top.uniqueA} onOpenImage={setModalImage} compact />
+                <ImageGrid title="Unique top images for B" images={compareSummary.top.uniqueB} onOpenImage={setModalImage} compact />
               </div>
               <div className="compare-overlap-grid">
-                <ImageGrid title="Overlapping bottom" images={compareSummary.bottom.overlap} onOpenImage={setModalImage} compact />
-                <ImageGrid title="Unique bottom A" images={compareSummary.bottom.uniqueA} onOpenImage={setModalImage} compact />
-                <ImageGrid title="Unique bottom B" images={compareSummary.bottom.uniqueB} onOpenImage={setModalImage} compact />
+                <ImageGrid
+                  title="Overlapping bottom images"
+                  images={compareSummary.bottom.overlap}
+                  onOpenImage={setModalImage}
+                  compact
+                />
+                <ImageGrid
+                  title="Unique bottom images for A"
+                  images={compareSummary.bottom.uniqueA}
+                  onOpenImage={setModalImage}
+                  compact
+                />
+                <ImageGrid
+                  title="Unique bottom images for B"
+                  images={compareSummary.bottom.uniqueB}
+                  onOpenImage={setModalImage}
+                  compact
+                />
               </div>
+              {/* Most similar other intersections section removed as requested */}
             </section>
           ) : (
             <p className="compare-empty">Both selected cells need matching CSV columns before overlaps can be computed.</p>

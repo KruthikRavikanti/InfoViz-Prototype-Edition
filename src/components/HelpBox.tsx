@@ -1,19 +1,19 @@
 export function HelpBox() {
   return (
     <details className="help-box">
-      <summary>How to use this dashboard</summary>
+      <summary>How to use this prototype</summary>
       <div>
         <p>
-          The heatmap is your primary overview: columns are ROIs, rows are models, and color encodes the aggregate score.
-          Use the controls bar to search, sort, and filter the model set.
+          Start with the heatmap: columns are ROIs, rows are models, and color encodes the aggregate JSON score. Use
+          search and sort controls to narrow the model set.
         </p>
         <p>
-          Click any cell (or focus it and press Enter) to open image-level evidence in the right panel. Use the top/bottom
-          tier selector to control how many images are shown.
+          Click a cell, or focus it and press Enter, to open image-level evidence in the details panel. Turn on compare
+          mode in the control bar to select two cells and open a comparison pop-up with overlap and evidence details.
         </p>
         <p>
-          Enable compare mode to select two cells and open a comparison overlay with image overlap and score difference analysis.
-          Press Escape to close the comparison.
+          Image-level evidence is currently available for only part of the aggregate score matrix. Cells without matching
+          CSV evidence still appear in the heatmap, but compare mode only enables evidence-backed selections.
         </p>
       </div>
     </details>

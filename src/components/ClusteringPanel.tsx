@@ -8,24 +8,14 @@ type ClusteringPanelProps = {
   onOpenImage: (image: EvidenceImage) => void;
 };
 
-// Distinct, vibrant but not garish colors for dark backgrounds
-const clusterColors = [
-  '#7c8cff', // accent blue
-  '#ff8a5b', // compare orange
-  '#5fd0a5', // success teal
-  '#f2c66d', // warning yellow
-  '#a78bfa', // soft violet
-  '#38bdf8', // sky blue
-  '#fb7185', // soft red
-  '#34d399', // emerald
-];
+const clusterColors = ['#256f77', '#b23a48', '#7c5d13', '#496d2f', '#5b55a0', '#a24b2a', '#315f9f', '#7a4776'];
 
 function formatNumber(value: number | null | undefined): string {
-  return value === null || value === undefined ? '—' : value.toFixed(3);
+  return value === null || value === undefined ? 'Unavailable' : value.toFixed(3);
 }
 
 function formatInteger(value: number | null | undefined): string {
-  return value === null || value === undefined ? '—' : String(value);
+  return value === null || value === undefined ? 'Unavailable' : String(value);
 }
 
 function getPointCoordinates(point: ClusterPoint, mode: ClusterView['coordinateMode']): { x: number; y: number } | null {
@@ -46,7 +36,7 @@ function getPointCoordinates(point: ClusterPoint, mode: ClusterView['coordinateM
 
 function ClusterScatter({ view }: { view: ClusterView }) {
   if (!view.coordinateMode) {
-    return <p className="cluster-empty-note">No projection coordinates found for this clustering output.</p>;
+    return <p className="cluster-empty-note">No projection coordinates were found for this clustering output.</p>;
   }
 
   const drawablePoints = view.points
@@ -57,7 +47,7 @@ function ClusterScatter({ view }: { view: ClusterView }) {
     .filter((point): point is { point: ClusterPoint; x: number; y: number } => point !== null);
 
   if (drawablePoints.length === 0) {
-    return <p className="cluster-empty-note">No complete coordinate pairs found for this clustering output.</p>;
+    return <p className="cluster-empty-note">No complete coordinate pairs were found for this clustering output.</p>;
   }
 
   const xValues = drawablePoints.map((point) => point.x);
@@ -67,15 +57,15 @@ function ClusterScatter({ view }: { view: ClusterView }) {
   const minY = Math.min(...yValues);
   const maxY = Math.max(...yValues);
   const width = 520;
-  const height = 300;
-  const padding = 20;
+  const height = 320;
+  const padding = 24;
   const xSpan = maxX - minX || 1;
   const ySpan = maxY - minY || 1;
 
   return (
     <figure className="cluster-scatter">
       <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${view.coordinateMode.toUpperCase()} cluster scatter plot`}>
-        <rect x="0" y="0" width={width} height={height} rx="10" />
+        <rect x="0" y="0" width={width} height={height} rx="8" />
         {drawablePoints.map(({ point, x, y }) => {
           const labelIndex = Number(point.clusterLabel);
           const color = clusterColors[Number.isFinite(labelIndex) ? labelIndex % clusterColors.length : 0];
@@ -83,7 +73,7 @@ function ClusterScatter({ view }: { view: ClusterView }) {
           const cy = height - padding - ((y - minY) / ySpan) * (height - padding * 2);
 
           return (
-            <circle key={`${point.imageName}-${point.clusterLabel}`} cx={cx} cy={cy} r="3.8" fill={color}>
+            <circle key={`${point.imageName}-${point.clusterLabel}`} cx={cx} cy={cy} r="4.2" fill={color}>
               <title>{`${point.imageName} | cluster ${point.clusterLabel}`}</title>
             </circle>
           );
@@ -149,7 +139,7 @@ function ClusterViewSection({
         <div>
           <h3>{title}</h3>
           <p>
-            {view.groups.length} clusters &middot; {view.points.length} images
+            {view.groups.length} clusters across {view.points.length} images
           </p>
         </div>
       </div>
@@ -178,7 +168,7 @@ export function ClusteringPanel({ voxelView, voxelStatus, visualView, onOpenImag
       {voxelStatus === 'loading' ? (
         <section className="cluster-section">
           <h3>Voxel clustering</h3>
-          <p className="cluster-empty-note">Loading voxel clusters…</p>
+          <p className="cluster-empty-note">Loading voxel clusters for this cell.</p>
         </section>
       ) : (
         <ClusterViewSection
@@ -187,7 +177,7 @@ export function ClusteringPanel({ voxelView, voxelStatus, visualView, onOpenImag
           emptyMessage={
             voxelStatus === 'error'
               ? 'Voxel clustering exists for this cell, but the cluster CSV could not be loaded.'
-              : 'No voxel clustering output found for this model and ROI.'
+              : 'No voxel clustering output was found for this model and ROI.'
           }
           onOpenImage={onOpenImage}
         />
@@ -196,7 +186,7 @@ export function ClusteringPanel({ voxelView, voxelStatus, visualView, onOpenImag
       <ClusterViewSection
         title="Visual clustering"
         view={visualView}
-        emptyMessage="No visual clustering output found."
+        emptyMessage="No visual clustering output was found."
         onOpenImage={onOpenImage}
       />
     </div>
