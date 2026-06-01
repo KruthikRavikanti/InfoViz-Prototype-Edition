@@ -37,7 +37,13 @@ type DotTooltip = {
   svgY: number;
 };
 
-function ClusterScatter({ view, onOpenImage }: { view: ClusterView; onOpenImage: (i: EvidenceImage) => void }) {
+function ClusterScatter({
+  view, onOpenImage, searchQuery,
+}: {
+  view: ClusterView;
+  onOpenImage: (i: EvidenceImage) => void;
+  searchQuery: string;
+}) {
   const [dotTooltip, setDotTooltip] = useState<DotTooltip | null>(null);
 
   if (!view.coordinateMode) {
@@ -58,6 +64,11 @@ function ClusterScatter({ view, onOpenImage }: { view: ClusterView; onOpenImage:
   const xSpan = maxX - minX || 1;
   const ySpan = maxY - minY || 1;
 
+  const needle = searchQuery.trim().toLowerCase();
+  const hasSearch = needle.length > 0;
+
+  function isMatch(name: string) { return hasSearch && name.toLowerCase().includes(needle); }
+
   function handleDotClick(p: ClusterPoint) {
     onOpenImage({ imageName: p.imageName, imageUrl: p.imageUrl, value: p.value, rank: p.rank });
   }
@@ -69,17 +80,22 @@ function ClusterScatter({ view, onOpenImage }: { view: ClusterView; onOpenImage:
           <rect x="0" y="0" width={W} height={H} rx="10" />
           {pts.map(({ p, x, y }) => {
             const idx = Number(p.clusterLabel);
-            const fill = CLUSTER_COLORS[Number.isFinite(idx) ? idx % CLUSTER_COLORS.length : 0];
+            const baseColor = CLUSTER_COLORS[Number.isFinite(idx) ? idx % CLUSTER_COLORS.length : 0];
             const cx = pad + ((x - minX) / xSpan) * (W - pad * 2);
             const cy = H - pad - ((y - minY) / ySpan) * (H - pad * 2);
             const isHovered = dotTooltip?.point.imageName === p.imageName;
+            const matched = isMatch(p.imageName);
+            const dimmed = hasSearch && !matched;
             return (
               <circle
                 key={`${p.imageName}-${p.clusterLabel}`}
                 cx={cx} cy={cy}
-                r={isHovered ? 6 : 3.8}
-                fill={fill}
-                style={{ cursor: 'pointer', transition: 'r .1s' }}
+                r={matched ? 7 : isHovered ? 6 : 3.8}
+                fill={matched ? '#F59E0B' : baseColor}
+                opacity={dimmed ? 0.15 : 0.82}
+                stroke={matched ? '#92400E' : 'var(--surface-raised)'}
+                strokeWidth={matched ? 1.5 : 1}
+                style={{ cursor: 'pointer' }}
                 onMouseEnter={() => setDotTooltip({ point: p, svgX: cx, svgY: cy })}
                 onClick={() => handleDotClick(p)}
               />
@@ -125,6 +141,8 @@ function Metrics({ summary }: { summary: ClusterSummary | null }) {
 function ClusterSection({
   title, view, emptyMessage, onOpenImage,
 }: { title: string; view: ClusterView | null; emptyMessage: string; onOpenImage: (i: EvidenceImage) => void }) {
+  const [searchQuery, setSearchQuery] = useState('');
+
   if (!view) {
     return (
       <section className="cluster-section">
@@ -133,6 +151,9 @@ function ClusterSection({
       </section>
     );
   }
+
+  const needle = searchQuery.trim().toLowerCase();
+  const matchCount = needle ? view.points.filter((p) => p.imageName.toLowerCase().includes(needle)).length : 0;
 
   return (
     <section className="cluster-section">
@@ -143,7 +164,24 @@ function ClusterSection({
         </div>
       </div>
       <Metrics summary={view.summary} />
-      <ClusterScatter view={view} onOpenImage={onOpenImage} />
+
+      <div className="scatter-search-row">
+        <input
+          type="search"
+          className="scatter-search-input"
+          placeholder="Search image filename…"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          aria-label="Search image filenames in scatter plot"
+        />
+        {needle && (
+          <span className="scatter-search-count">
+            {matchCount} match{matchCount !== 1 ? 'es' : ''}
+          </span>
+        )}
+      </div>
+
+      <ClusterScatter view={view} onOpenImage={onOpenImage} searchQuery={searchQuery} />
       <div className="cluster-group-list">
         {view.groups.map((g) => (
           <section className="cluster-group" key={`${title}-${g.label}`}>

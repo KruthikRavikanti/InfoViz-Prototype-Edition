@@ -993,6 +993,35 @@ input[type="checkbox"] { accent-color: var(--accent); }
 
 .cluster-summary-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
 
+.scatter-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.scatter-search-input {
+  flex: 1;
+  height: 32px;
+  padding: 0 10px;
+  font-size: .8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-raised);
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.scatter-search-input:focus {
+  border-color: var(--accent-mid);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+.scatter-search-count {
+  font-size: .75rem;
+  color: var(--warning);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 .cluster-scatter { display: grid; gap: 5px; margin: 0; }
 .cluster-scatter > div { position: relative; }
 .cluster-scatter svg {
