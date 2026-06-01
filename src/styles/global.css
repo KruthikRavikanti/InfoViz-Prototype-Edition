@@ -1018,12 +1018,12 @@ input[type="checkbox"] { accent-color: var(--accent); }
   color: var(--text-2);
 }
 .scatter-category-btn:hover { opacity: .85; }
-.scatter-category-btn--faces         { border-color: #E05252; }
-.scatter-category-btn--faces.active  { background: #E05252; color: #fff; border-color: #E05252; }
-.scatter-category-btn--places        { border-color: #3B82F6; }
-.scatter-category-btn--places.active { background: #3B82F6; color: #fff; border-color: #3B82F6; }
-.scatter-category-btn--body-part        { border-color: #16A34A; }
-.scatter-category-btn--body-part.active { background: #16A34A; color: #fff; border-color: #16A34A; }
+.scatter-category-btn--faces         { border-color: #F97316; }
+.scatter-category-btn--faces.active  { background: #F97316; color: #fff; border-color: #F97316; }
+.scatter-category-btn--places        { border-color: #06B6D4; }
+.scatter-category-btn--places.active { background: #06B6D4; color: #fff; border-color: #06B6D4; }
+.scatter-category-btn--body-part        { border-color: #EC4899; }
+.scatter-category-btn--body-part.active { background: #EC4899; color: #fff; border-color: #EC4899; }
 
 .scatter-search-row {
   display: flex;

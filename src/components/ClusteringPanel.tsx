@@ -10,11 +10,11 @@ type ClusteringPanelProps = {
   onOpenImage: (image: EvidenceImage) => void;
 };
 
-// Category highlight colors — distinct, accessible
+// Category highlight colors — must not clash with CLUSTER_COLORS (no red, blue, green, amber, violet, steel-blue, brown, teal)
 const CATEGORY_COLORS: Record<ImageCategory, { fill: string; stroke: string }> = {
-  'Faces':     { fill: '#E05252', stroke: '#7F1D1D' },
-  'Places':    { fill: '#3B82F6', stroke: '#1E3A8A' },
-  'Body Part': { fill: '#16A34A', stroke: '#14532D' },
+  'Faces':     { fill: '#F97316', stroke: '#7C2D12' }, // vivid orange
+  'Places':    { fill: '#06B6D4', stroke: '#164E63' }, // cyan
+  'Body Part': { fill: '#EC4899', stroke: '#831843' }, // hot pink
 };
 
 // Muted, harmonious palette — reads well on the warm off-white surface
