@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ImageGrid } from './ImageGrid';
 import type { ClusterPoint, ClusterSummary, ClusterView, EvidenceImage } from '../types/data';
 
@@ -30,7 +31,15 @@ function coords(point: ClusterPoint, mode: ClusterView['coordinateMode']): { x: 
   return null;
 }
 
-function ClusterScatter({ view }: { view: ClusterView }) {
+type DotTooltip = {
+  point: ClusterPoint;
+  svgX: number;
+  svgY: number;
+};
+
+function ClusterScatter({ view, onOpenImage }: { view: ClusterView; onOpenImage: (i: EvidenceImage) => void }) {
+  const [dotTooltip, setDotTooltip] = useState<DotTooltip | null>(null);
+
   if (!view.coordinateMode) {
     return <p className="cluster-empty-note">No projection coordinates available.</p>;
   }
@@ -49,23 +58,54 @@ function ClusterScatter({ view }: { view: ClusterView }) {
   const xSpan = maxX - minX || 1;
   const ySpan = maxY - minY || 1;
 
+  function handleDotClick(p: ClusterPoint) {
+    onOpenImage({ imageName: p.imageName, imageUrl: p.imageUrl, value: p.value, rank: p.rank });
+  }
+
   return (
-    <figure className="cluster-scatter">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${view.coordinateMode.toUpperCase()} scatter`}>
-        <rect x="0" y="0" width={W} height={H} rx="10" />
-        {pts.map(({ p, x, y }) => {
-          const idx = Number(p.clusterLabel);
-          const fill = CLUSTER_COLORS[Number.isFinite(idx) ? idx % CLUSTER_COLORS.length : 0];
-          const cx = pad + ((x - minX) / xSpan) * (W - pad * 2);
-          const cy = H - pad - ((y - minY) / ySpan) * (H - pad * 2);
-          return (
-            <circle key={`${p.imageName}-${p.clusterLabel}`} cx={cx} cy={cy} r="3.8" fill={fill}>
-              <title>{p.imageName} · cluster {p.clusterLabel}</title>
-            </circle>
-          );
-        })}
-      </svg>
-      <figcaption>{view.coordinateMode.toUpperCase()} projection, coloured by cluster.</figcaption>
+    <figure className="cluster-scatter" onMouseLeave={() => setDotTooltip(null)}>
+      <div style={{ position: 'relative' }}>
+        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${view.coordinateMode.toUpperCase()} scatter`}>
+          <rect x="0" y="0" width={W} height={H} rx="10" />
+          {pts.map(({ p, x, y }) => {
+            const idx = Number(p.clusterLabel);
+            const fill = CLUSTER_COLORS[Number.isFinite(idx) ? idx % CLUSTER_COLORS.length : 0];
+            const cx = pad + ((x - minX) / xSpan) * (W - pad * 2);
+            const cy = H - pad - ((y - minY) / ySpan) * (H - pad * 2);
+            const isHovered = dotTooltip?.point.imageName === p.imageName;
+            return (
+              <circle
+                key={`${p.imageName}-${p.clusterLabel}`}
+                cx={cx} cy={cy}
+                r={isHovered ? 6 : 3.8}
+                fill={fill}
+                style={{ cursor: 'pointer', transition: 'r .1s' }}
+                onMouseEnter={() => setDotTooltip({ point: p, svgX: cx, svgY: cy })}
+                onClick={() => handleDotClick(p)}
+              />
+            );
+          })}
+        </svg>
+
+        {dotTooltip && (
+          <div
+            className="scatter-dot-tooltip"
+            style={{
+              left: `${(dotTooltip.svgX / W) * 100}%`,
+              top: `${(dotTooltip.svgY / H) * 100}%`,
+            }}
+          >
+            <img
+              src={dotTooltip.point.imageUrl}
+              alt={dotTooltip.point.imageName}
+              className="scatter-dot-tooltip-img"
+            />
+            <p className="scatter-dot-tooltip-label">{dotTooltip.point.imageName}</p>
+            <p className="scatter-dot-tooltip-sub">Cluster {dotTooltip.point.clusterLabel}</p>
+          </div>
+        )}
+      </div>
+      <figcaption>{view.coordinateMode.toUpperCase()} projection, coloured by cluster. Hover dots to preview · click to enlarge.</figcaption>
     </figure>
   );
 }
@@ -103,7 +143,7 @@ function ClusterSection({
         </div>
       </div>
       <Metrics summary={view.summary} />
-      <ClusterScatter view={view} />
+      <ClusterScatter view={view} onOpenImage={onOpenImage} />
       <div className="cluster-group-list">
         {view.groups.map((g) => (
           <section className="cluster-group" key={`${title}-${g.label}`}>

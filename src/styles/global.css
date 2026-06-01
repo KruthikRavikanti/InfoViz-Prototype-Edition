@@ -994,6 +994,7 @@ input[type="checkbox"] { accent-color: var(--accent); }
 .cluster-summary-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
 
 .cluster-scatter { display: grid; gap: 5px; margin: 0; }
+.cluster-scatter > div { position: relative; }
 .cluster-scatter svg {
   width: 100%; height: auto;
   border: 1px solid var(--border);
@@ -1003,6 +1004,41 @@ input[type="checkbox"] { accent-color: var(--accent); }
 }
 .cluster-scatter rect  { fill: var(--bg-subtle); }
 .cluster-scatter circle { opacity: .82; stroke: var(--surface-raised); stroke-width: 1px; }
+
+.scatter-dot-tooltip {
+  position: absolute;
+  z-index: 30;
+  transform: translate(-50%, calc(-100% - 10px));
+  pointer-events: none;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  padding: 6px;
+  width: 120px;
+  animation: scale-in .1s ease;
+}
+.scatter-dot-tooltip-img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--r-sm);
+  display: block;
+}
+.scatter-dot-tooltip-label {
+  margin: 4px 0 1px;
+  font-size: .68rem;
+  font-weight: 500;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scatter-dot-tooltip-sub {
+  margin: 0;
+  font-size: .65rem;
+  color: var(--text-4);
+}
 
 .cluster-group-list { display: grid; gap: 14px; }
 .cluster-group      { display: grid; gap: 7px; }
