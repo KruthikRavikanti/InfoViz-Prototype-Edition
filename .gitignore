@@ -9,3 +9,4 @@ pnpm-debug.log*
 node_modules/.vite/deps/_metadata.json
 node_modules/
 public/
+.env
