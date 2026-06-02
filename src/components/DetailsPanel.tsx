@@ -233,6 +233,7 @@ export function DetailsPanel({
           voxelStatus={voxelStatus}
           visualView={clustering.visualView}
           imageCategories={clustering.imageCategories}
+          groundTruthPatients={clustering.groundTruthPatients}
           onOpenImage={setModalImage}
         />
       </section>

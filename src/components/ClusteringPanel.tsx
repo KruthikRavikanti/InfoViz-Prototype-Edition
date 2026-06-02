@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { ImageGrid } from './ImageGrid';
-import type { ClusterPoint, ClusterSummary, ClusterView, EvidenceImage, ImageCategory } from '../types/data';
+import type { ClusterPoint, ClusterSummary, ClusterView, EvidenceImage, GroundTruthPatient, ImageCategory } from '../types/data';
 
 type ClusteringPanelProps = {
   voxelView: ClusterView | null;
   voxelStatus: 'idle' | 'loading' | 'error';
   visualView: ClusterView | null;
   imageCategories: Map<string, ImageCategory>;
+  groundTruthPatients: GroundTruthPatient[];
   onOpenImage: (image: EvidenceImage) => void;
 };
 
@@ -180,21 +181,24 @@ const CATEGORY_LABELS: Record<ImageCategory, string> = {
 };
 
 function ClusterSection({
-  title, view, emptyMessage, onOpenImage, imageCategories,
+  title, view, emptyMessage, onOpenImage, imageCategories, compact,
 }: {
   title: string;
   view: ClusterView | null;
   emptyMessage: string;
   onOpenImage: (i: EvidenceImage) => void;
   imageCategories: Map<string, ImageCategory>;
+  compact?: boolean;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryHighlight, setCategoryHighlight] = useState<ImageCategory | null>(null);
 
   if (!view) {
-    return (
+    return compact ? (
+      <p className="cluster-empty-note">{emptyMessage}</p>
+    ) : (
       <section className="cluster-section">
-        <h3>{title}</h3>
+        {title && <h3>{title}</h3>}
         <p className="cluster-empty-note">{emptyMessage}</p>
       </section>
     );
@@ -207,14 +211,19 @@ function ClusterSection({
     setCategoryHighlight((prev) => (prev === cat ? null : cat));
   }
 
-  return (
-    <section className="cluster-section">
-      <div className="cluster-section-heading">
-        <div>
-          <h3>{title}</h3>
-          <p>{view.groups.length} clusters · {view.points.length} images</p>
+  const inner = (
+    <>
+      {!compact && title && (
+        <div className="cluster-section-heading">
+          <div>
+            <h3>{title}</h3>
+            <p>{view.groups.length} clusters · {view.points.length} images</p>
+          </div>
         </div>
-      </div>
+      )}
+      {compact && (
+        <p className="cluster-section-meta">{view.groups.length} clusters · {view.points.length} images</p>
+      )}
       <Metrics summary={view.summary} />
 
       <div className="scatter-search-row">
@@ -266,11 +275,94 @@ function ClusterSection({
           </section>
         ))}
       </div>
+    </>
+  );
+
+  return compact ? <>{inner}</> : <section className="cluster-section">{inner}</section>;
+}
+
+const ROI_LABELS: Record<string, string> = {
+  lffa: 'L FFA', rffa: 'R FFA',
+  leba: 'L EBA', reba: 'R EBA',
+  lppa: 'L PPA', rppa: 'R PPA',
+};
+
+function GroundTruthSection({
+  patients, imageCategories, onOpenImage,
+}: {
+  patients: GroundTruthPatient[];
+  imageCategories: Map<string, ImageCategory>;
+  onOpenImage: (i: EvidenceImage) => void;
+}) {
+  const [activePatient, setActivePatient] = useState(patients[0]?.id ?? '');
+  const [activeRoi, setActiveRoi] = useState<string | null>(null);
+
+  if (patients.length === 0) {
+    return (
+      <section className="cluster-section">
+        <h3>Ground truth clustering</h3>
+        <p className="cluster-empty-note">No ground truth cluster data found.</p>
+      </section>
+    );
+  }
+
+  const patient = patients.find((p) => p.id === activePatient) ?? patients[0];
+  const selectedRoi = activeRoi ?? patient.rois[0]?.roi ?? null;
+  const roiView = patient.rois.find((r) => r.roi === selectedRoi);
+
+  return (
+    <section className="cluster-section">
+      <h3>Ground truth clustering</h3>
+
+      {/* Patient tabs */}
+      <div className="gt-patient-tabs" role="tablist" aria-label="Select patient">
+        {patients.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            role="tab"
+            aria-selected={p.id === patient.id}
+            className={`gt-patient-tab ${p.id === patient.id ? 'active' : ''}`}
+            onClick={() => { setActivePatient(p.id); setActiveRoi(null); }}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ROI selector */}
+      <div className="gt-roi-tabs" role="tablist" aria-label="Select ROI">
+        {patient.rois.map(({ roi }) => (
+          <button
+            key={roi}
+            type="button"
+            role="tab"
+            aria-selected={roi === selectedRoi}
+            className={`gt-roi-tab ${roi === selectedRoi ? 'active' : ''}`}
+            onClick={() => setActiveRoi(roi)}
+          >
+            {ROI_LABELS[roi] ?? roi.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      {roiView ? (
+        <ClusterSection
+          title=""
+          view={roiView.view}
+          emptyMessage="No data for this ROI."
+          imageCategories={imageCategories}
+          onOpenImage={onOpenImage}
+          compact
+        />
+      ) : (
+        <p className="cluster-empty-note">Select a ROI above.</p>
+      )}
     </section>
   );
 }
 
-export function ClusteringPanel({ voxelView, voxelStatus, visualView, imageCategories, onOpenImage }: ClusteringPanelProps) {
+export function ClusteringPanel({ voxelView, voxelStatus, visualView, imageCategories, groundTruthPatients, onOpenImage }: ClusteringPanelProps) {
   return (
     <div className="clustering-panel">
       {voxelStatus === 'loading' ? (
@@ -295,6 +387,11 @@ export function ClusteringPanel({ voxelView, voxelStatus, visualView, imageCateg
         title="Visual clustering"
         view={visualView}
         emptyMessage="No visual clustering output found."
+        imageCategories={imageCategories}
+        onOpenImage={onOpenImage}
+      />
+      <GroundTruthSection
+        patients={groundTruthPatients}
         imageCategories={imageCategories}
         onOpenImage={onOpenImage}
       />

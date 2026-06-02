@@ -98,11 +98,23 @@ export type ClusterView = {
 
 export type ImageCategory = 'Faces' | 'Places' | 'Body Part';
 
+export type GroundTruthRoiView = {
+  roi: string;
+  view: ClusterView;
+};
+
+export type GroundTruthPatient = {
+  id: string;       // e.g. "p1", "p2", "dp"
+  label: string;    // e.g. "Patient 1", "Patient 2", "DP"
+  rois: GroundTruthRoiView[];
+};
+
 export type ClusteringData = {
   voxelSummaries: ClusterSummary[];
   visualSummary: ClusterSummary | null;
   visualView: ClusterView | null;
   imageCategories: Map<string, ImageCategory>;
+  groundTruthPatients: GroundTruthPatient[];
 };
 
 export type EvidenceStats = {

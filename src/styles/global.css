@@ -983,6 +983,49 @@ input[type="checkbox"] { accent-color: var(--accent); }
 
 .cluster-section { display: grid; gap: 11px; }
 .cluster-section + .cluster-section { border-top: 1px solid var(--border); padding-top: 14px; }
+.cluster-section-meta { font-size: .78rem; color: var(--text-3); margin: 0; }
+
+/* Ground truth patient + ROI tabs */
+.gt-patient-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.gt-patient-tab {
+  font-size: .75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px 6px 0 0;
+  border: 1.5px solid var(--border);
+  border-bottom: none;
+  background: var(--bg-subtle);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background .1s, color .1s;
+}
+.gt-patient-tab:hover { background: var(--surface-raised); }
+.gt-patient-tab.active { background: var(--surface); color: var(--text-1); border-color: var(--border-strong); }
+
+.gt-roi-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1.5px solid var(--border);
+  margin-bottom: 4px;
+}
+.gt-roi-tab {
+  font-size: .72rem;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 4px 4px 0 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background .1s, color .1s;
+}
+.gt-roi-tab:hover { background: var(--bg-subtle); color: var(--text-2); }
+.gt-roi-tab.active { background: var(--surface); color: var(--text-1); border-color: var(--border); border-bottom-color: var(--surface); font-weight: 600; }
 
 .cluster-section-heading { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
 .cluster-section-heading h3 { margin-bottom: 2px; }

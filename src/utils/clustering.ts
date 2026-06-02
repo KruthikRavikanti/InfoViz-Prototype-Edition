@@ -1,11 +1,32 @@
 import { csv, json } from 'd3';
-import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringData, EvidenceImage, ImageCategory, Roi, SelectedHeatmapCell } from '../types/data';
+import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringData, EvidenceImage, GroundTruthPatient, GroundTruthRoiView, ImageCategory, Roi, SelectedHeatmapCell } from '../types/data';
 
 const VOXEL_SUMMARY_PATH = '/data/voxel_clusters/voxel_cluster_summary.json';
 const VISUAL_SUMMARY_PATH = '/data/visual_clusters/visual_cluster_summary.json';
 const VISUAL_CLUSTERS_PATH = '/data/visual_clusters/visual_clusters.csv';
 const IMAGE_CATEGORIES_PATH = '/data/murty185Classification.csv';
+const GT_BASE = '/data/ground_truth_clusters';
 const IMAGE_BASE_PATH = '/images';
+
+// All patient/ROI combos that have files in ground_truth_clusters/
+const GT_ENTRIES: Array<{ patient: string; roi: string }> = [
+  { patient: 'dp', roi: 'leba' }, { patient: 'dp', roi: 'lffa' },
+  { patient: 'dp', roi: 'reba' }, { patient: 'dp', roi: 'rffa' },
+  { patient: 'p1', roi: 'leba' }, { patient: 'p1', roi: 'lffa' }, { patient: 'p1', roi: 'lppa' },
+  { patient: 'p1', roi: 'reba' }, { patient: 'p1', roi: 'rffa' }, { patient: 'p1', roi: 'rppa' },
+  { patient: 'p2', roi: 'leba' }, { patient: 'p2', roi: 'lffa' }, { patient: 'p2', roi: 'lppa' },
+  { patient: 'p2', roi: 'reba' }, { patient: 'p2', roi: 'rffa' }, { patient: 'p2', roi: 'rppa' },
+  { patient: 'p3', roi: 'leba' }, { patient: 'p3', roi: 'lffa' }, { patient: 'p3', roi: 'lppa' },
+  { patient: 'p3', roi: 'reba' }, { patient: 'p3', roi: 'rffa' }, { patient: 'p3', roi: 'rppa' },
+  { patient: 'p4', roi: 'leba' }, { patient: 'p4', roi: 'lffa' }, { patient: 'p4', roi: 'lppa' },
+  { patient: 'p4', roi: 'reba' }, { patient: 'p4', roi: 'rffa' }, { patient: 'p4', roi: 'rppa' },
+];
+
+function patientLabel(id: string): string {
+  if (id === 'dp') return 'DP';
+  const num = id.replace(/^p/, '');
+  return `Patient ${num}`;
+}
 
 type RawClusterSummary = {
   source_file?: string;
@@ -76,16 +97,18 @@ function deriveVoxelClusterPath(summary: ClusterSummary): string | null {
   return `/data/voxel_clusters/${summary.sourceFile.replace(/\.csv$/i, '_clusters.csv')}`;
 }
 
-function parseClusterPoint(row: RawClusterRow, index: number): ClusterPoint | null {
+function parseClusterPoint(row: RawClusterRow, index: number, nameTransform?: (n: string) => string): ClusterPoint | null {
   if (!row.image_name) {
     return null;
   }
 
+  const rawName = String(row.image_name);
+  const imageName = nameTransform ? nameTransform(rawName) : rawName;
   const distanceToCentroid = toFiniteNumber(row.distance_to_centroid);
 
   return {
-    imageName: String(row.image_name),
-    imageUrl: `${IMAGE_BASE_PATH}/${row.image_name}`,
+    imageName,
+    imageUrl: `${IMAGE_BASE_PATH}/${imageName}`,
     clusterLabel: String(row.cluster_label ?? 'unassigned'),
     value: distanceToCentroid ?? 0,
     rank: index + 1,
@@ -248,11 +271,55 @@ async function loadImageCategories(): Promise<Map<string, ImageCategory>> {
   return map;
 }
 
+// Ground truth CSVs use 4-digit zero-padded names without extension: image_0001 → image_001.png
+function normalizeGtImageName(raw: string): string {
+  const match = raw.match(/^image_0*(\d+)$/);
+  if (!match) return raw;
+  const num = Number(match[1]);
+  return `image_${String(num).padStart(3, '0')}.png`;
+}
+
+async function loadGroundTruthPatients(): Promise<GroundTruthPatient[]> {
+  const results = await Promise.allSettled(
+    GT_ENTRIES.map(async ({ patient, roi }) => {
+      const name = `${patient}__${roi}`;
+      const [rawSummary, points] = await Promise.all([
+        json<RawClusterSummary>(`${GT_BASE}/${name}_summary.json`),
+        csv(`${GT_BASE}/${name}_clusters.csv`, (row, idx) =>
+          parseClusterPoint(row as RawClusterRow, idx, normalizeGtImageName),
+        ).then((rows) => rows.filter((p): p is ClusterPoint => p !== null)),
+      ]);
+      const summary = rawSummary ? normalizeSummary(rawSummary) : null;
+      const view = buildClusterView(summary, points);
+      return { patient, roi, view };
+    }),
+  );
+
+  const byPatient = new Map<string, GroundTruthRoiView[]>();
+  for (const result of results) {
+    if (result.status !== 'fulfilled' || !result.value.view) continue;
+    const { patient, roi, view } = result.value;
+    const rois = byPatient.get(patient) ?? [];
+    rois.push({ roi, view });
+    byPatient.set(patient, rois);
+  }
+
+  const patientOrder = ['dp', 'p1', 'p2', 'p3', 'p4'];
+  return patientOrder
+    .filter((id) => byPatient.has(id))
+    .map((id) => ({
+      id,
+      label: patientLabel(id),
+      rois: byPatient.get(id)!,
+    }));
+}
+
 export async function loadClusteringData(): Promise<ClusteringData> {
-  const [voxelSummaries, visualClusters, imageCategories] = await Promise.all([
+  const [voxelSummaries, visualClusters, imageCategories, groundTruthPatients] = await Promise.all([
     loadVoxelSummaries(),
     loadVisualClusterView(),
     loadImageCategories(),
+    loadGroundTruthPatients(),
   ]);
 
   return {
@@ -260,5 +327,6 @@ export async function loadClusteringData(): Promise<ClusteringData> {
     visualSummary: visualClusters.summary,
     visualView: visualClusters.view,
     imageCategories,
+    groundTruthPatients,
   };
 }
