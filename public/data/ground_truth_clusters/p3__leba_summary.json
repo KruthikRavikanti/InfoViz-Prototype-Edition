@@ -1,0 +1,25 @@
+{
+  "name": "p3__leba",
+  "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__leba_clusters.csv",
+  "n_images": 185,
+  "n_voxels": 315,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.44870757857833327,
+  "cluster_sizes": {
+    "0": 122,
+    "1": 63
+  },
+  "explained_variance_ratio_first10": [
+    0.7224343023700016,
+    0.09096638021560402,
+    0.050801092414740165,
+    0.04364001370950217,
+    0.0231420320349047,
+    0.015209031067007302,
+    0.008999540466721809,
+    0.00865834379332013,
+    0.006626976576068169,
+    0.0064327937408871294
+  ]
+}

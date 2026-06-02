@@ -1,0 +1,898 @@
+[
+  {
+    "name": "dp__rffa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/dp__rffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 277,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.33480095433629903,
+    "cluster_sizes": {
+      "0": 76,
+      "1": 109
+    },
+    "explained_variance_ratio_first10": [
+      0.5811419581520667,
+      0.16315029765889566,
+      0.0675291483381898,
+      0.04449880364222818,
+      0.03329312885392545,
+      0.025598700042889905,
+      0.019085128680768264,
+      0.015151404215263214,
+      0.009100782245083991,
+      0.007934279677124928
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        277
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "dp__lffa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/dp__lffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 119,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.4489665476551553,
+    "cluster_sizes": {
+      "0": 76,
+      "1": 109
+    },
+    "explained_variance_ratio_first10": [
+      0.7491893914244058,
+      0.1463028593263978,
+      0.04055815592656412,
+      0.02825939301725456,
+      0.014645369794286564,
+      0.007134991268996985,
+      0.0041139400593703185,
+      0.0031671457704146836,
+      0.0026101781393259036,
+      0.001352662282324441
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        119
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "dp__reba",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/dp__reba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 769,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.40917602430492905,
+    "cluster_sizes": {
+      "0": 71,
+      "1": 114
+    },
+    "explained_variance_ratio_first10": [
+      0.6314582577257724,
+      0.07725547285843286,
+      0.05822365764283104,
+      0.03981994739560114,
+      0.031077888740588526,
+      0.028601171572316026,
+      0.01846259969102816,
+      0.014823299412989169,
+      0.010828490818981672,
+      0.010689146610681856
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        769
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "dp__leba",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/dp__leba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 488,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.3736892255726957,
+    "cluster_sizes": {
+      "0": 78,
+      "1": 107
+    },
+    "explained_variance_ratio_first10": [
+      0.6006022704124439,
+      0.09776968428820562,
+      0.0812268140005692,
+      0.04022977642827371,
+      0.03596293963286127,
+      0.025135366996163276,
+      0.021861722707054568,
+      0.016711935586100835,
+      0.01344684801000412,
+      0.011986343030117952
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        488
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__lffa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__lffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 325,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.603251022209948,
+    "cluster_sizes": {
+      "0": 163,
+      "1": 22
+    },
+    "explained_variance_ratio_first10": [
+      0.7397461031841662,
+      0.06732640141108592,
+      0.051557155407740425,
+      0.04576586495631088,
+      0.02394921958901612,
+      0.01955341940314676,
+      0.01222509754027338,
+      0.009130606569254206,
+      0.0069249459199193985,
+      0.005680593473964607
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        325
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__rffa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__rffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 463,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.4413024784730195,
+    "cluster_sizes": {
+      "0": 40,
+      "1": 145
+    },
+    "explained_variance_ratio_first10": [
+      0.7397205127519292,
+      0.07417598684759662,
+      0.04473970000536103,
+      0.03708920661569692,
+      0.02259170722246013,
+      0.019137233533960053,
+      0.013942676660740908,
+      0.008126861984905214,
+      0.006747096598228835,
+      0.006454633814470617
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        463
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__leba",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__leba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 535,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.349812158286743,
+    "cluster_sizes": {
+      "0": 71,
+      "1": 114
+    },
+    "explained_variance_ratio_first10": [
+      0.6838477347835493,
+      0.08494607963031302,
+      0.06669360715153476,
+      0.04156820130514661,
+      0.023639356197739603,
+      0.018951499368243023,
+      0.012972796853106311,
+      0.010088425517936199,
+      0.008671215771077843,
+      0.007591605700296425
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        535
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__reba",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__reba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 1121,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.4389034278856452,
+    "cluster_sizes": {
+      "0": 54,
+      "1": 131
+    },
+    "explained_variance_ratio_first10": [
+      0.7293073595978471,
+      0.06541979937688477,
+      0.04769311249646727,
+      0.028799983994424638,
+      0.019227117626605218,
+      0.017524531202322276,
+      0.012339137876822852,
+      0.010424579400422691,
+      0.00894112838071591,
+      0.00643806191747846
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        1121
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__lppa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__lppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 715,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.35012358220530243,
+    "cluster_sizes": {
+      "0": 106,
+      "1": 79
+    },
+    "explained_variance_ratio_first10": [
+      0.6347700391069858,
+      0.12500944449404305,
+      0.04680424482847938,
+      0.03272638381246047,
+      0.024164919891911853,
+      0.018725304876101162,
+      0.014970079482563374,
+      0.014938245057784787,
+      0.010600421467738609,
+      0.009478357975441006
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        715
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__rppa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__rppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 840,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.33968923711200344,
+    "cluster_sizes": {
+      "0": 105,
+      "1": 80
+    },
+    "explained_variance_ratio_first10": [
+      0.6164081909626457,
+      0.12416884177523138,
+      0.03961990796066636,
+      0.031174720420925006,
+      0.029571293548707273,
+      0.021712077650335768,
+      0.01742718144548725,
+      0.014497082371606209,
+      0.01274562489308664,
+      0.010323142419803703
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        840
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__lffa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__lffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 299,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.4754319797230775,
+    "cluster_sizes": {
+      "0": 59,
+      "1": 126
+    },
+    "explained_variance_ratio_first10": [
+      0.8308739209614969,
+      0.061982163811883165,
+      0.03287360196880067,
+      0.021712102966797465,
+      0.01538848370743751,
+      0.01107279786810688,
+      0.005728211415627476,
+      0.004244132948623584,
+      0.0037566817449699876,
+      0.003380667688906116
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        299
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__rffa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__rffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 795,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.6014849015731646,
+    "cluster_sizes": {
+      "0": 165,
+      "1": 20
+    },
+    "explained_variance_ratio_first10": [
+      0.7612403104450842,
+      0.06418937722837804,
+      0.040705376450435704,
+      0.025004657549846526,
+      0.015823862643579715,
+      0.013876660270027794,
+      0.011836482541587348,
+      0.009740260027326397,
+      0.007044964904075872,
+      0.006177799923828362
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        795
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__leba",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__leba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 400,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.4646672651490423,
+    "cluster_sizes": {
+      "0": 132,
+      "1": 53
+    },
+    "explained_variance_ratio_first10": [
+      0.7039462455919857,
+      0.12146310127469541,
+      0.05402908680242569,
+      0.024925919726641006,
+      0.020343456788977136,
+      0.014354394148111797,
+      0.012009822188140038,
+      0.009445082372578578,
+      0.008199072961516021,
+      0.006490387569511711
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        400
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__reba",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__reba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 835,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.4129156554215923,
+    "cluster_sizes": {
+      "0": 118,
+      "1": 67
+    },
+    "explained_variance_ratio_first10": [
+      0.6546993417967507,
+      0.08744866750049639,
+      0.04987722336117956,
+      0.0419757538763748,
+      0.03053950232572819,
+      0.018119006628086676,
+      0.01799625660902143,
+      0.01202675534889624,
+      0.010476960177158176,
+      0.00867234460484767
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        835
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__lppa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__lppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 453,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.35333390465875386,
+    "cluster_sizes": {
+      "0": 79,
+      "1": 106
+    },
+    "explained_variance_ratio_first10": [
+      0.686006829674418,
+      0.11896409140336926,
+      0.04631216225502759,
+      0.03508740965843467,
+      0.020631280182290476,
+      0.01770485118147774,
+      0.012717356302751743,
+      0.010423324617797963,
+      0.008659774096560283,
+      0.006823999282168621
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        453
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__rppa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__rppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 582,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.3623635132393091,
+    "cluster_sizes": {
+      "0": 115,
+      "1": 70
+    },
+    "explained_variance_ratio_first10": [
+      0.6453048418447584,
+      0.10604486023749556,
+      0.06949244669948636,
+      0.03158770789677808,
+      0.021176318478688925,
+      0.019351164835482063,
+      0.017172248813412987,
+      0.014710821256855623,
+      0.010694989691551625,
+      0.007598172664133935
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        582
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__lffa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__lffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 138,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.4675086814019082,
+    "cluster_sizes": {
+      "0": 130,
+      "1": 55
+    },
+    "explained_variance_ratio_first10": [
+      0.8103862733496633,
+      0.08860583931087006,
+      0.037983320501000645,
+      0.026320341833621048,
+      0.014868429450412156,
+      0.00733370093873377,
+      0.0041106133533966305,
+      0.0037015261941923017,
+      0.002062756903159253,
+      0.0016110720057222042
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        138
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__rffa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__rffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 291,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.4447586187625195,
+    "cluster_sizes": {
+      "0": 134,
+      "1": 51
+    },
+    "explained_variance_ratio_first10": [
+      0.7405821748284486,
+      0.0817732662734652,
+      0.06636626621101882,
+      0.03015715845922812,
+      0.02058794768826788,
+      0.014866539867335785,
+      0.010570514869266788,
+      0.008744489244330786,
+      0.0056494911233530305,
+      0.003984553908155443
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        291
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__leba",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__leba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 315,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.44870757857833327,
+    "cluster_sizes": {
+      "0": 122,
+      "1": 63
+    },
+    "explained_variance_ratio_first10": [
+      0.7224343023700016,
+      0.09096638021560402,
+      0.050801092414740165,
+      0.04364001370950217,
+      0.0231420320349047,
+      0.015209031067007302,
+      0.008999540466721809,
+      0.00865834379332013,
+      0.006626976576068169,
+      0.0064327937408871294
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        315
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__reba",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__reba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 903,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.4565519397930719,
+    "cluster_sizes": {
+      "0": 121,
+      "1": 64
+    },
+    "explained_variance_ratio_first10": [
+      0.7426793254389739,
+      0.05549389960866187,
+      0.03590589082899302,
+      0.030196319379863903,
+      0.022289876012005633,
+      0.01869330925594457,
+      0.015524818613900484,
+      0.011466951958599546,
+      0.00892640758170708,
+      0.008735752049228815
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        903
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__lppa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__lppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 736,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.3740003089855621,
+    "cluster_sizes": {
+      "0": 124,
+      "1": 61
+    },
+    "explained_variance_ratio_first10": [
+      0.671660303760242,
+      0.09157786088633194,
+      0.040963770365139374,
+      0.031421061243532146,
+      0.025856857656325002,
+      0.01829779113257075,
+      0.014924880950190837,
+      0.013693160790811626,
+      0.011294856965776572,
+      0.008944752291865787
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        736
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__rppa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__rppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 1634,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.3704257849524492,
+    "cluster_sizes": {
+      "0": 89,
+      "1": 96
+    },
+    "explained_variance_ratio_first10": [
+      0.6867596969618975,
+      0.08238073652912005,
+      0.028959074302155698,
+      0.02352921508948712,
+      0.019542816071302413,
+      0.015394105345845774,
+      0.014624863242806794,
+      0.01270156828776566,
+      0.010637783104624071,
+      0.010135177935273111
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        1634
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__lffa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__lffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 262,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.5929788124681576,
+    "cluster_sizes": {
+      "0": 147,
+      "1": 38
+    },
+    "explained_variance_ratio_first10": [
+      0.8854597289614186,
+      0.03958281660039635,
+      0.02536947786432928,
+      0.011988040416224734,
+      0.009501122609999241,
+      0.0076414895399691775,
+      0.005246711379293329,
+      0.004228537320741935,
+      0.0028225785913738276,
+      0.002156317765867307
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        262
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__rffa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__rffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 609,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.49119422036614485,
+    "cluster_sizes": {
+      "0": 153,
+      "1": 32
+    },
+    "explained_variance_ratio_first10": [
+      0.7321989004300448,
+      0.08437291162851368,
+      0.03214571943654277,
+      0.02480135797350637,
+      0.022878085970654768,
+      0.019732998420496438,
+      0.012193937686048728,
+      0.009858457377305485,
+      0.009330551831757124,
+      0.0068402089317013874
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        609
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__leba",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__leba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 618,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.41113204024056643,
+    "cluster_sizes": {
+      "0": 114,
+      "1": 71
+    },
+    "explained_variance_ratio_first10": [
+      0.7200943968213857,
+      0.06813903128882448,
+      0.06023990423830964,
+      0.03455477708463823,
+      0.02435979628810855,
+      0.015224337894337952,
+      0.01502534585018929,
+      0.009338884112360278,
+      0.008534035720309516,
+      0.006624476667195699
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        618
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__reba",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__reba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 884,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.4133177009851926,
+    "cluster_sizes": {
+      "0": 107,
+      "1": 78
+    },
+    "explained_variance_ratio_first10": [
+      0.7032176607560056,
+      0.08833304011274219,
+      0.05319224757079003,
+      0.0274785550301971,
+      0.02056078955460861,
+      0.01914236462662159,
+      0.013940470732643316,
+      0.011773560766344284,
+      0.007821096535781034,
+      0.006274990562552364
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        884
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__lppa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__lppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 462,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.38059033682537263,
+    "cluster_sizes": {
+      "0": 62,
+      "1": 123
+    },
+    "explained_variance_ratio_first10": [
+      0.6846962867376928,
+      0.10775241412514983,
+      0.04284517012131247,
+      0.03294367451768452,
+      0.02549697256188516,
+      0.016342149904387246,
+      0.014262455005906982,
+      0.012096839861336856,
+      0.010814769310174123,
+      0.008659549755767104
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        462
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__rppa",
+    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__rppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 1065,
+    "pca_dim_used": 50,
+    "best_k": 2,
+    "silhouette": 0.36236941762415165,
+    "cluster_sizes": {
+      "0": 68,
+      "1": 117
+    },
+    "explained_variance_ratio_first10": [
+      0.6426497615276053,
+      0.08835752623895769,
+      0.052180881212738686,
+      0.03058467604096923,
+      0.023817387442519215,
+      0.022443120295313965,
+      0.016550189219274196,
+      0.013096589755680168,
+      0.011394807844964959,
+      0.009602536564873438
+    ],
+    "meta": {
+      "original_shape": [
+        185,
+        1065
+      ],
+      "reduction": "none"
+    }
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "name": "p3__rppa",
+  "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__rppa_clusters.csv",
+  "n_images": 185,
+  "n_voxels": 1634,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.3704257849524492,
+  "cluster_sizes": {
+    "0": 89,
+    "1": 96
+  },
+  "explained_variance_ratio_first10": [
+    0.6867596969618975,
+    0.08238073652912005,
+    0.028959074302155698,
+    0.02352921508948712,
+    0.019542816071302413,
+    0.015394105345845774,
+    0.014624863242806794,
+    0.01270156828776566,
+    0.010637783104624071,
+    0.010135177935273111
+  ]
+}

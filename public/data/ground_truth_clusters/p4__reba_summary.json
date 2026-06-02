@@ -1,0 +1,25 @@
+{
+  "name": "p4__reba",
+  "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__reba_clusters.csv",
+  "n_images": 185,
+  "n_voxels": 884,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.4133177009851926,
+  "cluster_sizes": {
+    "0": 107,
+    "1": 78
+  },
+  "explained_variance_ratio_first10": [
+    0.7032176607560056,
+    0.08833304011274219,
+    0.05319224757079003,
+    0.0274785550301971,
+    0.02056078955460861,
+    0.01914236462662159,
+    0.013940470732643316,
+    0.011773560766344284,
+    0.007821096535781034,
+    0.006274990562552364
+  ]
+}

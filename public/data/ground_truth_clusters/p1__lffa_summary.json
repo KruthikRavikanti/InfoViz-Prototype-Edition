@@ -1,0 +1,25 @@
+{
+  "name": "p1__lffa",
+  "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__lffa_clusters.csv",
+  "n_images": 185,
+  "n_voxels": 325,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.603251022209948,
+  "cluster_sizes": {
+    "0": 163,
+    "1": 22
+  },
+  "explained_variance_ratio_first10": [
+    0.7397461031841662,
+    0.06732640141108592,
+    0.051557155407740425,
+    0.04576586495631088,
+    0.02394921958901612,
+    0.01955341940314676,
+    0.01222509754027338,
+    0.009130606569254206,
+    0.0069249459199193985,
+    0.005680593473964607
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "p2__lppa",
+  "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__lppa_clusters.csv",
+  "n_images": 185,
+  "n_voxels": 453,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.35333390465875386,
+  "cluster_sizes": {
+    "0": 79,
+    "1": 106
+  },
+  "explained_variance_ratio_first10": [
+    0.686006829674418,
+    0.11896409140336926,
+    0.04631216225502759,
+    0.03508740965843467,
+    0.020631280182290476,
+    0.01770485118147774,
+    0.012717356302751743,
+    0.010423324617797963,
+    0.008659774096560283,
+    0.006823999282168621
+  ]
+}

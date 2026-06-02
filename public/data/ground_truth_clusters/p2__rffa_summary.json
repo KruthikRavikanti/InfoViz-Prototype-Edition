@@ -1,0 +1,25 @@
+{
+  "name": "p2__rffa",
+  "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__rffa_clusters.csv",
+  "n_images": 185,
+  "n_voxels": 795,
+  "pca_dim_used": 50,
+  "best_k": 2,
+  "silhouette": 0.6014849015731646,
+  "cluster_sizes": {
+    "0": 165,
+    "1": 20
+  },
+  "explained_variance_ratio_first10": [
+    0.7612403104450842,
+    0.06418937722837804,
+    0.040705376450435704,
+    0.025004657549846526,
+    0.015823862643579715,
+    0.013876660270027794,
+    0.011836482541587348,
+    0.009740260027326397,
+    0.007044964904075872,
+    0.006177799923828362
+  ]
+}
