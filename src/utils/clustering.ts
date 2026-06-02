@@ -172,7 +172,7 @@ export function buildClusterView(summary: ClusterSummary | null, points: Cluster
         .slice(0, 6)
         .map(pointToImage),
     }))
-    .sort((a, b) => b.size - a.size || a.label.localeCompare(b.label, undefined, { numeric: true }));
+    .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
 
   return {
     summary,
