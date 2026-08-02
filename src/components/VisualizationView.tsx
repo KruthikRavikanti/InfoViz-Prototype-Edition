@@ -112,6 +112,7 @@ export function VisualizationView({
         heatmapCells={heatmapCells}
         compareMode={compareMode}
         compareCells={compareCells}
+        clustering={clustering}
         rows={rows}
         modelRoiColumns={modelRoiColumns}
         topK={6}

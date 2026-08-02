@@ -970,9 +970,126 @@ input[type="checkbox"] { accent-color: var(--accent); }
   font-size: .7rem;
   font-weight: 600;
 }
+.compare-badge-row > span.compare-rank-similarity {
+  border-color: rgba(42,125,91,.32);
+  background: rgba(42,125,91,.11);
+  color: #216349;
+  font-weight: 800;
+}
 
 .compare-summary-note { font-size: .78rem; color: var(--text-2); }
 .compare-summary-note strong { color: var(--compare); }
+
+.compare-cluster-section {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid rgba(192,57,43,.16);
+  padding-top: 12px;
+}
+.compare-cluster-section h3 {
+  margin: 0;
+  font-size: .86rem;
+  color: var(--text-1);
+}
+.compare-cluster-section p {
+  margin-top: 2px;
+  color: var(--text-3);
+  font-size: .74rem;
+}
+.compare-cluster-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px;
+}
+.compare-cluster-card {
+  display: grid;
+  gap: 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px;
+  background: var(--surface-raised);
+}
+.compare-cluster-card-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.compare-cluster-card-heading h4 {
+  margin: 0;
+  font-size: .8rem;
+}
+.compare-cluster-card-heading span {
+  color: var(--text-4);
+  font-size: .68rem;
+  text-align: right;
+}
+.compare-cluster-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 6px;
+  margin: 0;
+}
+.compare-cluster-metrics > div {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 6px 7px;
+  background: var(--bg-subtle);
+}
+.compare-cluster-metrics dt {
+  font-size: .64rem;
+}
+.compare-cluster-metrics dd {
+  font-size: .78rem;
+}
+.compare-cluster-matrix-wrap {
+  display: grid;
+  gap: 5px;
+}
+.compare-cluster-matrix {
+  display: grid;
+  gap: 4px;
+  align-items: stretch;
+}
+.compare-cluster-matrix-corner,
+.compare-cluster-matrix-label,
+.compare-cluster-matrix-cell {
+  min-height: 28px;
+  border-radius: var(--r-sm);
+  display: grid;
+  place-items: center;
+  font-size: .68rem;
+  line-height: 1;
+}
+.compare-cluster-matrix-corner,
+.compare-cluster-matrix-label {
+  background: var(--bg-subtle);
+  color: var(--text-3);
+  font-weight: 700;
+}
+.compare-cluster-matrix-cell {
+  border: 1px solid rgba(42,125,91,.16);
+  color: #143c2d;
+  font-weight: 800;
+}
+.compare-cluster-matrix-caption {
+  margin: 0;
+  color: var(--text-4);
+  font-size: .66rem;
+}
+.compare-cluster-intersections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.compare-cluster-intersections span {
+  border-radius: var(--r-sm);
+  padding: 2px 6px;
+  background: rgba(42,125,91,.09);
+  color: #216349;
+  font-size: .68rem;
+  font-weight: 600;
+}
 
 .compare-overlap-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 11px; }
 
@@ -980,6 +1097,32 @@ input[type="checkbox"] { accent-color: var(--accent); }
    CLUSTERING PANEL
    ───────────────────────────────────────────── */
 .clustering-panel { display: grid; gap: 18px; }
+
+.cluster-method-control {
+  display: grid;
+  gap: 5px;
+  color: var(--text-3);
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+.cluster-method-control select {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0 10px;
+  background: var(--bg-subtle);
+  color: var(--text-1);
+  font-size: .78rem;
+  font-weight: 600;
+}
+.cluster-method-control select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,95,166,.14);
+}
 
 .cluster-section { display: grid; gap: 11px; }
 .cluster-section + .cluster-section { border-top: 1px solid var(--border); padding-top: 14px; }
@@ -1035,6 +1178,25 @@ input[type="checkbox"] { accent-color: var(--accent); }
 .cluster-scatter figcaption { color: var(--text-4); font-size: .72rem; }
 
 .cluster-summary-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+
+.cluster-dendrogram {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+.cluster-dendrogram img {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: #fff;
+}
+.cluster-dendrogram figcaption {
+  color: var(--text-4);
+  font-size: .72rem;
+}
 
 .scatter-category-row {
   display: flex;
@@ -1224,7 +1386,7 @@ input[type="checkbox"] { accent-color: var(--accent); }
   .tab-nav { padding: 14px 20px 0; margin: 0; }
   .help-box { margin: 10px 20px 0; }
   .controls-bar { margin: 10px 20px 12px; }
-  .compare-card-grid, .compare-overlap-grid { grid-template-columns: 1fr; }
+  .compare-card-grid, .compare-cluster-grid, .compare-overlap-grid { grid-template-columns: 1fr; }
   .user-study-header { display: grid; gap: 14px; }
   .user-study-header > a { justify-self: start; }
 }

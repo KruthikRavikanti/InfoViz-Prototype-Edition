@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { ImageGrid } from './ImageGrid';
-import type { ClusterPoint, ClusterSummary, ClusterView, EvidenceImage, GroundTruthPatient, ImageCategory } from '../types/data';
+import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringMethod, EvidenceImage, GroundTruthPatient, ImageCategory } from '../types/data';
 
 type ClusteringPanelProps = {
   voxelView: ClusterView | null;
   voxelStatus: 'idle' | 'loading' | 'error';
+  clusteringMethod: ClusteringMethod;
+  clusteringMethodOptions: Array<{ id: ClusteringMethod; label: string; description: string }>;
+  onClusteringMethodChange: (method: ClusteringMethod) => void;
   visualView: ClusterView | null;
   imageCategories: Map<string, ImageCategory>;
   groundTruthPatients: GroundTruthPatient[];
@@ -226,6 +229,16 @@ function ClusterSection({
       )}
       <Metrics summary={view.summary} />
 
+      {view.summary?.dendrogramPng && (
+        <figure className="cluster-dendrogram">
+          <img src={view.summary.dendrogramPng} alt={`${title || 'Selected clustering'} dendrogram`} loading="lazy" />
+          <figcaption>
+            Hierarchical dendrogram using {view.summary.distanceMetric ?? 'correlation'} distance
+            {view.summary.linkageMethod ? ` and ${view.summary.linkageMethod} linkage` : ''}.
+          </figcaption>
+        </figure>
+      )}
+
       <div className="scatter-search-row">
         <input
           type="search"
@@ -362,9 +375,45 @@ function GroundTruthSection({
   );
 }
 
-export function ClusteringPanel({ voxelView, voxelStatus, visualView, imageCategories, groundTruthPatients, onOpenImage }: ClusteringPanelProps) {
+function ClusteringMethodControl({
+  value, options, onChange,
+}: {
+  value: ClusteringMethod;
+  options: Array<{ id: ClusteringMethod; label: string; description: string }>;
+  onChange: (method: ClusteringMethod) => void;
+}) {
+  return (
+    <label className="cluster-method-control">
+      Clustering method
+      <select value={value} onChange={(event) => onChange(event.target.value as ClusteringMethod)}>
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.label} · {option.description}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+export function ClusteringPanel({
+  voxelView,
+  voxelStatus,
+  clusteringMethod,
+  clusteringMethodOptions,
+  onClusteringMethodChange,
+  visualView,
+  imageCategories,
+  groundTruthPatients,
+  onOpenImage,
+}: ClusteringPanelProps) {
   return (
     <div className="clustering-panel">
+      <ClusteringMethodControl
+        value={clusteringMethod}
+        options={clusteringMethodOptions}
+        onChange={onClusteringMethodChange}
+      />
       {voxelStatus === 'loading' ? (
         <section className="cluster-section">
           <h3>Voxel clustering</h3>

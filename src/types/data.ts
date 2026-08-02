@@ -28,6 +28,8 @@ export type VisualizationData = {
   clustering: ClusteringData;
 };
 
+export type ClusteringMethod = 'kmeans_euclidean' | 'hierarchical_correlation';
+export type VoxelClusteringMethod = ClusteringMethod;
 export type RankingSystem = 'overall' | 'roi';
 export type SortDirection = 'desc' | 'asc';
 
@@ -64,6 +66,13 @@ export type ClusterSummary = {
   explainedVarianceRatioFirst10?: number[];
   featureSet?: string;
   projectionUsedForClustering?: string;
+  clusteringMethod?: string;
+  distanceMetric?: string;
+  linkageMethod?: string;
+  normalization?: string;
+  linkageCsv?: string;
+  dendrogramPng?: string;
+  distanceToClusterRepresentative?: string;
   filePath?: string;
 };
 
@@ -111,10 +120,14 @@ export type GroundTruthPatient = {
 
 export type ClusteringData = {
   voxelSummaries: ClusterSummary[];
+  voxelSummariesByMethod: Record<ClusteringMethod, ClusterSummary[]>;
   visualSummary: ClusterSummary | null;
   visualView: ClusterView | null;
+  visualSummaryByMethod: Record<ClusteringMethod, ClusterSummary | null>;
+  visualViewByMethod: Record<ClusteringMethod, ClusterView | null>;
   imageCategories: Map<string, ImageCategory>;
   groundTruthPatients: GroundTruthPatient[];
+  groundTruthPatientsByMethod: Record<ClusteringMethod, GroundTruthPatient[]>;
 };
 
 export type EvidenceStats = {
@@ -139,9 +152,34 @@ export type ImageSetComparison = {
   uniqueB: EvidenceImage[];
 };
 
+export type RankSimilaritySummary = {
+  spearmanRho: number | null;
+  similarityScore: number | null;
+  sharedImageCount: number;
+};
+
+export type ClusterIntersection = {
+  aLabel: string;
+  bLabel: string;
+  count: number;
+};
+
+export type ClusterComparisonSummary = {
+  adjustedRandIndex: number | null;
+  normalizedMutualInformation: number | null;
+  pairAgreement: number | null;
+  coClusterJaccard: number | null;
+  sharedImageCount: number;
+  clusterCountA: number;
+  clusterCountB: number;
+  intersections: ClusterIntersection[];
+  largestIntersections: ClusterIntersection[];
+};
+
 export type CompareSummary = {
   top: ImageSetComparison;
   bottom: ImageSetComparison;
   aggregateScoreDifference: number | null;
   imageMeanDifference: number | null;
+  rankSimilarity: RankSimilaritySummary;
 };

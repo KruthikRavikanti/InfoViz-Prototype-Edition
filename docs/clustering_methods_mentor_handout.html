@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Clustering Calculation Notes</title>
+  <style>
+    @page { size: letter; margin: 0.62in; }
+
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #d9e2ec;
+      --soft: #f4f7fa;
+      --accent: #285b74;
+      --code-bg: #101820;
+      --code-ink: #edf2f7;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.42;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    h1, h2, h3 { margin: 0; line-height: 1.16; color: #142a35; }
+    h1 { font-size: 26pt; margin-bottom: 8px; letter-spacing: 0; }
+    h2 { font-size: 15pt; margin-top: 22px; margin-bottom: 8px; border-bottom: 1px solid var(--line); padding-bottom: 5px; }
+    h3 { font-size: 11.5pt; margin-top: 14px; margin-bottom: 6px; color: var(--accent); }
+    p { margin: 0 0 8px; }
+    ul, ol { margin: 4px 0 10px 18px; padding: 0; }
+    li { margin-bottom: 4px; }
+
+    .kicker {
+      color: var(--accent);
+      font-size: 8.8pt;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 12pt;
+      max-width: 760px;
+      margin-bottom: 14px;
+    }
+
+    .summary {
+      background: #e6f1f5;
+      border: 1px solid #bad4df;
+      border-radius: 8px;
+      padding: 9px 10px;
+      margin: 12px 0 16px;
+    }
+
+    .formula {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 8px 10px;
+      margin: 6px 0 10px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 8px 0 14px;
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 7px 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: var(--soft);
+      color: #243b53;
+      font-size: 8.8pt;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+
+    td { font-size: 9.4pt; }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 8.7pt;
+      background: #edf2f7;
+      color: #102a43;
+      border-radius: 4px;
+      padding: 1px 4px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    pre {
+      margin: 8px 0 14px;
+      padding: 10px 12px;
+      overflow: hidden;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--code-bg);
+      color: var(--code-ink);
+      border-radius: 8px;
+      font-size: 8.2pt;
+      line-height: 1.34;
+    }
+
+    pre code { padding: 0; background: transparent; color: inherit; font-size: inherit; }
+    .small { color: var(--muted); font-size: 8.7pt; }
+    .page-break { page-break-before: always; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="kicker">InfoViz-Prototype-Edition</p>
+    <h1>Clustering Calculation Notes</h1>
+    <p class="subtitle">
+      Concise explanation of how Euclidean/KMeans and correlation-distance hierarchical clustering are calculated in the data scripts.
+    </p>
+
+    <div class="summary">
+      <strong>Main comparison.</strong>
+      KMeans uses Euclidean distance in a z-scored feature space and assigns each image to the nearest centroid.
+      Hierarchical clustering computes pairwise correlation distances between images, builds an average-linkage dendrogram, then cuts that tree into the best 2 to 5 clusters by silhouette score.
+    </div>
+
+    <h2>Data Matrices</h2>
+    <p>All clustering is done on a matrix where rows are images and columns are features.</p>
+    <div class="formula">X shape = n_images x n_features</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 27%">Clustering type</th>
+          <th style="width: 33%">Rows and columns</th>
+          <th style="width: 40%">Repo functions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Voxel prediction clustering</strong></td>
+          <td>Rows are images. Columns are predicted voxel responses for one model and ROI.</td>
+          <td>
+            <code>scripts/data/cluster_runner.py</code><br>
+            <code>cluster_single_voxel_csv</code><br>
+            <code>cluster_single_voxel_csv_hierarchical_corr</code>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Visual clustering</strong></td>
+          <td>Rows are images. Columns are extracted visual features such as brightness, saturation, hue, grid statistics, edges, histograms, contrast, aspect ratio, and RGB means.</td>
+          <td>
+            <code>scripts/data/cluster_runner.py</code><br>
+            <code>run_visual_mode</code><br>
+            <code>run_visual_hierarchical_mode</code>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Ground-truth fMRI clustering</strong></td>
+          <td>Rows are images. Columns are measured fMRI voxel responses for one patient and ROI.</td>
+          <td>
+            <code>scripts/data/cluster_pickle_fmri.py</code><br>
+            <code>cluster_matrix</code><br>
+            <code>cluster_matrix_hierarchical_corr</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Shared Preprocessing</h2>
+    <p>The same preprocessing happens before both clustering methods.</p>
+    <ol>
+      <li>Convert values to a numeric matrix.</li>
+      <li>Mean-impute missing values.</li>
+      <li>Z-score each feature column across images.</li>
+    </ol>
+
+    <div class="formula">z = (x - mean(feature_column)) / standard_deviation(feature_column)</div>
+
+    <pre><code>X = SimpleImputer(strategy="mean").fit_transform(raw_matrix)
+Xz = StandardScaler().fit_transform(X)</code></pre>
+
+    <p>
+      For voxel prediction and ground truth, the z-scored columns are voxels.
+      For visual clustering, the z-scored columns are image features.
+    </p>
+
+    <h2>Euclidean/KMeans Method</h2>
+    <p>
+      KMeans is a flat, centroid-based clustering method. It assigns each image to the nearest cluster centroid using Euclidean distance.
+    </p>
+    <div class="formula">Euclidean distance(x, c) = sqrt(sum_j((x_j - c_j)^2))</div>
+
+    <h3>Process</h3>
+    <ol>
+      <li>Start with the imputed, z-scored matrix <code>Xz</code>.</li>
+      <li>For voxel prediction and ground truth, reduce <code>Xz</code> with PCA before KMeans.</li>
+      <li>For visual clustering, cluster the PCA projection of the visual features.</li>
+      <li>Try <code>k = 2..5</code>.</li>
+      <li>Keep the <code>k</code> with the highest silhouette score.</li>
+      <li>Save each image's cluster label and distance to its assigned centroid.</li>
+    </ol>
+
+    <h3>Choosing k</h3>
+    <pre><code>def choose_best_k(points, k_min=2, k_max=5, random_state=42):
+    best = None
+    for k in range(k_min, k_max + 1):
+        km = KMeans(n_clusters=k, n_init=20, random_state=random_state)
+        labels = km.fit_predict(points)
+        score = silhouette_score(points, labels)
+
+        if best is None or score &gt; best["silhouette"]:
+            best = {
+                "k": k,
+                "labels": labels,
+                "silhouette": float(score),
+                "model": km,
+            }
+    return best</code></pre>
+
+    <h3>Voxel prediction and ground-truth KMeans</h3>
+    <pre><code>X = SimpleImputer(strategy="mean").fit_transform(matrix)
+Xz = StandardScaler().fit_transform(X)
+
+used_pca_dim = max(2, min(pca_dim, Xz.shape[0] - 1, Xz.shape[1]))
+X_reduced = PCA(n_components=used_pca_dim, random_state=random_state).fit_transform(Xz)
+
+best = choose_best_k(X_reduced, k_min=2, k_max=5, random_state=random_state)
+
+distance_to_centroid = np.linalg.norm(
+    X_reduced - best["model"].cluster_centers_[best["labels"]],
+    axis=1,
+)</code></pre>
+
+    <h3>Visual KMeans</h3>
+    <pre><code>feat_df = extract_visual_feature_frame(image_dir, feature_set)
+feature_cols = [c for c in feat_df.columns if c != "image_name"]
+X = feat_df[feature_cols].values
+Xz = StandardScaler().fit_transform(X)
+
+pca2 = PCA(n_components=2, random_state=random_state).fit_transform(Xz)
+best = choose_best_k(pca2, k_min=2, k_max=5, random_state=random_state)</code></pre>
+
+    <div class="page-break"></div>
+
+    <h2>Correlation-Distance Hierarchical Method</h2>
+    <p>
+      This method is tree-based instead of centroid-based. It compares each pair of images by the similarity of their response pattern across voxels or features.
+    </p>
+    <div class="formula">correlation_distance(x, y) = 1 - corr(x, y)</div>
+
+    <p>
+      A distance near 0 means two images have very similar patterns. A distance near 1 means weak or no correlation.
+      A distance approaching 2 means strongly opposite patterns.
+    </p>
+
+    <h3>Process</h3>
+    <ol>
+      <li>Start with the imputed, z-scored matrix <code>Xz</code>.</li>
+      <li>Compute all pairwise correlation distances between images.</li>
+      <li>Build an average-linkage hierarchical tree from those distances.</li>
+      <li>Cut the tree into <code>k = 2..5</code> clusters.</li>
+      <li>Pick the cut with the highest silhouette score using the precomputed distance matrix.</li>
+      <li>Save the cluster labels, linkage matrix, dendrogram, and distance to cluster medoid.</li>
+    </ol>
+
+    <h3>Distance matrix and linkage</h3>
+    <pre><code>distance_vector = clean_correlation_distance_vector(
+    pdist(Xz, metric="correlation")
+)
+distance_matrix = squareform(distance_vector)
+linkage_matrix = linkage(distance_vector, method="average")</code></pre>
+
+    <h3>Choosing the tree cut</h3>
+    <pre><code>def choose_best_hierarchical_k(distance_vector, linkage_matrix, k_min=2, k_max=5):
+    distance_matrix = squareform(distance_vector)
+    best = None
+
+    for k in range(k_min, k_max + 1):
+        labels = fcluster(linkage_matrix, t=k, criterion="maxclust") - 1
+        score = silhouette_score(distance_matrix, labels, metric="precomputed")
+
+        if best is None or score &gt; best["silhouette"]:
+            best = {
+                "k": k,
+                "labels": labels,
+                "silhouette": float(score),
+            }
+    return best</code></pre>
+
+    <h3>Voxel prediction, visual, and ground-truth hierarchical clustering</h3>
+    <p>
+      The core calculation is the same for all three. The only difference is what the columns represent:
+      predicted voxels, visual features, or measured fMRI voxels.
+    </p>
+
+    <pre><code>X = SimpleImputer(strategy="mean").fit_transform(matrix)
+Xz = StandardScaler().fit_transform(X)
+
+distance_vector = clean_correlation_distance_vector(
+    pdist(Xz, metric="correlation")
+)
+distance_matrix = squareform(distance_vector)
+linkage_matrix = linkage(distance_vector, method=linkage_method)
+
+best = choose_best_hierarchical_k(
+    distance_vector,
+    linkage_matrix,
+    k_min=2,
+    k_max=5,
+)</code></pre>
+
+    <h3>Medoid distance</h3>
+    <p>
+      KMeans has centroids; hierarchical clustering does not. For hierarchical outputs, the representative image is the cluster medoid: the real image with the smallest total distance to other images in the same cluster.
+    </p>
+
+    <pre><code>medoid_distances = distance_to_cluster_medoids(
+    distance_matrix,
+    best["labels"],
+)
+
+result_df["distance_to_medoid"] = medoid_distances
+result_df["distance_to_centroid"] = medoid_distances</code></pre>
+
+    <p class="small">
+      The second column name is kept only for compatibility with existing CSV readers. For hierarchical clustering, it should be interpreted as distance to medoid by correlation distance.
+    </p>
+
+    <h2>Direct Method Comparison</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Part</th>
+          <th>Euclidean/KMeans</th>
+          <th>Correlation hierarchical</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Input after preprocessing</td>
+          <td>Imputed and z-scored matrix.</td>
+          <td>Same imputed and z-scored matrix.</td>
+        </tr>
+        <tr>
+          <td>Distance</td>
+          <td>Euclidean distance to centroids.</td>
+          <td><code>1 - corr(x, y)</code> between image pairs.</td>
+        </tr>
+        <tr>
+          <td>Cluster structure</td>
+          <td>Flat partition.</td>
+          <td>Dendrogram, then a selected flat tree cut.</td>
+        </tr>
+        <tr>
+          <td>How k is picked</td>
+          <td>Best silhouette score across <code>k = 2..5</code>.</td>
+          <td>Best silhouette score across tree cuts for <code>k = 2..5</code>.</td>
+        </tr>
+        <tr>
+          <td>Representative distance</td>
+          <td>Distance to assigned centroid.</td>
+          <td>Distance to assigned medoid.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Interpretation</h2>
+    <p>
+      Euclidean/KMeans is sensitive to where points sit in the z-scored/PCA space. Correlation-distance hierarchical clustering is more pattern-based: it groups images whose voxel or feature profiles vary similarly across columns, even if absolute magnitudes differ.
+    </p>
+    <p>
+      Therefore, changing from Euclidean KMeans to correlation-distance hierarchical clustering can change both cluster assignments and the apparent structure of the data.
+    </p>
+  </main>
+</body>
+</html>

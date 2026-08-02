@@ -1,0 +1,21 @@
+{
+  "source_file": "murtylab_convnext_nsd_1000_ffa_20260408190136154Z.csv",
+  "result_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_convnext_nsd_1000_ffa_20260408190136154Z_clusters.csv",
+  "model": "convnext",
+  "roi": "ffa",
+  "n_images": 185,
+  "n_voxels": 716,
+  "clustering_method": "hierarchical",
+  "distance_metric": "correlation",
+  "linkage_method": "average",
+  "normalization": "voxel_zscore",
+  "best_k": 2,
+  "silhouette": 0.23995483394647094,
+  "cluster_sizes": {
+    "0": 88,
+    "1": 97
+  },
+  "linkage_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_convnext_nsd_1000_ffa_20260408190136154Z_linkage.csv",
+  "dendrogram_png": "public/data/voxel_clusters_hierarchical_corr/murtylab_convnext_nsd_1000_ffa_20260408190136154Z_dendrogram.png",
+  "distance_to_cluster_representative": "medoid_correlation_distance"
+}

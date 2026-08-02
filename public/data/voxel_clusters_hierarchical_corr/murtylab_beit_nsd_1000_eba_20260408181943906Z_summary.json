@@ -1,0 +1,22 @@
+{
+  "source_file": "murtylab_beit_nsd_1000_eba_20260408181943906Z.csv",
+  "result_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_beit_nsd_1000_eba_20260408181943906Z_clusters.csv",
+  "model": "beit",
+  "roi": "eba",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "clustering_method": "hierarchical",
+  "distance_metric": "correlation",
+  "linkage_method": "average",
+  "normalization": "voxel_zscore",
+  "best_k": 3,
+  "silhouette": 0.26973119219377195,
+  "cluster_sizes": {
+    "0": 62,
+    "1": 45,
+    "2": 78
+  },
+  "linkage_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_beit_nsd_1000_eba_20260408181943906Z_linkage.csv",
+  "dendrogram_png": "public/data/voxel_clusters_hierarchical_corr/murtylab_beit_nsd_1000_eba_20260408181943906Z_dendrogram.png",
+  "distance_to_cluster_representative": "medoid_correlation_distance"
+}

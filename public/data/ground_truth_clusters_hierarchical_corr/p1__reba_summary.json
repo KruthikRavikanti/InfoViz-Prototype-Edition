@@ -1,0 +1,19 @@
+{
+  "name": "p1__reba",
+  "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__reba_clusters.csv",
+  "n_images": 185,
+  "n_voxels": 1121,
+  "clustering_method": "hierarchical",
+  "distance_metric": "correlation",
+  "linkage_method": "average",
+  "normalization": "voxel_zscore",
+  "best_k": 2,
+  "silhouette": 0.194988496452902,
+  "cluster_sizes": {
+    "0": 76,
+    "1": 109
+  },
+  "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__reba_linkage.csv",
+  "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p1__reba_dendrogram.png",
+  "distance_to_cluster_representative": "medoid_correlation_distance"
+}

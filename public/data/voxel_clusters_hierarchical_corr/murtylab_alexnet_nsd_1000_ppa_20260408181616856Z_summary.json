@@ -1,0 +1,21 @@
+{
+  "source_file": "murtylab_alexnet_nsd_1000_ppa_20260408181616856Z.csv",
+  "result_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_alexnet_nsd_1000_ppa_20260408181616856Z_clusters.csv",
+  "model": "alexnet",
+  "roi": "ppa",
+  "n_images": 185,
+  "n_voxels": 753,
+  "clustering_method": "hierarchical",
+  "distance_metric": "correlation",
+  "linkage_method": "average",
+  "normalization": "voxel_zscore",
+  "best_k": 2,
+  "silhouette": 0.4698212135809476,
+  "cluster_sizes": {
+    "0": 71,
+    "1": 114
+  },
+  "linkage_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_alexnet_nsd_1000_ppa_20260408181616856Z_linkage.csv",
+  "dendrogram_png": "public/data/voxel_clusters_hierarchical_corr/murtylab_alexnet_nsd_1000_ppa_20260408181616856Z_dendrogram.png",
+  "distance_to_cluster_representative": "medoid_correlation_distance"
+}

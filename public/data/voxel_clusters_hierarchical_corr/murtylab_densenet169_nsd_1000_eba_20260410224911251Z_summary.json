@@ -1,0 +1,22 @@
+{
+  "source_file": "murtylab_densenet169_nsd_1000_eba_20260410224911251Z.csv",
+  "result_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_densenet169_nsd_1000_eba_20260410224911251Z_clusters.csv",
+  "model": "densenet169",
+  "roi": "eba",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "clustering_method": "hierarchical",
+  "distance_metric": "correlation",
+  "linkage_method": "average",
+  "normalization": "voxel_zscore",
+  "best_k": 3,
+  "silhouette": 0.3677922808326425,
+  "cluster_sizes": {
+    "0": 82,
+    "1": 50,
+    "2": 53
+  },
+  "linkage_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_densenet169_nsd_1000_eba_20260410224911251Z_linkage.csv",
+  "dendrogram_png": "public/data/voxel_clusters_hierarchical_corr/murtylab_densenet169_nsd_1000_eba_20260410224911251Z_dendrogram.png",
+  "distance_to_cluster_representative": "medoid_correlation_distance"
+}

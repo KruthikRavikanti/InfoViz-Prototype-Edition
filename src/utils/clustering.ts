@@ -1,12 +1,43 @@
 import { csv, json } from 'd3';
-import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringData, EvidenceImage, GroundTruthPatient, GroundTruthRoiView, ImageCategory, Roi, SelectedHeatmapCell } from '../types/data';
+import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringData, ClusteringMethod, EvidenceImage, GroundTruthPatient, GroundTruthRoiView, ImageCategory, Roi, SelectedHeatmapCell } from '../types/data';
 
-const VOXEL_SUMMARY_PATH = '/data/voxel_clusters/voxel_cluster_summary.json';
-const VISUAL_SUMMARY_PATH = '/data/visual_clusters/visual_cluster_summary.json';
-const VISUAL_CLUSTERS_PATH = '/data/visual_clusters/visual_clusters.csv';
 const IMAGE_CATEGORIES_PATH = '/data/murty185Classification.csv';
-const GT_BASE = '/data/ground_truth_clusters';
 const IMAGE_BASE_PATH = '/images';
+
+export const CLUSTERING_METHODS: Array<{ id: ClusteringMethod; label: string; description: string }> = [
+  { id: 'kmeans_euclidean', label: 'KMeans', description: 'Euclidean distance' },
+  { id: 'hierarchical_correlation', label: 'Hierarchical', description: 'Correlation distance' },
+];
+export const VOXEL_CLUSTERING_METHODS = CLUSTERING_METHODS;
+
+const VOXEL_CLUSTER_SOURCES: Record<ClusteringMethod, { summaryPath: string; basePath: string }> = {
+  kmeans_euclidean: {
+    summaryPath: '/data/voxel_clusters/voxel_cluster_summary.json',
+    basePath: '/data/voxel_clusters',
+  },
+  hierarchical_correlation: {
+    summaryPath: '/data/voxel_clusters_hierarchical_corr/voxel_cluster_summary.json',
+    basePath: '/data/voxel_clusters_hierarchical_corr',
+  },
+};
+
+const VISUAL_CLUSTER_SOURCES: Record<ClusteringMethod, { summaryPath: string; clustersPath: string; linkagePath?: string; dendrogramPath?: string }> = {
+  kmeans_euclidean: {
+    summaryPath: '/data/visual_clusters/visual_cluster_summary.json',
+    clustersPath: '/data/visual_clusters/visual_clusters.csv',
+  },
+  hierarchical_correlation: {
+    summaryPath: '/data/visual_clusters_hierarchical_corr/visual_cluster_summary.json',
+    clustersPath: '/data/visual_clusters_hierarchical_corr/visual_clusters.csv',
+    linkagePath: '/data/visual_clusters_hierarchical_corr/visual_linkage.csv',
+    dendrogramPath: '/data/visual_clusters_hierarchical_corr/visual_dendrogram.png',
+  },
+};
+
+const GROUND_TRUTH_CLUSTER_SOURCES: Record<ClusteringMethod, { basePath: string }> = {
+  kmeans_euclidean: { basePath: '/data/ground_truth_clusters' },
+  hierarchical_correlation: { basePath: '/data/ground_truth_clusters_hierarchical_corr' },
+};
 
 // All patient/ROI combos that have files in ground_truth_clusters/
 const GT_ENTRIES: Array<{ patient: string; roi: string }> = [
@@ -42,6 +73,13 @@ type RawClusterSummary = {
   explained_variance_ratio_first10?: number[];
   feature_set?: string;
   projection_used_for_clustering?: string;
+  clustering_method?: string;
+  distance_metric?: string;
+  linkage_method?: string;
+  normalization?: string;
+  linkage_csv?: string;
+  dendrogram_png?: string;
+  distance_to_cluster_representative?: string;
 };
 
 type RawClusterRow = {
@@ -86,15 +124,43 @@ function normalizeSummary(summary: RawClusterSummary): ClusterSummary {
       : undefined,
     featureSet: summary.feature_set,
     projectionUsedForClustering: summary.projection_used_for_clustering,
+    clusteringMethod: summary.clustering_method,
+    distanceMetric: summary.distance_metric,
+    linkageMethod: summary.linkage_method,
+    normalization: summary.normalization,
+    linkageCsv: summary.linkage_csv,
+    dendrogramPng: summary.dendrogram_png,
+    distanceToClusterRepresentative: summary.distance_to_cluster_representative,
   };
 }
 
-function deriveVoxelClusterPath(summary: ClusterSummary): string | null {
+function browserDataPath(path: string | undefined): string | undefined {
+  if (!path) {
+    return undefined;
+  }
+
+  if (path.startsWith('/data/')) {
+    return path;
+  }
+
+  const publicDataIndex = path.indexOf('/data/');
+  if (publicDataIndex !== -1) {
+    return path.slice(publicDataIndex);
+  }
+
+  return undefined;
+}
+
+function deriveVoxelArtifactPath(summary: ClusterSummary, basePath: string, suffix: string): string | null {
   if (!summary.sourceFile) {
     return null;
   }
 
-  return `/data/voxel_clusters/${summary.sourceFile.replace(/\.csv$/i, '_clusters.csv')}`;
+  return `${basePath}/${summary.sourceFile.replace(/\.csv$/i, suffix)}`;
+}
+
+function deriveVoxelClusterPath(summary: ClusterSummary, basePath = VOXEL_CLUSTER_SOURCES.kmeans_euclidean.basePath): string | null {
+  return deriveVoxelArtifactPath(summary, basePath, '_clusters.csv');
 }
 
 function parseClusterPoint(row: RawClusterRow, index: number, nameTransform?: (n: string) => string): ClusterPoint | null {
@@ -212,9 +278,10 @@ export async function loadVoxelClusterView(
   return buildClusterView(summary, points);
 }
 
-async function loadVoxelSummaries(): Promise<ClusterSummary[]> {
+async function loadVoxelSummaries(method: ClusteringMethod): Promise<ClusterSummary[]> {
   try {
-    const summaries = await json<RawClusterSummary[]>(VOXEL_SUMMARY_PATH);
+    const source = VOXEL_CLUSTER_SOURCES[method];
+    const summaries = await json<RawClusterSummary[]>(source.summaryPath);
 
     if (!Array.isArray(summaries)) {
       return [];
@@ -224,7 +291,17 @@ async function loadVoxelSummaries(): Promise<ClusterSummary[]> {
       const normalized = normalizeSummary(summary);
       return {
         ...normalized,
-        filePath: deriveVoxelClusterPath(normalized) ?? undefined,
+        filePath: deriveVoxelClusterPath(normalized, source.basePath) ?? undefined,
+        linkageCsv: browserDataPath(normalized.linkageCsv) ?? (
+          method === 'hierarchical_correlation'
+            ? deriveVoxelArtifactPath(normalized, source.basePath, '_linkage.csv') ?? undefined
+            : undefined
+        ),
+        dendrogramPng: browserDataPath(normalized.dendrogramPng) ?? (
+          method === 'hierarchical_correlation'
+            ? deriveVoxelArtifactPath(normalized, source.basePath, '_dendrogram.png') ?? undefined
+            : undefined
+        ),
       };
     });
   } catch {
@@ -232,15 +309,25 @@ async function loadVoxelSummaries(): Promise<ClusterSummary[]> {
   }
 }
 
-async function loadVisualClusterView(): Promise<{ summary: ClusterSummary | null; view: ClusterView | null }> {
+async function loadVisualClusterView(method: ClusteringMethod): Promise<{ summary: ClusterSummary | null; view: ClusterView | null }> {
   try {
+    const source = VISUAL_CLUSTER_SOURCES[method];
     const [rawSummary, points] = await Promise.all([
-      json<RawClusterSummary>(VISUAL_SUMMARY_PATH),
-      csv(VISUAL_CLUSTERS_PATH, (row, index) => parseClusterPoint(row as RawClusterRow, index)).then((rows) =>
+      json<RawClusterSummary>(source.summaryPath),
+      csv(source.clustersPath, (row, index) => parseClusterPoint(row as RawClusterRow, index)).then((rows) =>
         rows.filter((point): point is ClusterPoint => point !== null),
       ),
     ]);
-    const summary = rawSummary ? normalizeSummary(rawSummary) : null;
+    const normalized = rawSummary ? normalizeSummary(rawSummary) : null;
+    const summary = normalized
+      ? {
+          ...normalized,
+          resultCsv: browserDataPath(normalized.resultCsv) ?? source.clustersPath,
+          filePath: source.clustersPath,
+          linkageCsv: browserDataPath(normalized.linkageCsv) ?? source.linkagePath,
+          dendrogramPng: browserDataPath(normalized.dendrogramPng) ?? source.dendrogramPath,
+        }
+      : null;
 
     return {
       summary,
@@ -279,17 +366,30 @@ function normalizeGtImageName(raw: string): string {
   return `image_${String(num).padStart(3, '0')}.png`;
 }
 
-async function loadGroundTruthPatients(): Promise<GroundTruthPatient[]> {
+async function loadGroundTruthPatients(method: ClusteringMethod): Promise<GroundTruthPatient[]> {
+  const { basePath } = GROUND_TRUTH_CLUSTER_SOURCES[method];
   const results = await Promise.allSettled(
     GT_ENTRIES.map(async ({ patient, roi }) => {
       const name = `${patient}__${roi}`;
       const [rawSummary, points] = await Promise.all([
-        json<RawClusterSummary>(`${GT_BASE}/${name}_summary.json`),
-        csv(`${GT_BASE}/${name}_clusters.csv`, (row, idx) =>
+        json<RawClusterSummary>(`${basePath}/${name}_summary.json`),
+        csv(`${basePath}/${name}_clusters.csv`, (row, idx) =>
           parseClusterPoint(row as RawClusterRow, idx, normalizeGtImageName),
         ).then((rows) => rows.filter((p): p is ClusterPoint => p !== null)),
       ]);
-      const summary = rawSummary ? normalizeSummary(rawSummary) : null;
+      const normalized = rawSummary ? normalizeSummary(rawSummary) : null;
+      const summary = normalized
+        ? {
+            ...normalized,
+            resultCsv: browserDataPath(normalized.resultCsv) ?? `${basePath}/${name}_clusters.csv`,
+            linkageCsv: browserDataPath(normalized.linkageCsv) ?? (
+              method === 'hierarchical_correlation' ? `${basePath}/${name}_linkage.csv` : undefined
+            ),
+            dendrogramPng: browserDataPath(normalized.dendrogramPng) ?? (
+              method === 'hierarchical_correlation' ? `${basePath}/${name}_dendrogram.png` : undefined
+            ),
+          }
+        : null;
       const view = buildClusterView(summary, points);
       return { patient, roi, view };
     }),
@@ -315,18 +415,45 @@ async function loadGroundTruthPatients(): Promise<GroundTruthPatient[]> {
 }
 
 export async function loadClusteringData(): Promise<ClusteringData> {
-  const [voxelSummaries, visualClusters, imageCategories, groundTruthPatients] = await Promise.all([
-    loadVoxelSummaries(),
-    loadVisualClusterView(),
+  const [
+    kmeansVoxelSummaries,
+    hierarchicalVoxelSummaries,
+    kmeansVisualClusters,
+    hierarchicalVisualClusters,
+    imageCategories,
+    kmeansGroundTruthPatients,
+    hierarchicalGroundTruthPatients,
+  ] = await Promise.all([
+    loadVoxelSummaries('kmeans_euclidean'),
+    loadVoxelSummaries('hierarchical_correlation'),
+    loadVisualClusterView('kmeans_euclidean'),
+    loadVisualClusterView('hierarchical_correlation'),
     loadImageCategories(),
-    loadGroundTruthPatients(),
+    loadGroundTruthPatients('kmeans_euclidean'),
+    loadGroundTruthPatients('hierarchical_correlation'),
   ]);
 
   return {
-    voxelSummaries,
-    visualSummary: visualClusters.summary,
-    visualView: visualClusters.view,
+    voxelSummaries: kmeansVoxelSummaries,
+    voxelSummariesByMethod: {
+      kmeans_euclidean: kmeansVoxelSummaries,
+      hierarchical_correlation: hierarchicalVoxelSummaries,
+    },
+    visualSummary: kmeansVisualClusters.summary,
+    visualView: kmeansVisualClusters.view,
+    visualSummaryByMethod: {
+      kmeans_euclidean: kmeansVisualClusters.summary,
+      hierarchical_correlation: hierarchicalVisualClusters.summary,
+    },
+    visualViewByMethod: {
+      kmeans_euclidean: kmeansVisualClusters.view,
+      hierarchical_correlation: hierarchicalVisualClusters.view,
+    },
     imageCategories,
-    groundTruthPatients,
+    groundTruthPatients: kmeansGroundTruthPatients,
+    groundTruthPatientsByMethod: {
+      kmeans_euclidean: kmeansGroundTruthPatients,
+      hierarchical_correlation: hierarchicalGroundTruthPatients,
+    },
   };
 }

@@ -1,0 +1,19 @@
+{
+  "name": "p2__lffa",
+  "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__lffa_clusters.csv",
+  "n_images": 185,
+  "n_voxels": 299,
+  "clustering_method": "hierarchical",
+  "distance_metric": "correlation",
+  "linkage_method": "average",
+  "normalization": "voxel_zscore",
+  "best_k": 2,
+  "silhouette": 0.3006018984232482,
+  "cluster_sizes": {
+    "0": 86,
+    "1": 99
+  },
+  "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__lffa_linkage.csv",
+  "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p2__lffa_dendrogram.png",
+  "distance_to_cluster_representative": "medoid_correlation_distance"
+}

@@ -1,0 +1,731 @@
+[
+  {
+    "name": "dp__rffa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/dp__rffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 277,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.3209649830647059,
+    "cluster_sizes": {
+      "0": 90,
+      "1": 95
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/dp__rffa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/dp__rffa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        277
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "dp__lffa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/dp__lffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 119,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.38786054363173206,
+    "cluster_sizes": {
+      "0": 80,
+      "1": 105
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/dp__lffa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/dp__lffa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        119
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "dp__reba",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/dp__reba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 769,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.15993013147871635,
+    "cluster_sizes": {
+      "0": 61,
+      "1": 124
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/dp__reba_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/dp__reba_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        769
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "dp__leba",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/dp__leba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 488,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.208929529044009,
+    "cluster_sizes": {
+      "0": 67,
+      "1": 118
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/dp__leba_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/dp__leba_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        488
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__lffa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__lffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 325,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.2517277491860732,
+    "cluster_sizes": {
+      "0": 86,
+      "1": 99
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__lffa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p1__lffa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        325
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__rffa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__rffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 463,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.22938818061198007,
+    "cluster_sizes": {
+      "0": 59,
+      "1": 126
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__rffa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p1__rffa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        463
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__leba",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__leba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 535,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.22637096691444317,
+    "cluster_sizes": {
+      "0": 76,
+      "1": 109
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__leba_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p1__leba_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        535
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__reba",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__reba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 1121,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.194988496452902,
+    "cluster_sizes": {
+      "0": 76,
+      "1": 109
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__reba_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p1__reba_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        1121
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__lppa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__lppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 715,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.28673432873088,
+    "cluster_sizes": {
+      "0": 68,
+      "1": 117
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__lppa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p1__lppa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        715
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p1__rppa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__rppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 840,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.20892955471322508,
+    "cluster_sizes": {
+      "0": 88,
+      "1": 97
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p1__rppa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p1__rppa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        840
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__lffa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__lffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 299,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.3006018984232482,
+    "cluster_sizes": {
+      "0": 86,
+      "1": 99
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__lffa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p2__lffa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        299
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__rffa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__rffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 795,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.21368457805409438,
+    "cluster_sizes": {
+      "0": 65,
+      "1": 120
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__rffa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p2__rffa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        795
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__leba",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__leba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 400,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.3132415507270473,
+    "cluster_sizes": {
+      "0": 82,
+      "1": 103
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__leba_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p2__leba_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        400
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__reba",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__reba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 835,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.18259634361748162,
+    "cluster_sizes": {
+      "0": 82,
+      "1": 103
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__reba_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p2__reba_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        835
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__lppa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__lppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 453,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.3264126704942823,
+    "cluster_sizes": {
+      "0": 85,
+      "1": 100
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__lppa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p2__lppa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        453
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p2__rppa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__rppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 582,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.2524191264736251,
+    "cluster_sizes": {
+      "0": 87,
+      "1": 98
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p2__rppa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p2__rppa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        582
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__lffa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__lffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 138,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.3591445563156488,
+    "cluster_sizes": {
+      "0": 90,
+      "1": 95
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__lffa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p3__lffa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        138
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__rffa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__rffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 291,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.2570953452532337,
+    "cluster_sizes": {
+      "0": 96,
+      "1": 89
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__rffa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p3__rffa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        291
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__leba",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__leba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 315,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.27867253341905557,
+    "cluster_sizes": {
+      "0": 99,
+      "1": 86
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__leba_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p3__leba_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        315
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__reba",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__reba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 903,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.1876226316762929,
+    "cluster_sizes": {
+      "0": 70,
+      "1": 115
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__reba_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p3__reba_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        903
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__lppa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__lppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 736,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.22491764540972958,
+    "cluster_sizes": {
+      "0": 81,
+      "1": 104
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__lppa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p3__lppa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        736
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p3__rppa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__rppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 1634,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.2509788019231027,
+    "cluster_sizes": {
+      "0": 107,
+      "1": 78
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__rppa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p3__rppa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        1634
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__lffa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__lffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 262,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.24075724232625992,
+    "cluster_sizes": {
+      "0": 62,
+      "1": 123
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__lffa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p4__lffa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        262
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__rffa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__rffa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 609,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.2428378437171951,
+    "cluster_sizes": {
+      "0": 80,
+      "1": 105
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__rffa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p4__rffa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        609
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__leba",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__leba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 618,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 3,
+    "silhouette": 0.20990673203770702,
+    "cluster_sizes": {
+      "0": 60,
+      "1": 64,
+      "2": 61
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__leba_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p4__leba_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        618
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__reba",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__reba_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 884,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.2565680768652356,
+    "cluster_sizes": {
+      "0": 69,
+      "1": 116
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__reba_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p4__reba_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        884
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__lppa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__lppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 462,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.2966323943904118,
+    "cluster_sizes": {
+      "0": 94,
+      "1": 91
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__lppa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p4__lppa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        462
+      ],
+      "reduction": "none"
+    }
+  },
+  {
+    "name": "p4__rppa",
+    "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__rppa_clusters.csv",
+    "n_images": 185,
+    "n_voxels": 1065,
+    "clustering_method": "hierarchical",
+    "distance_metric": "correlation",
+    "linkage_method": "average",
+    "normalization": "voxel_zscore",
+    "best_k": 2,
+    "silhouette": 0.2279756889329215,
+    "cluster_sizes": {
+      "0": 87,
+      "1": 98
+    },
+    "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p4__rppa_linkage.csv",
+    "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p4__rppa_dendrogram.png",
+    "distance_to_cluster_representative": "medoid_correlation_distance",
+    "meta": {
+      "original_shape": [
+        185,
+        1065
+      ],
+      "reduction": "none"
+    }
+  }
+]

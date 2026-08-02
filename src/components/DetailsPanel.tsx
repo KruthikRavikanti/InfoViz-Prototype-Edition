@@ -4,6 +4,7 @@ import { ImageGrid } from './ImageGrid';
 import type {
   AggregateHeatmapCell,
   ClusteringData,
+  ClusteringMethod,
   ClusterView,
   EvidenceImage,
   ModelRoiColumn,
@@ -11,7 +12,7 @@ import type {
   WideCsvRow,
 } from '../types/data';
 import { copyText, downloadJson } from '../utils/browserActions';
-import { findVoxelClusterSummary, loadVoxelClusterView } from '../utils/clustering';
+import { CLUSTERING_METHODS, findVoxelClusterSummary, loadVoxelClusterView } from '../utils/clustering';
 import { buildEvidenceView } from '../utils/evidence';
 import { inferModelCategory } from '../utils/modelTags';
 
@@ -67,15 +68,21 @@ export function DetailsPanel({
   const [actionMsg, setActionMsg] = useState<string | null>(null);
   const [voxelView, setVoxelView] = useState<ClusterView | null>(null);
   const [voxelStatus, setVoxelStatus] = useState<'idle' | 'loading' | 'error'>('idle');
+  const [clusteringMethod, setClusteringMethod] = useState<ClusteringMethod>('kmeans_euclidean');
 
   const evidenceView = useMemo(
     () => (selectedCell ? buildEvidenceView(selectedCell, rows, modelRoiColumns, topK) : null),
     [modelRoiColumns, rows, selectedCell, topK],
   );
 
+  const activeVoxelSummaries = clustering.voxelSummariesByMethod[clusteringMethod] ?? clustering.voxelSummaries;
+  const activeVisualSummary = clustering.visualSummaryByMethod[clusteringMethod] ?? clustering.visualSummary;
+  const activeVisualView = clustering.visualViewByMethod[clusteringMethod] ?? clustering.visualView;
+  const activeGroundTruthPatients = clustering.groundTruthPatientsByMethod[clusteringMethod] ?? clustering.groundTruthPatients;
+
   const voxelSummary = useMemo(
-    () => (selectedCell ? findVoxelClusterSummary(clustering.voxelSummaries, selectedCell) : null),
-    [clustering.voxelSummaries, selectedCell],
+    () => (selectedCell ? findVoxelClusterSummary(activeVoxelSummaries, selectedCell) : null),
+    [activeVoxelSummaries, selectedCell],
   );
 
   useEffect(() => {
@@ -87,11 +94,11 @@ export function DetailsPanel({
     }
     setVoxelStatus('loading');
     setVoxelView(null);
-    loadVoxelClusterView(clustering.voxelSummaries, selectedCell)
+    loadVoxelClusterView(activeVoxelSummaries, selectedCell)
       .then((v) => { if (!ignore) { setVoxelView(v); setVoxelStatus('idle'); } })
       .catch(() => { if (!ignore) { setVoxelView(null); setVoxelStatus('error'); } });
     return () => { ignore = true; };
-  }, [clustering.voxelSummaries, selectedCell, voxelSummary]);
+  }, [activeVoxelSummaries, selectedCell, voxelSummary]);
 
   function payload() {
     if (!selectedCell) return null;
@@ -105,7 +112,12 @@ export function DetailsPanel({
       evidence: evidenceView
         ? { csvColumn: evidenceView.columnName, stats: evidenceView.stats, topImages: evidenceView.topImages, bottomImages: evidenceView.bottomImages }
         : null,
-      clustering: { voxelSummary, voxelClusters: voxelView, visualSummary: clustering.visualSummary },
+      clustering: {
+        clusteringMethod,
+        voxelSummary,
+        voxelClusters: voxelView,
+        visualSummary: activeVisualSummary,
+      },
     };
   }
 
@@ -231,9 +243,12 @@ export function DetailsPanel({
         <ClusteringPanel
           voxelView={voxelView}
           voxelStatus={voxelStatus}
-          visualView={clustering.visualView}
+          clusteringMethod={clusteringMethod}
+          clusteringMethodOptions={CLUSTERING_METHODS}
+          onClusteringMethodChange={setClusteringMethod}
+          visualView={activeVisualView}
           imageCategories={clustering.imageCategories}
-          groundTruthPatients={clustering.groundTruthPatients}
+          groundTruthPatients={activeGroundTruthPatients}
           onOpenImage={setModalImage}
         />
       </section>

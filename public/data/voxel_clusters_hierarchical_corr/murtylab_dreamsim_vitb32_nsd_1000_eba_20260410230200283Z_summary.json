@@ -1,0 +1,22 @@
+{
+  "source_file": "murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z.csv",
+  "result_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z_clusters.csv",
+  "model": "dreamsim_vitb32",
+  "roi": "eba",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "clustering_method": "hierarchical",
+  "distance_metric": "correlation",
+  "linkage_method": "average",
+  "normalization": "voxel_zscore",
+  "best_k": 3,
+  "silhouette": 0.3944608066853844,
+  "cluster_sizes": {
+    "0": 76,
+    "1": 59,
+    "2": 50
+  },
+  "linkage_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z_linkage.csv",
+  "dendrogram_png": "public/data/voxel_clusters_hierarchical_corr/murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z_dendrogram.png",
+  "distance_to_cluster_representative": "medoid_correlation_distance"
+}

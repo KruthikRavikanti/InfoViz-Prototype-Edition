@@ -1,0 +1,19 @@
+{
+  "name": "p3__leba",
+  "result_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__leba_clusters.csv",
+  "n_images": 185,
+  "n_voxels": 315,
+  "clustering_method": "hierarchical",
+  "distance_metric": "correlation",
+  "linkage_method": "average",
+  "normalization": "voxel_zscore",
+  "best_k": 2,
+  "silhouette": 0.27867253341905557,
+  "cluster_sizes": {
+    "0": 99,
+    "1": 86
+  },
+  "linkage_csv": "public/data/ground_truth_clusters_hierarchical_corr/p3__leba_linkage.csv",
+  "dendrogram_png": "public/data/ground_truth_clusters_hierarchical_corr/p3__leba_dendrogram.png",
+  "distance_to_cluster_representative": "medoid_correlation_distance"
+}
