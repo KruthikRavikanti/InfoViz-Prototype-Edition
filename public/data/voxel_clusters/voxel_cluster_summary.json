@@ -1,7 +1,7 @@
 [
   {
     "source_file": "murtylab_adversarial_inceptionv3_nsd_1000_eba_20260408180918124Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_adversarial_inceptionv3_nsd_1000_eba_20260408180918124Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_adversarial_inceptionv3_nsd_1000_eba_20260408180918124Z_clusters.csv",
     "model": "adversarial_inceptionv3",
     "roi": "eba",
     "n_images": 185,
@@ -28,7 +28,7 @@
   },
   {
     "source_file": "murtylab_adversarial_inceptionv3_nsd_1000_ffa_20260408180850572Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_adversarial_inceptionv3_nsd_1000_ffa_20260408180850572Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_adversarial_inceptionv3_nsd_1000_ffa_20260408180850572Z_clusters.csv",
     "model": "adversarial_inceptionv3",
     "roi": "ffa",
     "n_images": 185,
@@ -55,7 +55,7 @@
   },
   {
     "source_file": "murtylab_adversarial_inceptionv3_nsd_1000_ppa_20260408180944286Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_adversarial_inceptionv3_nsd_1000_ppa_20260408180944286Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_adversarial_inceptionv3_nsd_1000_ppa_20260408180944286Z_clusters.csv",
     "model": "adversarial_inceptionv3",
     "roi": "ppa",
     "n_images": 185,
@@ -82,7 +82,7 @@
   },
   {
     "source_file": "murtylab_aimv2_nsd_1000_eba_20260408181142880Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_aimv2_nsd_1000_eba_20260408181142880Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_aimv2_nsd_1000_eba_20260408181142880Z_clusters.csv",
     "model": "aimv2",
     "roi": "eba",
     "n_images": 185,
@@ -109,7 +109,7 @@
   },
   {
     "source_file": "murtylab_aimv2_nsd_1000_ffa_20260408181105090Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_aimv2_nsd_1000_ffa_20260408181105090Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_aimv2_nsd_1000_ffa_20260408181105090Z_clusters.csv",
     "model": "aimv2",
     "roi": "ffa",
     "n_images": 185,
@@ -136,7 +136,7 @@
   },
   {
     "source_file": "murtylab_aimv2_nsd_1000_ppa_20260408181215407Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_aimv2_nsd_1000_ppa_20260408181215407Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_aimv2_nsd_1000_ppa_20260408181215407Z_clusters.csv",
     "model": "aimv2",
     "roi": "ppa",
     "n_images": 185,
@@ -163,7 +163,7 @@
   },
   {
     "source_file": "murtylab_alexnet_nsd_1000_eba_20260408181547240Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_alexnet_nsd_1000_eba_20260408181547240Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_alexnet_nsd_1000_eba_20260408181547240Z_clusters.csv",
     "model": "alexnet",
     "roi": "eba",
     "n_images": 185,
@@ -190,7 +190,7 @@
   },
   {
     "source_file": "murtylab_alexnet_nsd_1000_ffa_20260408181517551Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_alexnet_nsd_1000_ffa_20260408181517551Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_alexnet_nsd_1000_ffa_20260408181517551Z_clusters.csv",
     "model": "alexnet",
     "roi": "ffa",
     "n_images": 185,
@@ -217,7 +217,7 @@
   },
   {
     "source_file": "murtylab_alexnet_nsd_1000_ppa_20260408181616856Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_alexnet_nsd_1000_ppa_20260408181616856Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_alexnet_nsd_1000_ppa_20260408181616856Z_clusters.csv",
     "model": "alexnet",
     "roi": "ppa",
     "n_images": 185,
@@ -245,7 +245,7 @@
   },
   {
     "source_file": "murtylab_alexnet_random_nsd_1000_eba_20260408181742800Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_alexnet_random_nsd_1000_eba_20260408181742800Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_alexnet_random_nsd_1000_eba_20260408181742800Z_clusters.csv",
     "model": "alexnet_random",
     "roi": "eba",
     "n_images": 185,
@@ -273,7 +273,7 @@
   },
   {
     "source_file": "murtylab_alexnet_random_nsd_1000_ffa_20260408181715574Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_alexnet_random_nsd_1000_ffa_20260408181715574Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_alexnet_random_nsd_1000_ffa_20260408181715574Z_clusters.csv",
     "model": "alexnet_random",
     "roi": "ffa",
     "n_images": 185,
@@ -300,7 +300,7 @@
   },
   {
     "source_file": "murtylab_alexnet_random_nsd_1000_ppa_20260408181812489Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_alexnet_random_nsd_1000_ppa_20260408181812489Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_alexnet_random_nsd_1000_ppa_20260408181812489Z_clusters.csv",
     "model": "alexnet_random",
     "roi": "ppa",
     "n_images": 185,
@@ -328,7 +328,7 @@
   },
   {
     "source_file": "murtylab_beit_nsd_1000_eba_20260408181943906Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_beit_nsd_1000_eba_20260408181943906Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_beit_nsd_1000_eba_20260408181943906Z_clusters.csv",
     "model": "beit",
     "roi": "eba",
     "n_images": 185,
@@ -355,7 +355,7 @@
   },
   {
     "source_file": "murtylab_beit_nsd_1000_ffa_20260408181916663Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_beit_nsd_1000_ffa_20260408181916663Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_beit_nsd_1000_ffa_20260408181916663Z_clusters.csv",
     "model": "beit",
     "roi": "ffa",
     "n_images": 185,
@@ -382,7 +382,7 @@
   },
   {
     "source_file": "murtylab_beit_nsd_1000_ppa_20260408182011671Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_beit_nsd_1000_ppa_20260408182011671Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_beit_nsd_1000_ppa_20260408182011671Z_clusters.csv",
     "model": "beit",
     "roi": "ppa",
     "n_images": 185,
@@ -409,7 +409,7 @@
   },
   {
     "source_file": "murtylab_bit_nsd_1000_eba_20260408182145110Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_bit_nsd_1000_eba_20260408182145110Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_bit_nsd_1000_eba_20260408182145110Z_clusters.csv",
     "model": "bit",
     "roi": "eba",
     "n_images": 185,
@@ -436,7 +436,7 @@
   },
   {
     "source_file": "murtylab_bit_nsd_1000_ffa_20260408182117124Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_bit_nsd_1000_ffa_20260408182117124Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_bit_nsd_1000_ffa_20260408182117124Z_clusters.csv",
     "model": "bit",
     "roi": "ffa",
     "n_images": 185,
@@ -463,7 +463,7 @@
   },
   {
     "source_file": "murtylab_bit_nsd_1000_ppa_20260408182202935Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_bit_nsd_1000_ppa_20260408182202935Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_bit_nsd_1000_ppa_20260408182202935Z_clusters.csv",
     "model": "bit",
     "roi": "ppa",
     "n_images": 185,
@@ -490,7 +490,7 @@
   },
   {
     "source_file": "murtylab_blip2_nsd_1000_eba_20260408182423525Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_blip2_nsd_1000_eba_20260408182423525Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_blip2_nsd_1000_eba_20260408182423525Z_clusters.csv",
     "model": "blip2",
     "roi": "eba",
     "n_images": 185,
@@ -517,7 +517,7 @@
   },
   {
     "source_file": "murtylab_blip2_nsd_1000_ffa_20260408182330045Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_blip2_nsd_1000_ffa_20260408182330045Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_blip2_nsd_1000_ffa_20260408182330045Z_clusters.csv",
     "model": "blip2",
     "roi": "ffa",
     "n_images": 185,
@@ -544,7 +544,7 @@
   },
   {
     "source_file": "murtylab_blip2_nsd_1000_ppa_20260408182513632Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_blip2_nsd_1000_ppa_20260408182513632Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_blip2_nsd_1000_ppa_20260408182513632Z_clusters.csv",
     "model": "blip2",
     "roi": "ppa",
     "n_images": 185,
@@ -571,7 +571,7 @@
   },
   {
     "source_file": "murtylab_clip_rn101_nsd_1000_eba_20260408183353817Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn101_nsd_1000_eba_20260408183353817Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn101_nsd_1000_eba_20260408183353817Z_clusters.csv",
     "model": "clip_rn101",
     "roi": "eba",
     "n_images": 185,
@@ -598,7 +598,7 @@
   },
   {
     "source_file": "murtylab_clip_rn101_nsd_1000_ffa_20260408183303200Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn101_nsd_1000_ffa_20260408183303200Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn101_nsd_1000_ffa_20260408183303200Z_clusters.csv",
     "model": "clip_rn101",
     "roi": "ffa",
     "n_images": 185,
@@ -625,7 +625,7 @@
   },
   {
     "source_file": "murtylab_clip_rn101_nsd_1000_ppa_20260408183416226Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn101_nsd_1000_ppa_20260408183416226Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn101_nsd_1000_ppa_20260408183416226Z_clusters.csv",
     "model": "clip_rn101",
     "roi": "ppa",
     "n_images": 185,
@@ -652,7 +652,7 @@
   },
   {
     "source_file": "murtylab_clip_rn101_random_nsd_1000_eba_20260408183536743Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn101_random_nsd_1000_eba_20260408183536743Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn101_random_nsd_1000_eba_20260408183536743Z_clusters.csv",
     "model": "clip_rn101_random",
     "roi": "eba",
     "n_images": 185,
@@ -679,7 +679,7 @@
   },
   {
     "source_file": "murtylab_clip_rn101_random_nsd_1000_ffa_20260408183509474Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn101_random_nsd_1000_ffa_20260408183509474Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn101_random_nsd_1000_ffa_20260408183509474Z_clusters.csv",
     "model": "clip_rn101_random",
     "roi": "ffa",
     "n_images": 185,
@@ -706,7 +706,7 @@
   },
   {
     "source_file": "murtylab_clip_rn101_random_nsd_1000_ppa_20260408183610273Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn101_random_nsd_1000_ppa_20260408183610273Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn101_random_nsd_1000_ppa_20260408183610273Z_clusters.csv",
     "model": "clip_rn101_random",
     "roi": "ppa",
     "n_images": 185,
@@ -733,7 +733,7 @@
   },
   {
     "source_file": "murtylab_clip_rn50_nsd_1000_eba_20260408164251955Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn50_nsd_1000_eba_20260408164251955Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn50_nsd_1000_eba_20260408164251955Z_clusters.csv",
     "model": "clip_rn50",
     "roi": "eba",
     "n_images": 185,
@@ -760,7 +760,7 @@
   },
   {
     "source_file": "murtylab_clip_rn50_nsd_1000_ffa_20260408164117065Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn50_nsd_1000_ffa_20260408164117065Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn50_nsd_1000_ffa_20260408164117065Z_clusters.csv",
     "model": "clip_rn50",
     "roi": "ffa",
     "n_images": 185,
@@ -787,7 +787,7 @@
   },
   {
     "source_file": "murtylab_clip_rn50_nsd_1000_ppa_20260408164323488Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn50_nsd_1000_ppa_20260408164323488Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn50_nsd_1000_ppa_20260408164323488Z_clusters.csv",
     "model": "clip_rn50",
     "roi": "ppa",
     "n_images": 185,
@@ -814,7 +814,7 @@
   },
   {
     "source_file": "murtylab_clip_rn50_random_nsd_1000_eba_20260408185512101Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn50_random_nsd_1000_eba_20260408185512101Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn50_random_nsd_1000_eba_20260408185512101Z_clusters.csv",
     "model": "clip_rn50_random",
     "roi": "eba",
     "n_images": 185,
@@ -841,7 +841,7 @@
   },
   {
     "source_file": "murtylab_clip_rn50_random_nsd_1000_ffa_20260408185441786Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn50_random_nsd_1000_ffa_20260408185441786Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn50_random_nsd_1000_ffa_20260408185441786Z_clusters.csv",
     "model": "clip_rn50_random",
     "roi": "ffa",
     "n_images": 185,
@@ -868,7 +868,7 @@
   },
   {
     "source_file": "murtylab_clip_rn50_random_nsd_1000_ppa_20260408185537470Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn50_random_nsd_1000_ppa_20260408185537470Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_rn50_random_nsd_1000_ppa_20260408185537470Z_clusters.csv",
     "model": "clip_rn50_random",
     "roi": "ppa",
     "n_images": 185,
@@ -895,7 +895,7 @@
   },
   {
     "source_file": "murtylab_clip_vit_b32_nsd_1000_eba_20260408185753659Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_vit_b32_nsd_1000_eba_20260408185753659Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_vit_b32_nsd_1000_eba_20260408185753659Z_clusters.csv",
     "model": "clip_vit_b32",
     "roi": "eba",
     "n_images": 185,
@@ -922,7 +922,7 @@
   },
   {
     "source_file": "murtylab_clip_vit_b32_nsd_1000_ffa_20260408185726443Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_vit_b32_nsd_1000_ffa_20260408185726443Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_vit_b32_nsd_1000_ffa_20260408185726443Z_clusters.csv",
     "model": "clip_vit_b32",
     "roi": "ffa",
     "n_images": 185,
@@ -949,7 +949,7 @@
   },
   {
     "source_file": "murtylab_clip_vit_b32_nsd_1000_ppa_20260408185828087Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_vit_b32_nsd_1000_ppa_20260408185828087Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_vit_b32_nsd_1000_ppa_20260408185828087Z_clusters.csv",
     "model": "clip_vit_b32",
     "roi": "ppa",
     "n_images": 185,
@@ -976,7 +976,7 @@
   },
   {
     "source_file": "murtylab_clip_vit_b32_random_nsd_1000_eba_20260408185950352Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_eba_20260408185950352Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_eba_20260408185950352Z_clusters.csv",
     "model": "clip_vit_b32_random",
     "roi": "eba",
     "n_images": 185,
@@ -1003,7 +1003,7 @@
   },
   {
     "source_file": "murtylab_clip_vit_b32_random_nsd_1000_ffa_20260408185920614Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_ffa_20260408185920614Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_ffa_20260408185920614Z_clusters.csv",
     "model": "clip_vit_b32_random",
     "roi": "ffa",
     "n_images": 185,
@@ -1030,7 +1030,7 @@
   },
   {
     "source_file": "murtylab_clip_vit_b32_random_nsd_1000_ppa_20260408190014009Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_ppa_20260408190014009Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_ppa_20260408190014009Z_clusters.csv",
     "model": "clip_vit_b32_random",
     "roi": "ppa",
     "n_images": 185,
@@ -1057,7 +1057,7 @@
   },
   {
     "source_file": "murtylab_convnext_nsd_1000_eba_20260408190203191Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_convnext_nsd_1000_eba_20260408190203191Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_convnext_nsd_1000_eba_20260408190203191Z_clusters.csv",
     "model": "convnext",
     "roi": "eba",
     "n_images": 185,
@@ -1084,7 +1084,7 @@
   },
   {
     "source_file": "murtylab_convnext_nsd_1000_ffa_20260408190136154Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_convnext_nsd_1000_ffa_20260408190136154Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_convnext_nsd_1000_ffa_20260408190136154Z_clusters.csv",
     "model": "convnext",
     "roi": "ffa",
     "n_images": 185,
@@ -1111,7 +1111,7 @@
   },
   {
     "source_file": "murtylab_convnext_nsd_1000_ppa_20260408190226364Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_convnext_nsd_1000_ppa_20260408190226364Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_convnext_nsd_1000_ppa_20260408190226364Z_clusters.csv",
     "model": "convnext",
     "roi": "ppa",
     "n_images": 185,
@@ -1138,7 +1138,7 @@
   },
   {
     "source_file": "murtylab_cornet_rt_nsd_1000_eba_20260408190505692Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_rt_nsd_1000_eba_20260408190505692Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cornet_rt_nsd_1000_eba_20260408190505692Z_clusters.csv",
     "model": "cornet_rt",
     "roi": "eba",
     "n_images": 185,
@@ -1165,7 +1165,7 @@
   },
   {
     "source_file": "murtylab_cornet_rt_nsd_1000_ffa_20260408190441119Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_rt_nsd_1000_ffa_20260408190441119Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cornet_rt_nsd_1000_ffa_20260408190441119Z_clusters.csv",
     "model": "cornet_rt",
     "roi": "ffa",
     "n_images": 185,
@@ -1192,7 +1192,7 @@
   },
   {
     "source_file": "murtylab_cornet_rt_nsd_1000_ppa_20260408190527667Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_rt_nsd_1000_ppa_20260408190527667Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cornet_rt_nsd_1000_ppa_20260408190527667Z_clusters.csv",
     "model": "cornet_rt",
     "roi": "ppa",
     "n_images": 185,
@@ -1219,7 +1219,7 @@
   },
   {
     "source_file": "murtylab_cornet_s_nsd_1000_eba_20260408190927133Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_s_nsd_1000_eba_20260408190927133Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cornet_s_nsd_1000_eba_20260408190927133Z_clusters.csv",
     "model": "cornet_s",
     "roi": "eba",
     "n_images": 185,
@@ -1246,7 +1246,7 @@
   },
   {
     "source_file": "murtylab_cornet_s_nsd_1000_ffa_20260408190857644Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_s_nsd_1000_ffa_20260408190857644Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cornet_s_nsd_1000_ffa_20260408190857644Z_clusters.csv",
     "model": "cornet_s",
     "roi": "ffa",
     "n_images": 185,
@@ -1273,7 +1273,7 @@
   },
   {
     "source_file": "murtylab_cornet_s_nsd_1000_ppa_20260408190953354Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_s_nsd_1000_ppa_20260408190953354Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cornet_s_nsd_1000_ppa_20260408190953354Z_clusters.csv",
     "model": "cornet_s",
     "roi": "ppa",
     "n_images": 185,
@@ -1300,7 +1300,7 @@
   },
   {
     "source_file": "murtylab_cornet_z_nsd_1000_eba_20260408191104799Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_z_nsd_1000_eba_20260408191104799Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cornet_z_nsd_1000_eba_20260408191104799Z_clusters.csv",
     "model": "cornet_z",
     "roi": "eba",
     "n_images": 185,
@@ -1327,7 +1327,7 @@
   },
   {
     "source_file": "murtylab_cornet_z_nsd_1000_ffa_20260408191041366Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_z_nsd_1000_ffa_20260408191041366Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cornet_z_nsd_1000_ffa_20260408191041366Z_clusters.csv",
     "model": "cornet_z",
     "roi": "ffa",
     "n_images": 185,
@@ -1354,7 +1354,7 @@
   },
   {
     "source_file": "murtylab_cornet_z_nsd_1000_ppa_20260408191120523Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_z_nsd_1000_ppa_20260408191120523Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cornet_z_nsd_1000_ppa_20260408191120523Z_clusters.csv",
     "model": "cornet_z",
     "roi": "ppa",
     "n_images": 185,
@@ -1381,7 +1381,7 @@
   },
   {
     "source_file": "murtylab_cross_vit_nsd_1000_eba_20260410224249694Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cross_vit_nsd_1000_eba_20260410224249694Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cross_vit_nsd_1000_eba_20260410224249694Z_clusters.csv",
     "model": "cross_vit",
     "roi": "eba",
     "n_images": 185,
@@ -1408,7 +1408,7 @@
   },
   {
     "source_file": "murtylab_cross_vit_nsd_1000_ffa_20260410224222356Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cross_vit_nsd_1000_ffa_20260410224222356Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cross_vit_nsd_1000_ffa_20260410224222356Z_clusters.csv",
     "model": "cross_vit",
     "roi": "ffa",
     "n_images": 185,
@@ -1435,7 +1435,7 @@
   },
   {
     "source_file": "murtylab_cross_vit_nsd_1000_ppa_20260410224319595Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cross_vit_nsd_1000_ppa_20260410224319595Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_cross_vit_nsd_1000_ppa_20260410224319595Z_clusters.csv",
     "model": "cross_vit",
     "roi": "ppa",
     "n_images": 185,
@@ -1462,7 +1462,7 @@
   },
   {
     "source_file": "murtylab_densenet121_nsd_1000_eba_20260410224506181Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet121_nsd_1000_eba_20260410224506181Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet121_nsd_1000_eba_20260410224506181Z_clusters.csv",
     "model": "densenet121",
     "roi": "eba",
     "n_images": 185,
@@ -1489,7 +1489,7 @@
   },
   {
     "source_file": "murtylab_densenet121_nsd_1000_ffa_20260410224432366Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet121_nsd_1000_ffa_20260410224432366Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet121_nsd_1000_ffa_20260410224432366Z_clusters.csv",
     "model": "densenet121",
     "roi": "ffa",
     "n_images": 185,
@@ -1516,7 +1516,7 @@
   },
   {
     "source_file": "murtylab_densenet121_nsd_1000_ppa_20260410224535988Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet121_nsd_1000_ppa_20260410224535988Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet121_nsd_1000_ppa_20260410224535988Z_clusters.csv",
     "model": "densenet121",
     "roi": "ppa",
     "n_images": 185,
@@ -1544,7 +1544,7 @@
   },
   {
     "source_file": "murtylab_densenet161_nsd_1000_eba_20260410224710974Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet161_nsd_1000_eba_20260410224710974Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet161_nsd_1000_eba_20260410224710974Z_clusters.csv",
     "model": "densenet161",
     "roi": "eba",
     "n_images": 185,
@@ -1571,7 +1571,7 @@
   },
   {
     "source_file": "murtylab_densenet161_nsd_1000_ffa_20260410224631366Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet161_nsd_1000_ffa_20260410224631366Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet161_nsd_1000_ffa_20260410224631366Z_clusters.csv",
     "model": "densenet161",
     "roi": "ffa",
     "n_images": 185,
@@ -1598,7 +1598,7 @@
   },
   {
     "source_file": "murtylab_densenet161_nsd_1000_ppa_20260410224751294Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet161_nsd_1000_ppa_20260410224751294Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet161_nsd_1000_ppa_20260410224751294Z_clusters.csv",
     "model": "densenet161",
     "roi": "ppa",
     "n_images": 185,
@@ -1625,7 +1625,7 @@
   },
   {
     "source_file": "murtylab_densenet169_nsd_1000_eba_20260410224911251Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet169_nsd_1000_eba_20260410224911251Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet169_nsd_1000_eba_20260410224911251Z_clusters.csv",
     "model": "densenet169",
     "roi": "eba",
     "n_images": 185,
@@ -1652,7 +1652,7 @@
   },
   {
     "source_file": "murtylab_densenet169_nsd_1000_ffa_20260410224848154Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet169_nsd_1000_ffa_20260410224848154Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet169_nsd_1000_ffa_20260410224848154Z_clusters.csv",
     "model": "densenet169",
     "roi": "ffa",
     "n_images": 185,
@@ -1679,7 +1679,7 @@
   },
   {
     "source_file": "murtylab_densenet169_nsd_1000_ppa_20260410224933136Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet169_nsd_1000_ppa_20260410224933136Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet169_nsd_1000_ppa_20260410224933136Z_clusters.csv",
     "model": "densenet169",
     "roi": "ppa",
     "n_images": 185,
@@ -1706,7 +1706,7 @@
   },
   {
     "source_file": "murtylab_densenet201_nsd_1000_eba_20260410225033695Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet201_nsd_1000_eba_20260410225033695Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet201_nsd_1000_eba_20260410225033695Z_clusters.csv",
     "model": "densenet201",
     "roi": "eba",
     "n_images": 185,
@@ -1733,7 +1733,7 @@
   },
   {
     "source_file": "murtylab_densenet201_nsd_1000_ffa_20260410225008546Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet201_nsd_1000_ffa_20260410225008546Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet201_nsd_1000_ffa_20260410225008546Z_clusters.csv",
     "model": "densenet201",
     "roi": "ffa",
     "n_images": 185,
@@ -1760,7 +1760,7 @@
   },
   {
     "source_file": "murtylab_densenet201_nsd_1000_ppa_20260410225057212Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet201_nsd_1000_ppa_20260410225057212Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_densenet201_nsd_1000_ppa_20260410225057212Z_clusters.csv",
     "model": "densenet201",
     "roi": "ppa",
     "n_images": 185,
@@ -1787,7 +1787,7 @@
   },
   {
     "source_file": "murtylab_dinov2_large_nsd_1000_eba_20260410225612374Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dinov2_large_nsd_1000_eba_20260410225612374Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_dinov2_large_nsd_1000_eba_20260410225612374Z_clusters.csv",
     "model": "dinov2_large",
     "roi": "eba",
     "n_images": 185,
@@ -1814,7 +1814,7 @@
   },
   {
     "source_file": "murtylab_dinov2_large_nsd_1000_ffa_20260410225534603Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dinov2_large_nsd_1000_ffa_20260410225534603Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_dinov2_large_nsd_1000_ffa_20260410225534603Z_clusters.csv",
     "model": "dinov2_large",
     "roi": "ffa",
     "n_images": 185,
@@ -1841,7 +1841,7 @@
   },
   {
     "source_file": "murtylab_dinov2_large_nsd_1000_ppa_20260410225648367Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dinov2_large_nsd_1000_ppa_20260410225648367Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_dinov2_large_nsd_1000_ppa_20260410225648367Z_clusters.csv",
     "model": "dinov2_large",
     "roi": "ppa",
     "n_images": 185,
@@ -1868,7 +1868,7 @@
   },
   {
     "source_file": "murtylab_dreamsim_vitb16_nsd_1000_eba_20260410230011072Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dreamsim_vitb16_nsd_1000_eba_20260410230011072Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_dreamsim_vitb16_nsd_1000_eba_20260410230011072Z_clusters.csv",
     "model": "dreamsim_vitb16",
     "roi": "eba",
     "n_images": 185,
@@ -1895,7 +1895,7 @@
   },
   {
     "source_file": "murtylab_dreamsim_vitb16_nsd_1000_ffa_20260410225944640Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dreamsim_vitb16_nsd_1000_ffa_20260410225944640Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_dreamsim_vitb16_nsd_1000_ffa_20260410225944640Z_clusters.csv",
     "model": "dreamsim_vitb16",
     "roi": "ffa",
     "n_images": 185,
@@ -1922,7 +1922,7 @@
   },
   {
     "source_file": "murtylab_dreamsim_vitb16_nsd_1000_ppa_20260410230044758Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dreamsim_vitb16_nsd_1000_ppa_20260410230044758Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_dreamsim_vitb16_nsd_1000_ppa_20260410230044758Z_clusters.csv",
     "model": "dreamsim_vitb16",
     "roi": "ppa",
     "n_images": 185,
@@ -1949,7 +1949,7 @@
   },
   {
     "source_file": "murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z_clusters.csv",
     "model": "dreamsim_vitb32",
     "roi": "eba",
     "n_images": 185,
@@ -1976,7 +1976,7 @@
   },
   {
     "source_file": "murtylab_dreamsim_vitb32_nsd_1000_ffa_20260410230137468Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_ffa_20260410230137468Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_ffa_20260410230137468Z_clusters.csv",
     "model": "dreamsim_vitb32",
     "roi": "ffa",
     "n_images": 185,
@@ -2003,7 +2003,7 @@
   },
   {
     "source_file": "murtylab_dreamsim_vitb32_nsd_1000_ppa_20260410230221436Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_ppa_20260410230221436Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_ppa_20260410230221436Z_clusters.csv",
     "model": "dreamsim_vitb32",
     "roi": "ppa",
     "n_images": 185,
@@ -2030,7 +2030,7 @@
   },
   {
     "source_file": "murtylab_efficient_net_nsd_1000_eba_20260410230352513Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_efficient_net_nsd_1000_eba_20260410230352513Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_efficient_net_nsd_1000_eba_20260410230352513Z_clusters.csv",
     "model": "efficient_net",
     "roi": "eba",
     "n_images": 185,
@@ -2057,7 +2057,7 @@
   },
   {
     "source_file": "murtylab_efficient_net_nsd_1000_ffa_20260410230328651Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_efficient_net_nsd_1000_ffa_20260410230328651Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_efficient_net_nsd_1000_ffa_20260410230328651Z_clusters.csv",
     "model": "efficient_net",
     "roi": "ffa",
     "n_images": 185,
@@ -2084,7 +2084,7 @@
   },
   {
     "source_file": "murtylab_efficient_net_nsd_1000_ppa_20260410230414513Z.csv",
-    "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_efficient_net_nsd_1000_ppa_20260410230414513Z_clusters.csv",
+    "result_csv": "public/data/voxel_clusters/murtylab_efficient_net_nsd_1000_ppa_20260410230414513Z_clusters.csv",
     "model": "efficient_net",
     "roi": "ppa",
     "n_images": 185,

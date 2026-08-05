@@ -59,6 +59,8 @@ export type ClusterSummary = {
   roi?: Roi;
   nImages: number | null;
   nVoxels?: number | null;
+  nFeatures?: number | null;
+  embeddingKey?: string;
   pcaDimUsed?: number | null;
   bestK: number | null;
   silhouette: number | null;
@@ -125,6 +127,10 @@ export type ClusteringData = {
   visualView: ClusterView | null;
   visualSummaryByMethod: Record<ClusteringMethod, ClusterSummary | null>;
   visualViewByMethod: Record<ClusteringMethod, ClusterView | null>;
+  dreamsimSummary: ClusterSummary | null;
+  dreamsimView: ClusterView | null;
+  dreamsimSummaryByMethod: Record<ClusteringMethod, ClusterSummary | null>;
+  dreamsimViewByMethod: Record<ClusteringMethod, ClusterView | null>;
   imageCategories: Map<string, ImageCategory>;
   groundTruthPatients: GroundTruthPatient[];
   groundTruthPatientsByMethod: Record<ClusteringMethod, GroundTruthPatient[]>;

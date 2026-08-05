@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_cornet_z_nsd_1000_eba_20260408191104799Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_z_nsd_1000_eba_20260408191104799Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_cornet_z_nsd_1000_eba_20260408191104799Z_clusters.csv",
   "model": "cornet_z",
   "roi": "eba",
   "n_images": 185,

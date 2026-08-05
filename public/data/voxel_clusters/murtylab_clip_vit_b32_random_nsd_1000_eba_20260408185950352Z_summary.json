@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_clip_vit_b32_random_nsd_1000_eba_20260408185950352Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_eba_20260408185950352Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_eba_20260408185950352Z_clusters.csv",
   "model": "clip_vit_b32_random",
   "roi": "eba",
   "n_images": 185,

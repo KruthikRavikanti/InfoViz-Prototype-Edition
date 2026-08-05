@@ -34,6 +34,19 @@ const VISUAL_CLUSTER_SOURCES: Record<ClusteringMethod, { summaryPath: string; cl
   },
 };
 
+const DREAMSIM_CLUSTER_SOURCES: Record<ClusteringMethod, { summaryPath: string; clustersPath: string; linkagePath?: string; dendrogramPath?: string }> = {
+  kmeans_euclidean: {
+    summaryPath: '/data/dreamsim_clusters/dreamsim_cluster_summary.json',
+    clustersPath: '/data/dreamsim_clusters/dreamsim_clusters.csv',
+  },
+  hierarchical_correlation: {
+    summaryPath: '/data/dreamsim_clusters_hierarchical_corr/dreamsim_cluster_summary.json',
+    clustersPath: '/data/dreamsim_clusters_hierarchical_corr/dreamsim_clusters.csv',
+    linkagePath: '/data/dreamsim_clusters_hierarchical_corr/dreamsim_linkage.csv',
+    dendrogramPath: '/data/dreamsim_clusters_hierarchical_corr/dreamsim_dendrogram.png',
+  },
+};
+
 const GROUND_TRUTH_CLUSTER_SOURCES: Record<ClusteringMethod, { basePath: string }> = {
   kmeans_euclidean: { basePath: '/data/ground_truth_clusters' },
   hierarchical_correlation: { basePath: '/data/ground_truth_clusters_hierarchical_corr' },
@@ -66,6 +79,8 @@ type RawClusterSummary = {
   roi?: Roi;
   n_images?: number;
   n_voxels?: number;
+  n_features?: number;
+  embedding_key?: string;
   pca_dim_used?: number;
   best_k?: number;
   silhouette?: number;
@@ -115,6 +130,8 @@ function normalizeSummary(summary: RawClusterSummary): ClusterSummary {
     roi: summary.roi,
     nImages: toFiniteNumber(summary.n_images),
     nVoxels: toFiniteNumber(summary.n_voxels),
+    nFeatures: toFiniteNumber(summary.n_features),
+    embeddingKey: summary.embedding_key,
     pcaDimUsed: toFiniteNumber(summary.pca_dim_used),
     bestK: toFiniteNumber(summary.best_k),
     silhouette: toFiniteNumber(summary.silhouette),
@@ -341,6 +358,38 @@ async function loadVisualClusterView(method: ClusteringMethod): Promise<{ summar
   }
 }
 
+async function loadDreamsimClusterView(method: ClusteringMethod): Promise<{ summary: ClusterSummary | null; view: ClusterView | null }> {
+  try {
+    const source = DREAMSIM_CLUSTER_SOURCES[method];
+    const [rawSummary, points] = await Promise.all([
+      json<RawClusterSummary>(source.summaryPath),
+      csv(source.clustersPath, (row, index) => parseClusterPoint(row as RawClusterRow, index)).then((rows) =>
+        rows.filter((point): point is ClusterPoint => point !== null),
+      ),
+    ]);
+    const normalized = rawSummary ? normalizeSummary(rawSummary) : null;
+    const summary = normalized
+      ? {
+          ...normalized,
+          resultCsv: browserDataPath(normalized.resultCsv) ?? source.clustersPath,
+          filePath: source.clustersPath,
+          linkageCsv: browserDataPath(normalized.linkageCsv) ?? source.linkagePath,
+          dendrogramPng: browserDataPath(normalized.dendrogramPng) ?? source.dendrogramPath,
+        }
+      : null;
+
+    return {
+      summary,
+      view: buildClusterView(summary, points),
+    };
+  } catch {
+    return {
+      summary: null,
+      view: null,
+    };
+  }
+}
+
 async function loadImageCategories(): Promise<Map<string, ImageCategory>> {
   const map = new Map<string, ImageCategory>();
   try {
@@ -420,6 +469,8 @@ export async function loadClusteringData(): Promise<ClusteringData> {
     hierarchicalVoxelSummaries,
     kmeansVisualClusters,
     hierarchicalVisualClusters,
+    kmeansDreamsimClusters,
+    hierarchicalDreamsimClusters,
     imageCategories,
     kmeansGroundTruthPatients,
     hierarchicalGroundTruthPatients,
@@ -428,6 +479,8 @@ export async function loadClusteringData(): Promise<ClusteringData> {
     loadVoxelSummaries('hierarchical_correlation'),
     loadVisualClusterView('kmeans_euclidean'),
     loadVisualClusterView('hierarchical_correlation'),
+    loadDreamsimClusterView('kmeans_euclidean'),
+    loadDreamsimClusterView('hierarchical_correlation'),
     loadImageCategories(),
     loadGroundTruthPatients('kmeans_euclidean'),
     loadGroundTruthPatients('hierarchical_correlation'),
@@ -448,6 +501,16 @@ export async function loadClusteringData(): Promise<ClusteringData> {
     visualViewByMethod: {
       kmeans_euclidean: kmeansVisualClusters.view,
       hierarchical_correlation: hierarchicalVisualClusters.view,
+    },
+    dreamsimSummary: kmeansDreamsimClusters.summary,
+    dreamsimView: kmeansDreamsimClusters.view,
+    dreamsimSummaryByMethod: {
+      kmeans_euclidean: kmeansDreamsimClusters.summary,
+      hierarchical_correlation: hierarchicalDreamsimClusters.summary,
+    },
+    dreamsimViewByMethod: {
+      kmeans_euclidean: kmeansDreamsimClusters.view,
+      hierarchical_correlation: hierarchicalDreamsimClusters.view,
     },
     imageCategories,
     groundTruthPatients: kmeansGroundTruthPatients,

@@ -78,6 +78,8 @@ export function DetailsPanel({
   const activeVoxelSummaries = clustering.voxelSummariesByMethod[clusteringMethod] ?? clustering.voxelSummaries;
   const activeVisualSummary = clustering.visualSummaryByMethod[clusteringMethod] ?? clustering.visualSummary;
   const activeVisualView = clustering.visualViewByMethod[clusteringMethod] ?? clustering.visualView;
+  const activeDreamsimSummary = clustering.dreamsimSummaryByMethod[clusteringMethod] ?? clustering.dreamsimSummary;
+  const activeDreamsimView = clustering.dreamsimViewByMethod[clusteringMethod] ?? clustering.dreamsimView;
   const activeGroundTruthPatients = clustering.groundTruthPatientsByMethod[clusteringMethod] ?? clustering.groundTruthPatients;
 
   const voxelSummary = useMemo(
@@ -117,6 +119,7 @@ export function DetailsPanel({
         voxelSummary,
         voxelClusters: voxelView,
         visualSummary: activeVisualSummary,
+        dreamsimSummary: activeDreamsimSummary,
       },
     };
   }
@@ -247,6 +250,7 @@ export function DetailsPanel({
           clusteringMethodOptions={CLUSTERING_METHODS}
           onClusteringMethodChange={setClusteringMethod}
           visualView={activeVisualView}
+          dreamsimView={activeDreamsimView}
           imageCategories={clustering.imageCategories}
           groundTruthPatients={activeGroundTruthPatients}
           onOpenImage={setModalImage}

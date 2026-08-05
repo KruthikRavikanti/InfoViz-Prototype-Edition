@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_dreamsim_vitb32_nsd_1000_ppa_20260410230221436Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_ppa_20260410230221436Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_ppa_20260410230221436Z_clusters.csv",
   "model": "dreamsim_vitb32",
   "roi": "ppa",
   "n_images": 185,

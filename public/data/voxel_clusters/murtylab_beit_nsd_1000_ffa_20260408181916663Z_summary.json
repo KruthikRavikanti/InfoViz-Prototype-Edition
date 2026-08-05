@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_beit_nsd_1000_ffa_20260408181916663Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_beit_nsd_1000_ffa_20260408181916663Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_beit_nsd_1000_ffa_20260408181916663Z_clusters.csv",
   "model": "beit",
   "roi": "ffa",
   "n_images": 185,

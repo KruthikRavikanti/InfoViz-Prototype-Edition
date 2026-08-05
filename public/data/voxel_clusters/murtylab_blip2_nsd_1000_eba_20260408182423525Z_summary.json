@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_blip2_nsd_1000_eba_20260408182423525Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_blip2_nsd_1000_eba_20260408182423525Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_blip2_nsd_1000_eba_20260408182423525Z_clusters.csv",
   "model": "blip2",
   "roi": "eba",
   "n_images": 185,

@@ -1,6 +1,6 @@
 {
   "name": "p2__rppa",
-  "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__rppa_clusters.csv",
+  "result_csv": "public/data/ground_truth_clusters/p2__rppa_clusters.csv",
   "n_images": 185,
   "n_voxels": 582,
   "pca_dim_used": 50,

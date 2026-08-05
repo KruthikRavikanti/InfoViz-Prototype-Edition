@@ -1,6 +1,6 @@
 {
   "name": "p3__rffa",
-  "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__rffa_clusters.csv",
+  "result_csv": "public/data/ground_truth_clusters/p3__rffa_clusters.csv",
   "n_images": 185,
   "n_voxels": 291,
   "pca_dim_used": 50,

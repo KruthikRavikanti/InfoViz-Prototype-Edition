@@ -16,9 +16,19 @@ from sklearn.manifold import TSNE
 from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
+
+
+def artifact_path(path: Path) -> str:
+    """Store repo-local artifact paths without machine-specific absolute prefixes."""
+    try:
+        return path.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(path)
 
 
 def is_numeric_array(x: Any) -> bool:
@@ -316,7 +326,7 @@ def cluster_matrix(
 
     summary = {
         "name": base_name,
-        "result_csv": str(result_csv),
+        "result_csv": artifact_path(result_csv),
         "n_images": int(X.shape[0]),
         "n_voxels": int(X.shape[1]),
         "pca_dim_used": int(used_pca_dim),
@@ -395,7 +405,7 @@ def cluster_matrix_hierarchical_corr(
 
     summary = {
         "name": base_name,
-        "result_csv": str(result_csv),
+        "result_csv": artifact_path(result_csv),
         "n_images": int(X.shape[0]),
         "n_voxels": int(X.shape[1]),
         "clustering_method": "hierarchical",
@@ -405,8 +415,8 @@ def cluster_matrix_hierarchical_corr(
         "best_k": int(best["k"]),
         "silhouette": float(best["silhouette"]),
         "cluster_sizes": cluster_size_dict(best["labels"]),
-        "linkage_csv": str(linkage_csv),
-        "dendrogram_png": str(dendrogram_path) if save_dendrogram else None,
+        "linkage_csv": artifact_path(linkage_csv),
+        "dendrogram_png": artifact_path(dendrogram_path) if save_dendrogram else None,
         "distance_to_cluster_representative": "medoid_correlation_distance",
     }
 

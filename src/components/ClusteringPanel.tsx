@@ -9,6 +9,7 @@ type ClusteringPanelProps = {
   clusteringMethodOptions: Array<{ id: ClusteringMethod; label: string; description: string }>;
   onClusteringMethodChange: (method: ClusteringMethod) => void;
   visualView: ClusterView | null;
+  dreamsimView: ClusterView | null;
   imageCategories: Map<string, ImageCategory>;
   groundTruthPatients: GroundTruthPatient[];
   onOpenImage: (image: EvidenceImage) => void;
@@ -170,7 +171,8 @@ function Metrics({ summary }: { summary: ClusterSummary | null }) {
       <div><dt>Clusters</dt><dd>{fmtI(summary.bestK)}</dd></div>
       <div><dt>Silhouette</dt><dd>{fmtN(summary.silhouette)}</dd></div>
       <div><dt>Images</dt><dd>{fmtI(summary.nImages)}</dd></div>
-      {summary.nVoxels !== undefined && <div><dt>Voxels</dt><dd>{fmtI(summary.nVoxels)}</dd></div>}
+      {summary.nVoxels != null && <div><dt>Voxels</dt><dd>{fmtI(summary.nVoxels)}</dd></div>}
+      {summary.nFeatures != null && <div><dt>Features</dt><dd>{fmtI(summary.nFeatures)}</dd></div>}
     </dl>
   );
 }
@@ -403,6 +405,7 @@ export function ClusteringPanel({
   clusteringMethodOptions,
   onClusteringMethodChange,
   visualView,
+  dreamsimView,
   imageCategories,
   groundTruthPatients,
   onOpenImage,
@@ -436,6 +439,13 @@ export function ClusteringPanel({
         title="Visual clustering"
         view={visualView}
         emptyMessage="No visual clustering output found."
+        imageCategories={imageCategories}
+        onOpenImage={onOpenImage}
+      />
+      <ClusterSection
+        title="DreamSim embedding clustering"
+        view={dreamsimView}
+        emptyMessage="No DreamSim clustering output found."
         imageCategories={imageCategories}
         onOpenImage={onOpenImage}
       />

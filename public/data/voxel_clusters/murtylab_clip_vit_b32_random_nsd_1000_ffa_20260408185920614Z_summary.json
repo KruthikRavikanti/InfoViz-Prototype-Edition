@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_clip_vit_b32_random_nsd_1000_ffa_20260408185920614Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_ffa_20260408185920614Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_clip_vit_b32_random_nsd_1000_ffa_20260408185920614Z_clusters.csv",
   "model": "clip_vit_b32_random",
   "roi": "ffa",
   "n_images": 185,

@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_alexnet_nsd_1000_ffa_20260408181517551Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_alexnet_nsd_1000_ffa_20260408181517551Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_alexnet_nsd_1000_ffa_20260408181517551Z_clusters.csv",
   "model": "alexnet",
   "roi": "ffa",
   "n_images": 185,

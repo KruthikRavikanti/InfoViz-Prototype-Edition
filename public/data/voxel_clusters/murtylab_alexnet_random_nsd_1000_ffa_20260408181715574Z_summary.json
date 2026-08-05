@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_alexnet_random_nsd_1000_ffa_20260408181715574Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_alexnet_random_nsd_1000_ffa_20260408181715574Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_alexnet_random_nsd_1000_ffa_20260408181715574Z_clusters.csv",
   "model": "alexnet_random",
   "roi": "ffa",
   "n_images": 185,

@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_densenet169_nsd_1000_ffa_20260410224848154Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet169_nsd_1000_ffa_20260410224848154Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_densenet169_nsd_1000_ffa_20260410224848154Z_clusters.csv",
   "model": "densenet169",
   "roi": "ffa",
   "n_images": 185,

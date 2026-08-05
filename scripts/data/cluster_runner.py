@@ -6,6 +6,8 @@ Mentor guide:
 - `voxel-hierarchical`: z-scored voxels + correlation distance + hierarchical clustering.
 - `visual`: original visual-feature clustering, using z-scored image features + KMeans/euclidean.
 - `visual-hierarchical`: z-scored image features + correlation distance + hierarchical clustering.
+- `dreamsim`: DreamSim embeddings + PCA + KMeans/euclidean.
+- `dreamsim-hierarchical`: DreamSim embeddings + correlation distance + hierarchical clustering.
 
 Ground-truth fMRI pickle clustering uses the same method ideas in `cluster_pickle_fmri.py`.
 """
@@ -46,6 +48,8 @@ FILENAME_RE = re.compile(
     re.IGNORECASE,
 )
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 # ---------------------------------------------------------------------------
 # General helpers
@@ -53,6 +57,14 @@ FILENAME_RE = re.compile(
 
 def ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
+
+
+def artifact_path(path: Path) -> str:
+    """Store repo-local artifact paths without machine-specific absolute prefixes."""
+    try:
+        return path.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return str(path)
 
 
 def detect_id_column(df: pd.DataFrame) -> str:
@@ -275,7 +287,7 @@ def cluster_single_voxel_csv(csv_path: Path, out_dir: Path, pca_dim: int = 50, r
 
     summary = {
         "source_file": csv_path.name,
-        "result_csv": str(result_csv),
+        "result_csv": artifact_path(result_csv),
         "model": model_name,
         "roi": roi,
         "n_images": int(X.shape[0]),
@@ -360,7 +372,7 @@ def cluster_single_voxel_csv_hierarchical_corr(
 
     summary = {
         "source_file": csv_path.name,
-        "result_csv": str(result_csv),
+        "result_csv": artifact_path(result_csv),
         "model": model_name,
         "roi": roi,
         "n_images": int(X.shape[0]),
@@ -372,8 +384,8 @@ def cluster_single_voxel_csv_hierarchical_corr(
         "best_k": int(best["k"]),
         "silhouette": float(best["silhouette"]),
         "cluster_sizes": cluster_size_dict(best["labels"]),
-        "linkage_csv": str(linkage_csv),
-        "dendrogram_png": str(dendrogram_path) if save_dendrogram else None,
+        "linkage_csv": artifact_path(linkage_csv),
+        "dendrogram_png": artifact_path(dendrogram_path) if save_dendrogram else None,
         "distance_to_cluster_representative": "medoid_correlation_distance",
     }
 
@@ -639,6 +651,214 @@ def extract_visual_feature_frame(image_dir: Path, feature_set: str) -> pd.DataFr
 
 
 # ---------------------------------------------------------------------------
+# DreamSim embedding helpers
+# ---------------------------------------------------------------------------
+
+def load_dreamsim_embedding_matrix(pth_path: Path, key: str) -> np.ndarray:
+    """Load a named tensor from the DreamSim .pth bundle as a numpy matrix."""
+    import torch
+
+    if not pth_path.is_file():
+        raise FileNotFoundError(f"DreamSim embedding file not found: {pth_path}")
+
+    try:
+        blob = torch.load(str(pth_path), map_location="cpu", weights_only=True)
+    except TypeError:
+        blob = torch.load(str(pth_path), map_location="cpu")
+
+    if not isinstance(blob, dict):
+        raise TypeError(f"Expected dict[str, Tensor] in {pth_path}, got {type(blob)}")
+    if key not in blob:
+        raise KeyError(f"Embedding key {key!r} not found. Available keys: {sorted(blob.keys())}")
+
+    tensor = blob[key]
+    if not hasattr(tensor, "detach"):
+        raise TypeError(f"Embedding key {key!r} is not a torch Tensor.")
+
+    matrix = tensor.detach().cpu().float().numpy()
+    if matrix.ndim != 2:
+        raise ValueError(f"Expected a 2D embedding matrix for {key!r}, got shape {matrix.shape}")
+
+    return matrix
+
+
+def dreamsim_image_names(image_dir: Optional[Path], n_images: int) -> pd.Series:
+    """
+    Map DreamSim rows to app image filenames.
+
+    For this repo, murty185 embeddings are in stimulus order and line up with
+    public/images/image_001.png ... image_185.png.
+    """
+    if image_dir is not None:
+        image_paths = list_images(image_dir)
+        if len(image_paths) != n_images:
+            raise ValueError(
+                f"DreamSim rows ({n_images}) do not match image files in {image_dir} ({len(image_paths)})."
+            )
+        return pd.Series([path.name for path in image_paths])
+
+    return pd.Series([f"image_{i:03d}.png" for i in range(1, n_images + 1)])
+
+
+def cluster_dreamsim_embeddings(
+    pth_path: Path,
+    out_dir: Path,
+    embedding_key: str,
+    image_dir: Optional[Path],
+    pca_dim: int,
+    random_state: int,
+) -> Dict:
+    """DreamSim KMeans/euclidean method: z-score embeddings, PCA, then KMeans."""
+    ensure_dir(out_dir)
+
+    X = load_dreamsim_embedding_matrix(pth_path, embedding_key)
+    image_ids = dreamsim_image_names(image_dir, X.shape[0])
+    Xz = StandardScaler().fit_transform(X)
+
+    used_pca_dim = max(2, min(pca_dim, Xz.shape[0] - 1, Xz.shape[1]))
+    reducer = PCA(n_components=used_pca_dim, random_state=random_state)
+    X_reduced = reducer.fit_transform(Xz)
+
+    best = choose_best_k(X_reduced, k_min=2, k_max=5, random_state=random_state)
+    if best is None:
+        raise ValueError(f"Could not find a valid DreamSim clustering for key {embedding_key!r}.")
+
+    pca2 = PCA(n_components=2, random_state=random_state).fit_transform(Xz)
+    tsne2 = safe_tsne(X_reduced, random_state=random_state)
+
+    result_csv = out_dir / "dreamsim_clusters.csv"
+    result_df = pd.DataFrame({
+        "image_name": image_ids.values,
+        "cluster_label": best["labels"],
+        "embedding_key": embedding_key,
+        "clustering_method": "kmeans",
+        "distance_metric": "euclidean",
+        "plot_x": pca2[:, 0],
+        "plot_y": pca2[:, 1],
+        "pca_x": pca2[:, 0],
+        "pca_y": pca2[:, 1],
+        "tsne_x": tsne2[:, 0],
+        "tsne_y": tsne2[:, 1],
+        "distance_to_centroid": np.linalg.norm(X_reduced - best["model"].cluster_centers_[best["labels"]], axis=1),
+    })
+    result_df.to_csv(result_csv, index=False)
+
+    summary = {
+        "source_file": artifact_path(pth_path),
+        "result_csv": artifact_path(result_csv),
+        "n_images": int(X.shape[0]),
+        "n_features": int(X.shape[1]),
+        "embedding_key": embedding_key,
+        "feature_set": f"dreamsim_{embedding_key}_embeddings",
+        "pca_dim_used": int(used_pca_dim),
+        "projection_used_for_clustering": f"pca_{used_pca_dim}",
+        "clustering_method": "kmeans",
+        "distance_metric": "euclidean",
+        "normalization": "embedding_feature_zscore",
+        "best_k": int(best["k"]),
+        "silhouette": float(best["silhouette"]),
+        "cluster_sizes": cluster_size_dict(best["labels"]),
+        "explained_variance_ratio_first10": reducer.explained_variance_ratio_[:10].tolist(),
+    }
+
+    with open(out_dir / "dreamsim_cluster_summary.json", "w") as f:
+        json.dump(summary, f, indent=2)
+    print(f"\nSaved DreamSim outputs to: {out_dir}")
+    return summary
+
+
+def cluster_dreamsim_embeddings_hierarchical_corr(
+    pth_path: Path,
+    out_dir: Path,
+    embedding_key: str,
+    image_dir: Optional[Path],
+    linkage_method: str,
+    k_min: int,
+    k_max: int,
+    random_state: int,
+    save_dendrogram: bool,
+) -> Dict:
+    """DreamSim hierarchical method: z-score embeddings, then cluster correlation distances."""
+    ensure_dir(out_dir)
+
+    X = load_dreamsim_embedding_matrix(pth_path, embedding_key)
+    image_ids = dreamsim_image_names(image_dir, X.shape[0])
+    Xz = StandardScaler().fit_transform(X)
+
+    distance_vector = clean_correlation_distance_vector(pdist(Xz, metric="correlation"))
+    distance_matrix = squareform(distance_vector)
+    linkage_matrix = linkage(distance_vector, method=linkage_method)
+
+    best = choose_best_hierarchical_k(distance_vector, linkage_matrix, k_min=k_min, k_max=k_max)
+    if best is None:
+        raise ValueError(f"Could not find a valid DreamSim hierarchical clustering for key {embedding_key!r}.")
+
+    pca2 = PCA(n_components=2, random_state=random_state).fit_transform(Xz)
+    tsne2 = safe_tsne_precomputed(distance_matrix, random_state=random_state)
+    medoid_distances = distance_to_cluster_medoids(distance_matrix, best["labels"])
+
+    result_csv = out_dir / "dreamsim_clusters.csv"
+    linkage_csv = out_dir / "dreamsim_linkage.csv"
+    dendrogram_path = out_dir / "dreamsim_dendrogram.png"
+
+    result_df = pd.DataFrame({
+        "image_name": image_ids.values,
+        "cluster_label": best["labels"],
+        "embedding_key": embedding_key,
+        "clustering_method": "hierarchical",
+        "distance_metric": "correlation",
+        "linkage_method": linkage_method,
+        "plot_x": pca2[:, 0],
+        "plot_y": pca2[:, 1],
+        "pca_x": pca2[:, 0],
+        "pca_y": pca2[:, 1],
+        "tsne_x": tsne2[:, 0],
+        "tsne_y": tsne2[:, 1],
+        "distance_to_centroid": medoid_distances,
+        "distance_to_medoid": medoid_distances,
+    })
+    result_df.to_csv(result_csv, index=False)
+
+    pd.DataFrame(
+        linkage_matrix,
+        columns=["child_1", "child_2", "distance", "n_observations"],
+    ).to_csv(linkage_csv, index=False)
+
+    if save_dendrogram:
+        save_dendrogram_png(
+            linkage_matrix,
+            image_ids,
+            dendrogram_path,
+            title=f"DreamSim {embedding_key} hierarchical correlation dendrogram",
+        )
+
+    summary = {
+        "source_file": artifact_path(pth_path),
+        "result_csv": artifact_path(result_csv),
+        "n_images": int(X.shape[0]),
+        "n_features": int(X.shape[1]),
+        "embedding_key": embedding_key,
+        "feature_set": f"dreamsim_{embedding_key}_embeddings",
+        "projection_used_for_clustering": "correlation_distance",
+        "clustering_method": "hierarchical",
+        "distance_metric": "correlation",
+        "linkage_method": linkage_method,
+        "normalization": "embedding_feature_zscore",
+        "best_k": int(best["k"]),
+        "silhouette": float(best["silhouette"]),
+        "cluster_sizes": cluster_size_dict(best["labels"]),
+        "linkage_csv": artifact_path(linkage_csv),
+        "dendrogram_png": artifact_path(dendrogram_path) if save_dendrogram else None,
+        "distance_to_cluster_representative": "medoid_correlation_distance",
+    }
+
+    with open(out_dir / "dreamsim_cluster_summary.json", "w") as f:
+        json.dump(summary, f, indent=2)
+    print(f"\nSaved hierarchical correlation DreamSim outputs to: {out_dir}")
+    return summary
+
+
+# ---------------------------------------------------------------------------
 # Visual clustering modes
 # ---------------------------------------------------------------------------
 
@@ -683,7 +903,7 @@ def run_visual_mode(image_dir: Path, out_dir: Path, feature_set: str, projection
 
     summary = {
         "n_images": int(len(feat_df)),
-        "result_csv": str(out_dir / "visual_clusters.csv"),
+        "result_csv": artifact_path(out_dir / "visual_clusters.csv"),
         "feature_set": feature_set,
         "projection_used_for_clustering": projection,
         "clustering_method": "kmeans",
@@ -768,7 +988,7 @@ def run_visual_hierarchical_mode(
 
     summary = {
         "n_images": int(len(feat_df)),
-        "result_csv": str(result_csv),
+        "result_csv": artifact_path(result_csv),
         "feature_set": feature_set,
         "projection_used_for_clustering": "correlation_distance",
         "clustering_method": "hierarchical",
@@ -779,8 +999,8 @@ def run_visual_hierarchical_mode(
         "silhouette": float(best["silhouette"]),
         "cluster_sizes": cluster_size_dict(best["labels"]),
         "feature_columns": feature_cols,
-        "linkage_csv": str(linkage_csv),
-        "dendrogram_png": str(dendrogram_path) if save_dendrogram else None,
+        "linkage_csv": artifact_path(linkage_csv),
+        "dendrogram_png": artifact_path(dendrogram_path) if save_dendrogram else None,
         "distance_to_cluster_representative": "medoid_correlation_distance",
     }
     with open(out_dir / "visual_cluster_summary.json", "w") as f:
@@ -838,6 +1058,35 @@ def build_parser():
     visual_hier.add_argument("--random_state", type=int, default=42)
     visual_hier.add_argument("--skip_dendrogram", action="store_true")
 
+    dreamsim = sub.add_parser(
+        "dreamsim",
+        help="Cluster precomputed DreamSim embeddings with PCA + KMeans/euclidean.",
+    )
+    dreamsim.add_argument("--pth", type=Path, default=Path("data/dreamsim/dreamsim_embeddings.pth"))
+    dreamsim.add_argument("--embedding_key", default="murty185")
+    dreamsim.add_argument("--image_dir", type=Path, default=Path("public/images"))
+    dreamsim.add_argument("--out_dir", type=Path, required=True)
+    dreamsim.add_argument("--pca_dim", type=int, default=50)
+    dreamsim.add_argument("--random_state", type=int, default=42)
+
+    dreamsim_hier = sub.add_parser(
+        "dreamsim-hierarchical",
+        help="Cluster precomputed DreamSim embeddings with correlation distance and hierarchical clustering.",
+    )
+    dreamsim_hier.add_argument("--pth", type=Path, default=Path("data/dreamsim/dreamsim_embeddings.pth"))
+    dreamsim_hier.add_argument("--embedding_key", default="murty185")
+    dreamsim_hier.add_argument("--image_dir", type=Path, default=Path("public/images"))
+    dreamsim_hier.add_argument("--out_dir", type=Path, required=True)
+    dreamsim_hier.add_argument(
+        "--linkage_method",
+        choices=["single", "complete", "average", "weighted"],
+        default="average",
+    )
+    dreamsim_hier.add_argument("--k_min", type=int, default=2)
+    dreamsim_hier.add_argument("--k_max", type=int, default=5)
+    dreamsim_hier.add_argument("--random_state", type=int, default=42)
+    dreamsim_hier.add_argument("--skip_dendrogram", action="store_true")
+
     return parser
 
 
@@ -864,6 +1113,27 @@ def main():
             args.image_dir,
             args.out_dir,
             args.feature_set,
+            args.linkage_method,
+            args.k_min,
+            args.k_max,
+            args.random_state,
+            save_dendrogram=not args.skip_dendrogram,
+        )
+    elif args.mode == "dreamsim":
+        cluster_dreamsim_embeddings(
+            args.pth,
+            args.out_dir,
+            args.embedding_key,
+            args.image_dir,
+            args.pca_dim,
+            args.random_state,
+        )
+    elif args.mode == "dreamsim-hierarchical":
+        cluster_dreamsim_embeddings_hierarchical_corr(
+            args.pth,
+            args.out_dir,
+            args.embedding_key,
+            args.image_dir,
             args.linkage_method,
             args.k_min,
             args.k_max,

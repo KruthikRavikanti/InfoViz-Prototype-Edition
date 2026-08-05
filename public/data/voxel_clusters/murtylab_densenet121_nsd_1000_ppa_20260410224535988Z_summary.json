@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_densenet121_nsd_1000_ppa_20260410224535988Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet121_nsd_1000_ppa_20260410224535988Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_densenet121_nsd_1000_ppa_20260410224535988Z_clusters.csv",
   "model": "densenet121",
   "roi": "ppa",
   "n_images": 185,

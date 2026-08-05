@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_convnext_nsd_1000_ppa_20260408190226364Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_convnext_nsd_1000_ppa_20260408190226364Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_convnext_nsd_1000_ppa_20260408190226364Z_clusters.csv",
   "model": "convnext",
   "roi": "ppa",
   "n_images": 185,

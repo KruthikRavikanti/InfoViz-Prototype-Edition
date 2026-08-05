@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_adversarial_inceptionv3_nsd_1000_ffa_20260408180850572Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_adversarial_inceptionv3_nsd_1000_ffa_20260408180850572Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_adversarial_inceptionv3_nsd_1000_ffa_20260408180850572Z_clusters.csv",
   "model": "adversarial_inceptionv3",
   "roi": "ffa",
   "n_images": 185,

@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_aimv2_nsd_1000_eba_20260408181142880Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_aimv2_nsd_1000_eba_20260408181142880Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_aimv2_nsd_1000_eba_20260408181142880Z_clusters.csv",
   "model": "aimv2",
   "roi": "eba",
   "n_images": 185,

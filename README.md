@@ -19,8 +19,47 @@ The app loads data from `public/data/`:
   - aggregate ROI x model score matrix
 - `combined_image_means.csv`
   - image-level evidence table used to rank stimuli for selected cells
+- `voxel_clusters/` and `voxel_clusters_hierarchical_corr/`
+  - selected model/ROI image clusters
+- `visual_clusters/` and `visual_clusters_hierarchical_corr/`
+  - hand-built visual feature clusters for the 185 images
+- `dreamsim_clusters/` and `dreamsim_clusters_hierarchical_corr/`
+  - DreamSim embedding clusters for the 185 images
+- `ground_truth_clusters/` and `ground_truth_clusters_hierarchical_corr/`
+  - patient/ROI ground-truth fMRI clusters
 
 The app also serves image assets from `public/images/`.
+
+The source DreamSim embedding bundle is stored in `data/dreamsim/dreamsim_embeddings.pth`.
+It is not loaded by the browser directly; it is used by `scripts/data/cluster_runner.py` to generate the public DreamSim cluster CSV/JSON/PNG files.
+
+## Data Scripts
+
+Inspect the DreamSim bundle:
+
+```bash
+python scripts/data/dreamsim_pipeline.py --keys murty185
+```
+
+Regenerate DreamSim KMeans/euclidean clusters:
+
+```bash
+python scripts/data/cluster_runner.py dreamsim \
+  --pth data/dreamsim/dreamsim_embeddings.pth \
+  --embedding_key murty185 \
+  --image_dir public/images \
+  --out_dir public/data/dreamsim_clusters
+```
+
+Regenerate DreamSim hierarchical/correlation clusters:
+
+```bash
+python scripts/data/cluster_runner.py dreamsim-hierarchical \
+  --pth data/dreamsim/dreamsim_embeddings.pth \
+  --embedding_key murty185 \
+  --image_dir public/images \
+  --out_dir public/data/dreamsim_clusters_hierarchical_corr
+```
 
 ## Current Evidence Coverage
 

@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z_clusters.csv",
   "model": "dreamsim_vitb32",
   "roi": "eba",
   "n_images": 185,

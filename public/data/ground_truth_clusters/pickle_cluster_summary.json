@@ -1,7 +1,7 @@
 [
   {
     "name": "dp__rffa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/dp__rffa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/dp__rffa_clusters.csv",
     "n_images": 185,
     "n_voxels": 277,
     "pca_dim_used": 50,
@@ -33,7 +33,7 @@
   },
   {
     "name": "dp__lffa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/dp__lffa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/dp__lffa_clusters.csv",
     "n_images": 185,
     "n_voxels": 119,
     "pca_dim_used": 50,
@@ -65,7 +65,7 @@
   },
   {
     "name": "dp__reba",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/dp__reba_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/dp__reba_clusters.csv",
     "n_images": 185,
     "n_voxels": 769,
     "pca_dim_used": 50,
@@ -97,7 +97,7 @@
   },
   {
     "name": "dp__leba",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/dp__leba_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/dp__leba_clusters.csv",
     "n_images": 185,
     "n_voxels": 488,
     "pca_dim_used": 50,
@@ -129,7 +129,7 @@
   },
   {
     "name": "p1__lffa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__lffa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p1__lffa_clusters.csv",
     "n_images": 185,
     "n_voxels": 325,
     "pca_dim_used": 50,
@@ -161,7 +161,7 @@
   },
   {
     "name": "p1__rffa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__rffa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p1__rffa_clusters.csv",
     "n_images": 185,
     "n_voxels": 463,
     "pca_dim_used": 50,
@@ -193,7 +193,7 @@
   },
   {
     "name": "p1__leba",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__leba_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p1__leba_clusters.csv",
     "n_images": 185,
     "n_voxels": 535,
     "pca_dim_used": 50,
@@ -225,7 +225,7 @@
   },
   {
     "name": "p1__reba",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__reba_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p1__reba_clusters.csv",
     "n_images": 185,
     "n_voxels": 1121,
     "pca_dim_used": 50,
@@ -257,7 +257,7 @@
   },
   {
     "name": "p1__lppa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__lppa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p1__lppa_clusters.csv",
     "n_images": 185,
     "n_voxels": 715,
     "pca_dim_used": 50,
@@ -289,7 +289,7 @@
   },
   {
     "name": "p1__rppa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p1__rppa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p1__rppa_clusters.csv",
     "n_images": 185,
     "n_voxels": 840,
     "pca_dim_used": 50,
@@ -321,7 +321,7 @@
   },
   {
     "name": "p2__lffa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__lffa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p2__lffa_clusters.csv",
     "n_images": 185,
     "n_voxels": 299,
     "pca_dim_used": 50,
@@ -353,7 +353,7 @@
   },
   {
     "name": "p2__rffa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__rffa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p2__rffa_clusters.csv",
     "n_images": 185,
     "n_voxels": 795,
     "pca_dim_used": 50,
@@ -385,7 +385,7 @@
   },
   {
     "name": "p2__leba",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__leba_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p2__leba_clusters.csv",
     "n_images": 185,
     "n_voxels": 400,
     "pca_dim_used": 50,
@@ -417,7 +417,7 @@
   },
   {
     "name": "p2__reba",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__reba_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p2__reba_clusters.csv",
     "n_images": 185,
     "n_voxels": 835,
     "pca_dim_used": 50,
@@ -449,7 +449,7 @@
   },
   {
     "name": "p2__lppa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__lppa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p2__lppa_clusters.csv",
     "n_images": 185,
     "n_voxels": 453,
     "pca_dim_used": 50,
@@ -481,7 +481,7 @@
   },
   {
     "name": "p2__rppa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p2__rppa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p2__rppa_clusters.csv",
     "n_images": 185,
     "n_voxels": 582,
     "pca_dim_used": 50,
@@ -513,7 +513,7 @@
   },
   {
     "name": "p3__lffa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__lffa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p3__lffa_clusters.csv",
     "n_images": 185,
     "n_voxels": 138,
     "pca_dim_used": 50,
@@ -545,7 +545,7 @@
   },
   {
     "name": "p3__rffa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__rffa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p3__rffa_clusters.csv",
     "n_images": 185,
     "n_voxels": 291,
     "pca_dim_used": 50,
@@ -577,7 +577,7 @@
   },
   {
     "name": "p3__leba",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__leba_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p3__leba_clusters.csv",
     "n_images": 185,
     "n_voxels": 315,
     "pca_dim_used": 50,
@@ -609,7 +609,7 @@
   },
   {
     "name": "p3__reba",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__reba_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p3__reba_clusters.csv",
     "n_images": 185,
     "n_voxels": 903,
     "pca_dim_used": 50,
@@ -641,7 +641,7 @@
   },
   {
     "name": "p3__lppa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__lppa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p3__lppa_clusters.csv",
     "n_images": 185,
     "n_voxels": 736,
     "pca_dim_used": 50,
@@ -673,7 +673,7 @@
   },
   {
     "name": "p3__rppa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p3__rppa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p3__rppa_clusters.csv",
     "n_images": 185,
     "n_voxels": 1634,
     "pca_dim_used": 50,
@@ -705,7 +705,7 @@
   },
   {
     "name": "p4__lffa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__lffa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p4__lffa_clusters.csv",
     "n_images": 185,
     "n_voxels": 262,
     "pca_dim_used": 50,
@@ -737,7 +737,7 @@
   },
   {
     "name": "p4__rffa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__rffa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p4__rffa_clusters.csv",
     "n_images": 185,
     "n_voxels": 609,
     "pca_dim_used": 50,
@@ -769,7 +769,7 @@
   },
   {
     "name": "p4__leba",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__leba_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p4__leba_clusters.csv",
     "n_images": 185,
     "n_voxels": 618,
     "pca_dim_used": 50,
@@ -801,7 +801,7 @@
   },
   {
     "name": "p4__reba",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__reba_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p4__reba_clusters.csv",
     "n_images": 185,
     "n_voxels": 884,
     "pca_dim_used": 50,
@@ -833,7 +833,7 @@
   },
   {
     "name": "p4__lppa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__lppa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p4__lppa_clusters.csv",
     "n_images": 185,
     "n_voxels": 462,
     "pca_dim_used": 50,
@@ -865,7 +865,7 @@
   },
   {
     "name": "p4__rppa",
-    "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/p4__rppa_clusters.csv",
+    "result_csv": "public/data/ground_truth_clusters/p4__rppa_clusters.csv",
     "n_images": 185,
     "n_voxels": 1065,
     "pca_dim_used": 50,

@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_clip_rn101_random_nsd_1000_ppa_20260408183610273Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_rn101_random_nsd_1000_ppa_20260408183610273Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_clip_rn101_random_nsd_1000_ppa_20260408183610273Z_clusters.csv",
   "model": "clip_rn101_random",
   "roi": "ppa",
   "n_images": 185,

@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_dinov2_large_nsd_1000_ppa_20260410225648367Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_dinov2_large_nsd_1000_ppa_20260410225648367Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_dinov2_large_nsd_1000_ppa_20260410225648367Z_clusters.csv",
   "model": "dinov2_large",
   "roi": "ppa",
   "n_images": 185,

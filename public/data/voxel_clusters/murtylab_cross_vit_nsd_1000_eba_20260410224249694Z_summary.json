@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_cross_vit_nsd_1000_eba_20260410224249694Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cross_vit_nsd_1000_eba_20260410224249694Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_cross_vit_nsd_1000_eba_20260410224249694Z_clusters.csv",
   "model": "cross_vit",
   "roi": "eba",
   "n_images": 185,

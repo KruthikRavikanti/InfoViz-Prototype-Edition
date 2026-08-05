@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_densenet161_nsd_1000_eba_20260410224710974Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_densenet161_nsd_1000_eba_20260410224710974Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_densenet161_nsd_1000_eba_20260410224710974Z_clusters.csv",
   "model": "densenet161",
   "roi": "eba",
   "n_images": 185,

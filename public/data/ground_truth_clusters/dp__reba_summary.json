@@ -1,6 +1,6 @@
 {
   "name": "dp__reba",
-  "result_csv": "/Users/kruthikravikanti/Downloads/ground_truth_clusters/dp__reba_clusters.csv",
+  "result_csv": "public/data/ground_truth_clusters/dp__reba_clusters.csv",
   "n_images": 185,
   "n_voxels": 769,
   "pca_dim_used": 50,

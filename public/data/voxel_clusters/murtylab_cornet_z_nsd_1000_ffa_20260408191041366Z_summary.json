@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_cornet_z_nsd_1000_ffa_20260408191041366Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_cornet_z_nsd_1000_ffa_20260408191041366Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_cornet_z_nsd_1000_ffa_20260408191041366Z_clusters.csv",
   "model": "cornet_z",
   "roi": "ffa",
   "n_images": 185,

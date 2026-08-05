@@ -1,6 +1,6 @@
 {
   "source_file": "murtylab_clip_vit_b32_nsd_1000_ppa_20260408185828087Z.csv",
-  "result_csv": "/Users/kruthikravikanti/Downloads/voxel_clusters/murtylab_clip_vit_b32_nsd_1000_ppa_20260408185828087Z_clusters.csv",
+  "result_csv": "public/data/voxel_clusters/murtylab_clip_vit_b32_nsd_1000_ppa_20260408185828087Z_clusters.csv",
   "model": "clip_vit_b32",
   "roi": "ppa",
   "n_images": 185,
