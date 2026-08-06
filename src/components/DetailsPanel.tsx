@@ -63,7 +63,7 @@ export function DetailsPanel({
   selectedCell,
 }: DetailsPanelProps) {
   const [topK, setTopK] = useState(6);
-  const [activeTab, setActiveTab] = useState<DetailTab>('evidence');
+  const [activeTab, setActiveTab] = useState<DetailTab>('clustering');
   const [modalImage, setModalImage] = useState<EvidenceImage | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
   const [voxelView, setVoxelView] = useState<ClusterView | null>(null);
@@ -86,6 +86,12 @@ export function DetailsPanel({
     () => (selectedCell ? findVoxelClusterSummary(activeVoxelSummaries, selectedCell) : null),
     [activeVoxelSummaries, selectedCell],
   );
+
+  useEffect(() => {
+    if (selectedCell) {
+      setActiveTab('clustering');
+    }
+  }, [selectedCell?.id]);
 
   useEffect(() => {
     let ignore = false;
@@ -161,7 +167,7 @@ export function DetailsPanel({
 
   /* ── Selected state ── */
   return (
-    <aside className="details-panel evidence-panel" aria-label="Details panel">
+    <aside className={`details-panel evidence-panel ${activeTab === 'clustering' ? 'details-panel--clustering' : ''}`} aria-label="Details panel">
 
       {/* Header */}
       <div className="evidence-panel-header">
@@ -179,21 +185,6 @@ export function DetailsPanel({
           <div><dt>Overall</dt><dd>{fmt(selectedCell.overallScore)}</dd></div>
         </dl>
       </div>
-
-      {/* Actions */}
-      <div className="panel-action-row" aria-live="polite">
-        <button type="button" onClick={handleExport}>Export JSON</button>
-        <button type="button" onClick={handleCopy}>Copy metadata</button>
-        {actionMsg && <span>{actionMsg}</span>}
-      </div>
-
-      {/* Top-k selector */}
-      <label className="evidence-control">
-        Images per tier
-        <select value={topK} onChange={(e) => setTopK(Number(e.target.value))}>
-          {topKOptions.map((k) => <option key={k} value={k}>Top / bottom {k}</option>)}
-        </select>
-      </label>
 
       {/* Sub-tabs */}
       <div className="detail-subtabs" role="tablist" aria-label="Detail sections">
@@ -218,7 +209,7 @@ export function DetailsPanel({
       </div>
 
       {/* Evidence tab */}
-      <section hidden={activeTab !== 'evidence'} aria-label="Image evidence">
+      <section className="image-evidence-tab" hidden={activeTab !== 'evidence'} aria-label="Image evidence">
         {!evidenceView ? (
           <div className="evidence-empty-state">
             <h3>No image-level data</h3>
@@ -228,15 +219,30 @@ export function DetailsPanel({
           </div>
         ) : (
           <>
-            <dl className="summary-card-grid" style={{ marginBottom: 10 }}>
-              <div><dt>Max value</dt><dd>{fmtV(evidenceView.stats.max)}</dd></div>
-              <div><dt>Min value</dt><dd>{fmtV(evidenceView.stats.min)}</dd></div>
-            </dl>
-            <p className="evidence-column-note" style={{ marginBottom: 10 }}>
+            <div className="image-evidence-toolbar">
+              <div className="panel-action-row" aria-live="polite">
+                <button type="button" onClick={handleExport}>Export JSON</button>
+                <button type="button" onClick={handleCopy}>Copy metadata</button>
+                {actionMsg && <span>{actionMsg}</span>}
+              </div>
+              <label className="evidence-control">
+                Images per tier
+                <select value={topK} onChange={(e) => setTopK(Number(e.target.value))}>
+                  {topKOptions.map((k) => <option key={k} value={k}>Top / bottom {k}</option>)}
+                </select>
+              </label>
+              <dl className="summary-card-grid evidence-mini-stats">
+                <div><dt>Max value</dt><dd>{fmtV(evidenceView.stats.max)}</dd></div>
+                <div><dt>Min value</dt><dd>{fmtV(evidenceView.stats.min)}</dd></div>
+              </dl>
+            </div>
+            <p className="evidence-column-note">
               Column: <strong>{evidenceView.columnName}</strong>
             </p>
-            <ImageGrid title="Top images"    images={evidenceView.topImages}    onOpenImage={setModalImage} />
-            <ImageGrid title="Bottom images" images={evidenceView.bottomImages} onOpenImage={setModalImage} />
+            <div className="evidence-tier-grid">
+              <ImageGrid title="Top images" images={evidenceView.topImages} onOpenImage={setModalImage} compact />
+              <ImageGrid title="Bottom images" images={evidenceView.bottomImages} onOpenImage={setModalImage} compact />
+            </div>
           </>
         )}
       </section>

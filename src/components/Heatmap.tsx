@@ -25,10 +25,10 @@ type TooltipState = {
   y: number;
 };
 
-const margin = { top: 120, right: 28, bottom: 62, left: 190 };
-const roiColumnWidth = 96;
-const modelRowHeight = 28;
-const sortToggleBoxSize = 34;
+const margin = { top: 96, right: 18, bottom: 52, left: 142 };
+const roiColumnWidth = 70;
+const modelRowHeight = 22;
+const sortToggleBoxSize = 30;
 
 /**
  * Perceptually sequential scale: pale cream → warm amber → slate blue.
@@ -106,7 +106,7 @@ export function Heatmap({
     .domain([minScore, adjustedMax])
     .interpolator((t) => heatColor(t));
 
-  const width = Math.max(560, margin.left + margin.right + rois.length * roiColumnWidth);
+  const width = Math.max(430, margin.left + margin.right + rois.length * roiColumnWidth);
   const heatmapHeight = Math.max(220, models.length * modelRowHeight);
   const height = margin.top + margin.bottom + heatmapHeight;
   const innerWidth = width - margin.left - margin.right;

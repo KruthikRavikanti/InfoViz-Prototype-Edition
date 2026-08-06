@@ -15,6 +15,8 @@ type ClusteringPanelProps = {
   onOpenImage: (image: EvidenceImage) => void;
 };
 
+type ClusterSectionVariant = 'full' | 'board';
+
 // Category highlight colors — must not clash with CLUSTER_COLORS (no red, blue, green, amber, violet, steel-blue, brown, teal)
 const CATEGORY_COLORS: Record<ImageCategory, { fill: string; stroke: string }> = {
   'Faces':     { fill: '#F97316', stroke: '#7C2D12' }, // vivid orange
@@ -51,13 +53,14 @@ type DotTooltip = {
 };
 
 function ClusterScatter({
-  view, onOpenImage, searchQuery, categoryHighlight, imageCategories,
+  view, onOpenImage, searchQuery, categoryHighlight, imageCategories, variant = 'full',
 }: {
   view: ClusterView;
   onOpenImage: (i: EvidenceImage) => void;
   searchQuery: string;
   categoryHighlight: ImageCategory | null;
   imageCategories: Map<string, ImageCategory>;
+  variant?: ClusterSectionVariant;
 }) {
   const [dotTooltip, setDotTooltip] = useState<DotTooltip | null>(null);
 
@@ -75,7 +78,9 @@ function ClusterScatter({
   const ys = pts.map((d) => d.y);
   const [minX, maxX] = [Math.min(...xs), Math.max(...xs)];
   const [minY, maxY] = [Math.min(...ys), Math.max(...ys)];
-  const W = 520, H = 300, pad = 20;
+  const W = 520;
+  const H = variant === 'board' ? 210 : 300;
+  const pad = variant === 'board' ? 16 : 20;
   const xSpan = maxX - minX || 1;
   const ySpan = maxY - minY || 1;
 
@@ -91,7 +96,7 @@ function ClusterScatter({
   }
 
   return (
-    <figure className="cluster-scatter" onMouseLeave={() => setDotTooltip(null)}>
+    <figure className={`cluster-scatter ${variant === 'board' ? 'cluster-scatter--board' : ''}`} onMouseLeave={() => setDotTooltip(null)}>
       <div style={{ position: 'relative' }}>
         <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${view.coordinateMode.toUpperCase()} scatter`}>
           <rect x="0" y="0" width={W} height={H} rx="10" />
@@ -186,7 +191,7 @@ const CATEGORY_LABELS: Record<ImageCategory, string> = {
 };
 
 function ClusterSection({
-  title, view, emptyMessage, onOpenImage, imageCategories, compact,
+  title, view, emptyMessage, onOpenImage, imageCategories, compact, variant = 'full',
 }: {
   title: string;
   view: ClusterView | null;
@@ -194,15 +199,17 @@ function ClusterSection({
   onOpenImage: (i: EvidenceImage) => void;
   imageCategories: Map<string, ImageCategory>;
   compact?: boolean;
+  variant?: ClusterSectionVariant;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryHighlight, setCategoryHighlight] = useState<ImageCategory | null>(null);
+  const isBoard = variant === 'board';
 
   if (!view) {
     return compact ? (
       <p className="cluster-empty-note">{emptyMessage}</p>
     ) : (
-      <section className="cluster-section">
+      <section className={`cluster-section ${isBoard ? 'cluster-section--board' : ''}`}>
         {title && <h3>{title}</h3>}
         <p className="cluster-empty-note">{emptyMessage}</p>
       </section>
@@ -232,20 +239,33 @@ function ClusterSection({
       <Metrics summary={view.summary} />
 
       {view.summary?.dendrogramPng && (
-        <figure className="cluster-dendrogram">
-          <img src={view.summary.dendrogramPng} alt={`${title || 'Selected clustering'} dendrogram`} loading="lazy" />
-          <figcaption>
-            Hierarchical dendrogram using {view.summary.distanceMetric ?? 'correlation'} distance
-            {view.summary.linkageMethod ? ` and ${view.summary.linkageMethod} linkage` : ''}.
-          </figcaption>
-        </figure>
+        isBoard ? (
+          <details className="cluster-dendrogram-details">
+            <summary>Dendrogram</summary>
+            <figure className="cluster-dendrogram">
+              <img src={view.summary.dendrogramPng} alt={`${title || 'Selected clustering'} dendrogram`} loading="lazy" />
+              <figcaption>
+                {view.summary.distanceMetric ?? 'correlation'} distance
+                {view.summary.linkageMethod ? ` · ${view.summary.linkageMethod} linkage` : ''}
+              </figcaption>
+            </figure>
+          </details>
+        ) : (
+          <figure className="cluster-dendrogram">
+            <img src={view.summary.dendrogramPng} alt={`${title || 'Selected clustering'} dendrogram`} loading="lazy" />
+            <figcaption>
+              Hierarchical dendrogram using {view.summary.distanceMetric ?? 'correlation'} distance
+              {view.summary.linkageMethod ? ` and ${view.summary.linkageMethod} linkage` : ''}.
+            </figcaption>
+          </figure>
+        )
       )}
 
       <div className="scatter-search-row">
         <input
           type="search"
           className="scatter-search-input"
-          placeholder="Search image filename…"
+          placeholder="Search image filename..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           aria-label="Search image filenames in scatter plot"
@@ -278,22 +298,47 @@ function ClusterSection({
         searchQuery={searchQuery}
         categoryHighlight={categoryHighlight}
         imageCategories={imageCategories}
+        variant={variant}
       />
-      <div className="cluster-group-list">
-        {view.groups.map((g) => (
-          <section className="cluster-group" key={`${title}-${g.label}`}>
-            <div className="cluster-group-heading">
-              <h4>Cluster {g.label}</h4>
-              <span>{g.size} images</span>
-            </div>
-            <ImageGrid title={`Cluster ${g.label}`} images={g.images} onOpenImage={onOpenImage} compact />
-          </section>
-        ))}
-      </div>
+      {isBoard ? (
+        <div className="cluster-size-list">
+          {view.groups.map((g) => {
+            const representative = g.images[0];
+            return representative ? (
+              <button
+                type="button"
+                className="cluster-size-chip"
+                key={`${title}-${g.label}`}
+                onClick={() => onOpenImage(representative)}
+              >
+                <span>Cluster {g.label}</span>
+                <strong>{g.size}</strong>
+              </button>
+            ) : (
+              <span className="cluster-size-chip" key={`${title}-${g.label}`}>
+                <span>Cluster {g.label}</span>
+                <strong>{g.size}</strong>
+              </span>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="cluster-group-list">
+          {view.groups.map((g) => (
+            <section className="cluster-group" key={`${title}-${g.label}`}>
+              <div className="cluster-group-heading">
+                <h4>Cluster {g.label}</h4>
+                <span>{g.size} images</span>
+              </div>
+              <ImageGrid title={`Cluster ${g.label}`} images={g.images} onOpenImage={onOpenImage} compact />
+            </section>
+          ))}
+        </div>
+      )}
     </>
   );
 
-  return compact ? <>{inner}</> : <section className="cluster-section">{inner}</section>;
+  return compact ? <>{inner}</> : <section className={`cluster-section ${isBoard ? 'cluster-section--board' : ''}`}>{inner}</section>;
 }
 
 const ROI_LABELS: Record<string, string> = {
@@ -303,18 +348,19 @@ const ROI_LABELS: Record<string, string> = {
 };
 
 function GroundTruthSection({
-  patients, imageCategories, onOpenImage,
+  patients, imageCategories, onOpenImage, variant = 'full',
 }: {
   patients: GroundTruthPatient[];
   imageCategories: Map<string, ImageCategory>;
   onOpenImage: (i: EvidenceImage) => void;
+  variant?: ClusterSectionVariant;
 }) {
   const [activePatient, setActivePatient] = useState(patients[0]?.id ?? '');
   const [activeRoi, setActiveRoi] = useState<string | null>(null);
 
   if (patients.length === 0) {
     return (
-      <section className="cluster-section">
+      <section className={`cluster-section ${variant === 'board' ? 'cluster-section--board' : ''}`}>
         <h3>Ground truth clustering</h3>
         <p className="cluster-empty-note">No ground truth cluster data found.</p>
       </section>
@@ -326,7 +372,7 @@ function GroundTruthSection({
   const roiView = patient.rois.find((r) => r.roi === selectedRoi);
 
   return (
-    <section className="cluster-section">
+    <section className={`cluster-section ${variant === 'board' ? 'cluster-section--board' : ''}`}>
       <h3>Ground truth clustering</h3>
 
       {/* Patient tabs */}
@@ -369,6 +415,7 @@ function GroundTruthSection({
           imageCategories={imageCategories}
           onOpenImage={onOpenImage}
           compact
+          variant={variant}
         />
       ) : (
         <p className="cluster-empty-note">Select a ROI above.</p>
@@ -417,43 +464,49 @@ export function ClusteringPanel({
         options={clusteringMethodOptions}
         onChange={onClusteringMethodChange}
       />
-      {voxelStatus === 'loading' ? (
-        <section className="cluster-section">
-          <h3>Voxel clustering</h3>
-          <p className="cluster-empty-note">Loading…</p>
-        </section>
-      ) : (
+      <div className="cluster-board">
+        {voxelStatus === 'loading' ? (
+          <section className="cluster-section cluster-section--board">
+            <h3>Voxel clustering</h3>
+            <p className="cluster-empty-note">Loading…</p>
+          </section>
+        ) : (
+          <ClusterSection
+            title="Voxel clustering"
+            view={voxelStatus === 'error' ? null : voxelView}
+            emptyMessage={
+              voxelStatus === 'error'
+                ? 'Cluster CSV could not be loaded.'
+                : 'No voxel clustering found for this model and ROI.'
+            }
+            imageCategories={imageCategories}
+            onOpenImage={onOpenImage}
+            variant="board"
+          />
+        )}
         <ClusterSection
-          title="Voxel clustering"
-          view={voxelStatus === 'error' ? null : voxelView}
-          emptyMessage={
-            voxelStatus === 'error'
-              ? 'Cluster CSV could not be loaded.'
-              : 'No voxel clustering found for this model and ROI.'
-          }
+          title="Visual clustering"
+          view={visualView}
+          emptyMessage="No visual clustering output found."
           imageCategories={imageCategories}
           onOpenImage={onOpenImage}
+          variant="board"
         />
-      )}
-      <ClusterSection
-        title="Visual clustering"
-        view={visualView}
-        emptyMessage="No visual clustering output found."
-        imageCategories={imageCategories}
-        onOpenImage={onOpenImage}
-      />
-      <ClusterSection
-        title="DreamSim embedding clustering"
-        view={dreamsimView}
-        emptyMessage="No DreamSim clustering output found."
-        imageCategories={imageCategories}
-        onOpenImage={onOpenImage}
-      />
-      <GroundTruthSection
-        patients={groundTruthPatients}
-        imageCategories={imageCategories}
-        onOpenImage={onOpenImage}
-      />
+        <ClusterSection
+          title="DreamSim embedding clustering"
+          view={dreamsimView}
+          emptyMessage="No DreamSim clustering output found."
+          imageCategories={imageCategories}
+          onOpenImage={onOpenImage}
+          variant="board"
+        />
+        <GroundTruthSection
+          patients={groundTruthPatients}
+          imageCategories={imageCategories}
+          onOpenImage={onOpenImage}
+          variant="board"
+        />
+      </div>
     </div>
   );
 }
