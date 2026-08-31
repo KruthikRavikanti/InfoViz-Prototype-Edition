@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ImageGrid } from './ImageGrid';
 import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringMethod, EvidenceImage, GroundTruthPatient, ImageCategory } from '../types/data';
+import type { CortexComparisonSession, SessionClusterOverlay } from '../types/session';
+import { buildOptionalSessionOverlays, buildVoxelSessionOverlays, isCanonicalRoi } from '../utils/sessionEvidence';
 
 type ClusteringPanelProps = {
   voxelView: ClusterView | null;
@@ -13,6 +15,9 @@ type ClusteringPanelProps = {
   imageCategories: Map<string, ImageCategory>;
   groundTruthPatients: GroundTruthPatient[];
   onOpenImage: (image: EvidenceImage) => void;
+  session: CortexComparisonSession | null;
+  selectedRoi: string;
+  focusedStimulusId: string | null;
 };
 
 type ClusterSectionVariant = 'full' | 'board';
@@ -53,13 +58,14 @@ type DotTooltip = {
 };
 
 function ClusterScatter({
-  view, onOpenImage, searchQuery, categoryHighlight, imageCategories, variant = 'full',
+  view, onOpenImage, searchQuery, categoryHighlight, imageCategories, overlays = [], variant = 'full',
 }: {
   view: ClusterView;
   onOpenImage: (i: EvidenceImage) => void;
   searchQuery: string;
   categoryHighlight: ImageCategory | null;
   imageCategories: Map<string, ImageCategory>;
+  overlays?: SessionClusterOverlay[];
   variant?: ClusterSectionVariant;
 }) {
   const [dotTooltip, setDotTooltip] = useState<DotTooltip | null>(null);
@@ -83,6 +89,9 @@ function ClusterScatter({
   const pad = variant === 'board' ? 16 : 20;
   const xSpan = maxX - minX || 1;
   const ySpan = maxY - minY || 1;
+  const hasOutsideOverlay = overlays.some((overlay) => (
+    overlay.x < minX || overlay.x > maxX || overlay.y < minY || overlay.y > maxY
+  ));
 
   const needle = searchQuery.trim().toLowerCase();
   const hasSearch = needle.length > 0;
@@ -93,6 +102,19 @@ function ClusterScatter({
 
   function handleDotClick(p: ClusterPoint) {
     onOpenImage({ imageName: p.imageName, imageUrl: p.imageUrl, value: p.value, rank: p.rank });
+  }
+
+  function handleOverlayClick(overlay: SessionClusterOverlay) {
+    onOpenImage({
+      imageName: overlay.displayName,
+      imageUrl: overlay.imageUrl,
+      value: overlay.distance,
+      valueLabel: `Uploaded · cluster ${overlay.clusterId}`,
+      rank: 0,
+      origin: 'uploaded',
+      stimulusId: overlay.stimulusId,
+      markerColor: overlay.color,
+    });
   }
 
   return (
@@ -144,6 +166,34 @@ function ClusterScatter({
               />
             );
           })}
+          {overlays.map((overlay) => {
+            const rawCx = pad + ((overlay.x - minX) / xSpan) * (W - pad * 2);
+            const rawCy = H - pad - ((overlay.y - minY) / ySpan) * (H - pad * 2);
+            const cx = Math.max(pad, Math.min(W - pad, rawCx));
+            const cy = Math.max(pad, Math.min(H - pad, rawCy));
+            const outsideDomain = cx !== rawCx || cy !== rawCy;
+            return (
+              <g
+                key={`session-${overlay.stimulusId}`}
+                className="session-cluster-overlay"
+                transform={`translate(${cx},${cy})`}
+                role="button"
+                tabIndex={0}
+                data-stimulus-id={overlay.stimulusId}
+                onClick={() => handleOverlayClick(overlay)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') handleOverlayClick(overlay);
+                }}
+              >
+                <path d="M 0 -9 L 9 0 L 0 9 L -9 0 Z" fill={overlay.color} stroke="#fff" strokeWidth="2.4" />
+                <circle r="10.5" fill="none" stroke={overlay.color} strokeWidth="1.5" />
+                <title>
+                  Uploaded: {overlay.displayName}; cluster {overlay.clusterId}; centroid distance {overlay.distance.toFixed(3)}
+                  {outsideDomain ? '; projected outside the fixed reference domain and shown at its boundary' : ''}
+                </title>
+              </g>
+            );
+          })}
         </svg>
 
         {dotTooltip && (
@@ -164,7 +214,11 @@ function ClusterScatter({
           </div>
         )}
       </div>
-      <figcaption>{view.coordinateMode.toUpperCase()} projection, coloured by cluster. Hover dots to preview · click to enlarge.</figcaption>
+      <figcaption>
+        {view.coordinateMode.toUpperCase()} projection, coloured by cluster. Historical axes use only the fixed 185 references.
+        {overlays.length > 0 ? ' Diamond markers are uploaded stimuli.' : ''} Hover dots to preview · click to enlarge.
+        {hasOutsideOverlay ? ' Uploads outside the fixed reference range are pinned to the plot boundary.' : ''}
+      </figcaption>
     </figure>
   );
 }
@@ -191,13 +245,14 @@ const CATEGORY_LABELS: Record<ImageCategory, string> = {
 };
 
 function ClusterSection({
-  title, view, emptyMessage, onOpenImage, imageCategories, compact, variant = 'full',
+  title, view, emptyMessage, onOpenImage, imageCategories, overlays = [], compact, variant = 'full',
 }: {
   title: string;
   view: ClusterView | null;
   emptyMessage: string;
   onOpenImage: (i: EvidenceImage) => void;
   imageCategories: Map<string, ImageCategory>;
+  overlays?: SessionClusterOverlay[];
   compact?: boolean;
   variant?: ClusterSectionVariant;
 }) {
@@ -298,6 +353,7 @@ function ClusterSection({
         searchQuery={searchQuery}
         categoryHighlight={categoryHighlight}
         imageCategories={imageCategories}
+        overlays={overlays}
         variant={variant}
       />
       {isBoard ? (
@@ -348,11 +404,12 @@ const ROI_LABELS: Record<string, string> = {
 };
 
 function GroundTruthSection({
-  patients, imageCategories, onOpenImage, variant = 'full',
+  patients, imageCategories, onOpenImage, sessionActive = false, variant = 'full',
 }: {
   patients: GroundTruthPatient[];
   imageCategories: Map<string, ImageCategory>;
   onOpenImage: (i: EvidenceImage) => void;
+  sessionActive?: boolean;
   variant?: ClusterSectionVariant;
 }) {
   const [activePatient, setActivePatient] = useState(patients[0]?.id ?? '');
@@ -362,6 +419,11 @@ function GroundTruthSection({
     return (
       <section className={`cluster-section ${variant === 'board' ? 'cluster-section--board' : ''}`}>
         <h3>Ground truth clustering</h3>
+        {sessionActive && (
+          <p className="ground-truth-session-note" data-no-upload-overlay="true">
+            Uploaded stimuli are not shown in this measured fMRI view: they have predicted model responses, not ground-truth patient measurements.
+          </p>
+        )}
         <p className="cluster-empty-note">No ground truth cluster data found.</p>
       </section>
     );
@@ -374,6 +436,11 @@ function GroundTruthSection({
   return (
     <section className={`cluster-section ${variant === 'board' ? 'cluster-section--board' : ''}`}>
       <h3>Ground truth clustering</h3>
+      {sessionActive && (
+        <p className="ground-truth-session-note" data-no-upload-overlay="true">
+          Uploaded stimuli are not shown in this measured fMRI view: they have predicted model responses, not ground-truth patient measurements.
+        </p>
+      )}
 
       {/* Patient tabs */}
       <div className="gt-patient-tabs" role="tablist" aria-label="Select patient">
@@ -445,6 +512,59 @@ function ClusteringMethodControl({
   );
 }
 
+function SessionVoxelAssignments({
+  session,
+  roi,
+  method,
+  focusedStimulusId,
+}: {
+  session: CortexComparisonSession;
+  roi: 'ffa' | 'ppa' | 'eba';
+  method: ClusteringMethod;
+  focusedStimulusId: string | null;
+}) {
+  return (
+    <section className="session-cluster-assignments">
+      <h4>{method === 'kmeans_euclidean' ? 'Uploaded voxel assignments' : 'Inferred nearest-cluster assignments'}</h4>
+      {method === 'hierarchical_correlation' && (
+        <p>
+          Hierarchical clustering has no out-of-sample insertion. These are labelled nearest-medoid assignments;
+          the historical dendrogram was not rebuilt.
+        </p>
+      )}
+      <div className="session-assignment-list">
+        {session.roiResults[roi].stimuli.map((result) => {
+          const stimulus = session.stimuli.find((candidate) => candidate.id === result.stimulusId)!;
+          const hierarchical = result.hierarchicalAssignment;
+          return (
+            <article key={stimulus.id} className={stimulus.id === focusedStimulusId ? 'focused' : ''}>
+              <div>
+                <span className="stimulus-dot" style={{ backgroundColor: stimulus.color }} />
+                <strong>{stimulus.displayName}</strong>
+              </div>
+              {method === 'kmeans_euclidean' ? (
+                <>
+                  <span>Cluster {result.voxelProjection.clusterId}</span>
+                  <span>Centroid distance {result.voxelProjection.centroidDistance.toFixed(3)}</span>
+                  <small>
+                    Nearest references: {result.voxelProjection.nearestReferenceMembers.map((member) => member.imageName).join(', ') || 'none'}
+                  </small>
+                </>
+              ) : (
+                <>
+                  <span>{hierarchical.method}</span>
+                  <span>Cluster {hierarchical.clusterId} · distance {hierarchical.distance.toFixed(3)}</span>
+                  <small>Medoid: {hierarchical.medoid.imageName}</small>
+                </>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function ClusteringPanel({
   voxelView,
   voxelStatus,
@@ -456,7 +576,18 @@ export function ClusteringPanel({
   imageCategories,
   groundTruthPatients,
   onOpenImage,
+  session,
+  selectedRoi,
+  focusedStimulusId,
 }: ClusteringPanelProps) {
+  const roi = isCanonicalRoi(selectedRoi) ? selectedRoi : null;
+  const voxelOverlays = session && roi && clusteringMethod === 'kmeans_euclidean'
+    ? buildVoxelSessionOverlays(session, roi)
+    : [];
+  const visualOverlays = session && clusteringMethod === 'kmeans_euclidean'
+    ? buildOptionalSessionOverlays(session, session.visualResults)
+    : [];
+
   return (
     <div className="clustering-panel">
       <ClusteringMethodControl
@@ -481,7 +612,16 @@ export function ClusteringPanel({
             }
             imageCategories={imageCategories}
             onOpenImage={onOpenImage}
+            overlays={voxelOverlays}
             variant="board"
+          />
+        )}
+        {session && roi && (
+          <SessionVoxelAssignments
+            session={session}
+            roi={roi}
+            method={clusteringMethod}
+            focusedStimulusId={focusedStimulusId}
           />
         )}
         <ClusterSection
@@ -490,8 +630,14 @@ export function ClusteringPanel({
           emptyMessage="No visual clustering output found."
           imageCategories={imageCategories}
           onOpenImage={onOpenImage}
+          overlays={visualOverlays}
           variant="board"
         />
+        {session && visualOverlays.length === 0 && (
+          <p className="session-cluster-note">
+            Uploaded visual-feature placement is unavailable for this session; the fixed historical visual clusters remain unchanged.
+          </p>
+        )}
         <ClusterSection
           title="DreamSim embedding clustering"
           view={dreamsimView}
@@ -500,10 +646,17 @@ export function ClusteringPanel({
           onOpenImage={onOpenImage}
           variant="board"
         />
+        {session && (
+          <p className="session-cluster-note" data-dreamsim-overlay="disabled">
+            Uploaded DreamSim placement is disabled: the archived reference bundle has 1,792 features, while the current
+            Cortex embedding path produces 768. No incompatible projection is shown.
+          </p>
+        )}
         <GroundTruthSection
           patients={groundTruthPatients}
           imageCategories={imageCategories}
           onOpenImage={onOpenImage}
+          sessionActive={Boolean(session)}
           variant="board"
         />
       </div>

@@ -114,7 +114,7 @@ Follow these steps to set up and run the project locally:
    ```bash
    npm run dev
    ```
-   This will start the app locally. Open the URL shown in your terminal (usually http://localhost:5173) in your browser.
+   This will start the app locally at http://localhost:5174. Port 5174 is fixed so Virtual Cortex can use port 5173 at the same time.
 
 4. **Build for production:**
    ```bash
@@ -136,3 +136,26 @@ This repo previously tracked generated artifacts and dependency folders. The `.g
 - TypeScript build info files
 
 If you want the Git history to stop tracking those files, remove them from the index in a cleanup commit.
+
+## Cortex comparison-session mode
+
+The standalone visualization remains the default. When Virtual Cortex opens a URL such as
+`http://localhost:5174/#session=<opaque-token>`, InfoViz retrieves the temporary comparison from Cortex Core,
+validates it against the local reference manifest, removes the token from browser history after a successful load,
+and keeps the session only in memory.
+
+Copy `.env.example` to `.env` when the services use non-default origins:
+
+```bash
+VITE_CORTEX_CORE_URL=http://localhost:5556
+VITE_CORTEX_APP_URL=http://localhost:5173
+```
+
+The dev server listens on the university machine network interface as well as localhost. For remote development,
+replace `localhost` with the machine hostname in both values and include that InfoViz origin in Core's allowed origins.
+
+The session view always labels the standardized comparison separately from the user's original Cortex request:
+comparison evidence uses NSD-1000 across FFA, PPA, and EBA. Uploaded images are predictions only and are never
+inserted into measured patient/fMRI clusters. Voxel uploads use saved PCA/K-means transforms; static t-SNE remains
+reference-only. DreamSim upload placement is currently disabled because the archived 1,792-feature reference bundle
+is incompatible with the current 768-feature inference path.

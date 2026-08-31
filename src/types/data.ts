@@ -50,6 +50,13 @@ export type EvidenceImage = {
   value: number;
   valueLabel?: string;
   rank: number;
+  origin?: 'reference' | 'uploaded';
+  stimulusId?: string;
+  markerColor?: string;
+  referenceRank?: number;
+  referencePercentile?: number;
+  sessionRank?: number;
+  sessionCount?: number;
 };
 
 export type ClusterSummary = {

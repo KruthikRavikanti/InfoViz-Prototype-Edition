@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import type { EvidenceImage } from '../types/data';
 
 type ImageGridProps = {
@@ -22,16 +22,29 @@ function ImageCard({ image, onOpenImage }: ImageCardProps) {
 
   return (
     <article className="evidence-image-card">
-      <button className="image-preview-button" type="button" onClick={() => onOpenImage(image)}>
+      <button
+        className={`image-preview-button ${image.origin ? `image-preview-button--${image.origin}` : ''}`}
+        type="button"
+        onClick={() => onOpenImage(image)}
+        style={image.markerColor ? { '--stimulus-color': image.markerColor } as CSSProperties : undefined}
+      >
         {imageMissing ? (
           <span className="missing-image-fallback">Image unavailable</span>
         ) : (
           <img src={image.imageUrl} alt={image.imageName} loading="lazy" onError={() => setImageMissing(true)} />
         )}
+        {image.origin && (
+          <span className={`image-origin-badge image-origin-badge--${image.origin}`}>
+            {image.origin === 'uploaded' ? 'Uploaded' : 'Reference'}
+          </span>
+        )}
       </button>
       <div className="image-card-meta">
         <span>{image.imageName}</span>
         <strong>{image.valueLabel ?? formatValue(image.value)}</strong>
+        {image.origin === 'uploaded' && image.sessionRank !== undefined && (
+          <small>Reference {image.referencePercentile?.toFixed(1)}th pct · combined #{image.sessionRank}/{image.sessionCount}</small>
+        )}
       </div>
     </article>
   );
@@ -46,7 +59,7 @@ export function ImageGrid({ title, images, onOpenImage, compact = false }: Image
       </div>
       <div className={`evidence-image-grid${compact ? ' compact' : ''}`}>
         {images.map((image) => (
-          <ImageCard key={`${title}-${image.imageName}`} image={image} onOpenImage={onOpenImage} />
+          <ImageCard key={`${title}-${image.stimulusId ?? image.imageName}-${image.rank}`} image={image} onOpenImage={onOpenImage} />
         ))}
       </div>
     </section>

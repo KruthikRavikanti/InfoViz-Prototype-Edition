@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ClusteringPanel } from './ClusteringPanel';
 import { ImageGrid } from './ImageGrid';
+import { SessionEvidencePanel } from './SessionEvidencePanel';
 import type {
   AggregateHeatmapCell,
   ClusteringData,
@@ -11,10 +12,12 @@ import type {
   SelectedHeatmapCell,
   WideCsvRow,
 } from '../types/data';
+import type { CortexComparisonSession } from '../types/session';
 import { copyText, downloadJson } from '../utils/browserActions';
 import { CLUSTERING_METHODS, findVoxelClusterSummary, loadVoxelClusterView } from '../utils/clustering';
 import { buildEvidenceView } from '../utils/evidence';
 import { inferModelCategory } from '../utils/modelTags';
+import { buildSessionEvidenceView } from '../utils/sessionEvidence';
 
 type DetailsPanelProps = {
   heatmapCells: AggregateHeatmapCell[];
@@ -24,6 +27,9 @@ type DetailsPanelProps = {
   onSelectCell: (cell: SelectedHeatmapCell) => void;
   rows: WideCsvRow[];
   selectedCell: SelectedHeatmapCell | null;
+  session: CortexComparisonSession | null;
+  focusedStimulusId: string | null;
+  onFocusStimulus: (stimulusId: string) => void;
 };
 
 const topKOptions = [6, 9, 12];
@@ -61,6 +67,9 @@ export function DetailsPanel({
   onSelectCell: _onSelectCell,
   rows,
   selectedCell,
+  session,
+  focusedStimulusId,
+  onFocusStimulus,
 }: DetailsPanelProps) {
   const [topK, setTopK] = useState(6);
   const [activeTab, setActiveTab] = useState<DetailTab>('clustering');
@@ -73,6 +82,12 @@ export function DetailsPanel({
   const evidenceView = useMemo(
     () => (selectedCell ? buildEvidenceView(selectedCell, rows, modelRoiColumns, topK) : null),
     [modelRoiColumns, rows, selectedCell, topK],
+  );
+  const sessionEvidenceView = useMemo(
+    () => (selectedCell && session
+      ? buildSessionEvidenceView(selectedCell, rows, modelRoiColumns, session, focusedStimulusId, topK)
+      : null),
+    [focusedStimulusId, modelRoiColumns, rows, selectedCell, session, topK],
   );
 
   const activeVoxelSummaries = clustering.voxelSummariesByMethod[clusteringMethod] ?? clustering.voxelSummaries;
@@ -89,9 +104,9 @@ export function DetailsPanel({
 
   useEffect(() => {
     if (selectedCell) {
-      setActiveTab('clustering');
+      setActiveTab(sessionEvidenceView ? 'evidence' : 'clustering');
     }
-  }, [selectedCell?.id]);
+  }, [selectedCell?.id, Boolean(sessionEvidenceView)]);
 
   useEffect(() => {
     let ignore = false;
@@ -127,6 +142,7 @@ export function DetailsPanel({
         visualSummary: activeVisualSummary,
         dreamsimSummary: activeDreamsimSummary,
       },
+      sessionEvidence: sessionEvidenceView,
     };
   }
 
@@ -210,7 +226,13 @@ export function DetailsPanel({
 
       {/* Evidence tab */}
       <section className="image-evidence-tab" hidden={activeTab !== 'evidence'} aria-label="Image evidence">
-        {!evidenceView ? (
+        {sessionEvidenceView ? (
+          <SessionEvidencePanel
+            view={sessionEvidenceView}
+            onOpenImage={setModalImage}
+            onFocusStimulus={onFocusStimulus}
+          />
+        ) : !evidenceView ? (
           <div className="evidence-empty-state">
             <h3>No image-level data</h3>
             <p>
@@ -260,6 +282,9 @@ export function DetailsPanel({
           imageCategories={clustering.imageCategories}
           groundTruthPatients={activeGroundTruthPatients}
           onOpenImage={setModalImage}
+          session={sessionEvidenceView ? session : null}
+          selectedRoi={selectedCell.roi}
+          focusedStimulusId={focusedStimulusId}
         />
       </section>
 

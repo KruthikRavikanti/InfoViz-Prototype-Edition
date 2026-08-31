@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Header } from './components/Header';
 import { TabNav } from './components/TabNav';
 import type { AppTab } from './components/TabNav';
@@ -7,6 +7,17 @@ import { VisualizationView } from './components/VisualizationView';
 import type { RankingSystem, Roi, SelectedHeatmapCell, SortDirection, VisualizationData } from './types/data';
 import { loadVisualizationData } from './utils/data';
 import { hasComparableData } from './utils/evidence';
+import type { SessionLoadState } from './types/session';
+import {
+  CortexSessionError,
+  assertSessionReferenceCompatible,
+  clearSessionFragment,
+  extractSessionToken,
+  getCortexAppUrl,
+  loadCortexComparisonSession,
+  loadPublicReferenceManifest,
+} from './services/cortexSession';
+import { isCanonicalRoi } from './utils/sessionEvidence';
 import {
   buildAggregateHeatmapCells,
   filterModelsBySearch,
@@ -20,6 +31,19 @@ type DataState =
   | { status: 'error'; message: string }
   | { status: 'ready'; data: VisualizationData };
 
+function initialSessionState(): SessionLoadState {
+  try {
+    const token = extractSessionToken(window.location.hash);
+    return token ? { status: 'loading', token } : { status: 'static' };
+  } catch (error) {
+    return {
+      status: 'error',
+      kind: error instanceof CortexSessionError ? error.kind : 'invalid',
+      message: error instanceof Error ? error.message : 'The visualization session token is invalid.',
+    };
+  }
+}
+
 export default function App() {
   const [dataState, setDataState] = useState<DataState>({ status: 'loading' });
   const [rankingSystem, setRankingSystem] = useState<RankingSystem>('overall');
@@ -31,6 +55,9 @@ export default function App() {
   const [compareMode, setCompareMode] = useState(false);
   const [compareCells, setCompareCells] = useState<SelectedHeatmapCell[]>([]);
   const [activeTab, setActiveTab] = useState<AppTab>('visualization');
+  const [sessionState, setSessionState] = useState<SessionLoadState>(initialSessionState);
+  const [focusedStimulusId, setFocusedStimulusId] = useState<string | null>(null);
+  const initializedSessionVersion = useRef<string | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -54,6 +81,53 @@ export default function App() {
       ignore = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (sessionState.status !== 'loading') return;
+    let ignore = false;
+
+    Promise.all([
+      loadCortexComparisonSession(sessionState.token),
+      loadPublicReferenceManifest(),
+    ])
+      .then(([session, manifest]) => {
+        assertSessionReferenceCompatible(session, manifest);
+        if (ignore) return;
+        clearSessionFragment();
+        setFocusedStimulusId(session.stimuli[0]?.id ?? null);
+        setSessionState({ status: 'ready', session });
+      })
+      .catch((error: unknown) => {
+        if (ignore) return;
+        setSessionState({
+          status: 'error',
+          kind: error instanceof CortexSessionError ? error.kind : 'unavailable',
+          message: error instanceof Error ? error.message : 'The Cortex comparison session could not be loaded.',
+        });
+      });
+
+    return () => { ignore = true; };
+  }, [sessionState.status === 'loading' ? sessionState.token : null]);
+
+  useEffect(() => {
+    if (dataState.status !== 'ready' || sessionState.status !== 'ready') return;
+    const version = sessionState.session.comparison.referenceVersion;
+    if (initializedSessionVersion.current === version) return;
+
+    const { scores } = dataState.data;
+    const rois = getDefaultHeatmapRois(scores);
+    const models = inferAggregateModels(scores, rois);
+    const sourceRoi = sessionState.session.sourceRequest.roi.toLowerCase();
+    const initialRoi: Roi = isCanonicalRoi(sourceRoi)
+      ? sourceRoi
+      : 'ffa';
+    const initialCell = buildAggregateHeatmapCells(scores, rois, models)
+      .find((cell) => cell.model === sessionState.session.comparison.model && cell.roi === initialRoi);
+    if (initialCell) setSelectedCell(initialCell);
+    setSelectedRankingRoi(initialRoi);
+    setActiveTab('visualization');
+    initializedSessionVersion.current = version;
+  }, [dataState, sessionState]);
 
   function handleCompareModeChange(enabled: boolean) {
     setCompareMode(enabled);
@@ -94,13 +168,26 @@ export default function App() {
     setCompareCells([]);
   }
 
-  if (dataState.status === 'loading') {
+  if (sessionState.status === 'error') {
+    return (
+      <main className="app-shell session-error-shell">
+        <div className="status-panel error-panel session-error-panel">
+          <p className="eyebrow">Cortex session unavailable</p>
+          <h1>{sessionState.kind === 'expired' ? 'This comparison session expired' : 'Unable to open this comparison'}</h1>
+          <p>{sessionState.message}</p>
+          <a className="session-return-link" href={getCortexAppUrl()}>Return to Virtual Cortex</a>
+        </div>
+      </main>
+    );
+  }
+
+  if (dataState.status === 'loading' || sessionState.status === 'loading') {
     return (
       <main className="app-shell">
         <div className="status-panel">
           <p className="eyebrow">Loading</p>
-          <h1>Reading model response data</h1>
-          <p>Loading CSV rows, aggregate ROI scores, and clustering outputs from `public/data`.</p>
+          <h1>{sessionState.status === 'loading' ? 'Loading your Cortex comparison' : 'Reading model response data'}</h1>
+          <p>Loading historical model evidence and the temporary comparison context.</p>
         </div>
       </main>
     );
@@ -130,6 +217,14 @@ export default function App() {
       .filter((cell) => hasComparableData(cell.model, cell.roi, data.rows, data.modelRoiColumns))
       .map((cell) => cell.id),
   );
+  const session = sessionState.status === 'ready' ? sessionState.session : null;
+  const sessionCellIds = new Set(
+    session
+      ? heatmapRois
+          .filter((roi) => isCanonicalRoi(roi))
+          .map((roi) => `${roi}__${session.comparison.model}`)
+      : [],
+  );
 
   return (
     <main className="app-shell">
@@ -152,6 +247,9 @@ export default function App() {
           compareMode={compareMode}
           compareCells={compareCells}
           comparableCellIds={comparableCellIds}
+          session={session}
+          focusedStimulusId={focusedStimulusId}
+          sessionCellIds={sessionCellIds}
           onRankingSystemChange={setRankingSystem}
           onSelectedRankingRoiChange={setSelectedRankingRoi}
           onSortDirectionToggle={() => setSortDirection((currentDirection) => (currentDirection === 'desc' ? 'asc' : 'desc'))}
@@ -160,6 +258,7 @@ export default function App() {
           onResetControls={handleResetControls}
           onSelectCell={handleHeatmapCellClick}
           onCompareModeChange={handleCompareModeChange}
+          onFocusStimulus={setFocusedStimulusId}
         />
       </section>
       <section className="tab-panel" hidden={activeTab !== 'user-study'} aria-label="User study view">

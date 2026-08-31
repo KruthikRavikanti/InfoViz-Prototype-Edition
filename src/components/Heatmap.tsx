@@ -14,6 +14,7 @@ type HeatmapProps = {
   compareMode: boolean;
   compareCells: SelectedHeatmapCell[];
   comparableCellIds: Set<string>;
+  sessionCellIds: Set<string>;
   onSortDirectionToggle: () => void;
   onSelectCell: (cell: SelectedHeatmapCell) => void;
   selectedRankingRoi?: Roi | null;
@@ -90,6 +91,7 @@ export function Heatmap({
   compareMode,
   compareCells,
   comparableCellIds,
+  sessionCellIds,
   onSortDirectionToggle,
   onSelectCell,
   selectedRankingRoi = null,
@@ -253,6 +255,7 @@ export function Heatmap({
                 const isSelected = !compareMode && selectedCell?.id === cell.id;
                 const isComparable = comparableCellIds.has(cell.id);
                 const isDisabled = compareMode && !isComparable;
+                const hasSessionEvidence = sessionCellIds.has(cell.id);
                 const normalised = cell.score === null ? 0 : (cell.score - minScore) / (adjustedMax - minScore);
                 const fill = cell.score === null ? '#EDE9E3' : colorScale(cell.score);
 
@@ -264,7 +267,11 @@ export function Heatmap({
                         isSelected ? 'selected' : '',
                         isCompareSelected ? 'compare-selected' : '',
                         isDisabled ? 'compare-disabled' : '',
+                        hasSessionEvidence ? 'session-evidence' : '',
                       ].filter(Boolean).join(' ')}
+                      data-cell-id={cell.id}
+                      data-score={cell.score ?? ''}
+                      data-session-evidence={hasSessionEvidence ? 'true' : undefined}
                       role="button"
                       tabIndex={0}
                       aria-disabled={isDisabled}
@@ -288,6 +295,15 @@ export function Heatmap({
                       <text className="compare-cell-marker" x={xp + 6} y={yp + 14}>
                         {cmpIdx === 0 ? 'A' : 'B'}
                       </text>
+                    )}
+                    {hasSessionEvidence && (
+                      <circle
+                        className="session-cell-marker"
+                        cx={xp + x.bandwidth() - 5}
+                        cy={yp + 5}
+                        r="2.8"
+                        aria-hidden="true"
+                      />
                     )}
                     {canShowLabels && cell.score !== null && (
                       <text

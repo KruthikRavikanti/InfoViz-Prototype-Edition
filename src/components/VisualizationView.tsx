@@ -3,6 +3,7 @@ import { ControlsBar } from './ControlsBar';
 import { DetailsPanel } from './DetailsPanel';
 import { Heatmap } from './Heatmap';
 import { HelpBox } from './HelpBox';
+import { SessionBanner } from './SessionBanner';
 import type {
   AggregateHeatmapCell,
   ClusteringData,
@@ -13,6 +14,7 @@ import type {
   SortDirection,
   WideCsvRow,
 } from '../types/data';
+import type { CortexComparisonSession } from '../types/session';
 
 type VisualizationViewProps = {
   rows: WideCsvRow[];
@@ -30,6 +32,9 @@ type VisualizationViewProps = {
   compareMode: boolean;
   compareCells: SelectedHeatmapCell[];
   comparableCellIds: Set<string>;
+  session: CortexComparisonSession | null;
+  focusedStimulusId: string | null;
+  sessionCellIds: Set<string>;
   onRankingSystemChange: (rankingSystem: RankingSystem) => void;
   onSelectedRankingRoiChange: (roi: Roi) => void;
   onSortDirectionToggle: () => void;
@@ -38,6 +43,7 @@ type VisualizationViewProps = {
   onResetControls: () => void;
   onSelectCell: (cell: SelectedHeatmapCell) => void;
   onCompareModeChange: (enabled: boolean) => void;
+  onFocusStimulus: (stimulusId: string) => void;
 };
 
 export function VisualizationView({
@@ -56,6 +62,9 @@ export function VisualizationView({
   compareMode,
   compareCells,
   comparableCellIds,
+  session,
+  focusedStimulusId,
+  sessionCellIds,
   onRankingSystemChange,
   onSelectedRankingRoiChange,
   onSortDirectionToggle,
@@ -64,9 +73,17 @@ export function VisualizationView({
   onResetControls,
   onSelectCell,
   onCompareModeChange,
+  onFocusStimulus,
 }: VisualizationViewProps) {
   return (
     <>
+      {session && (
+        <SessionBanner
+          session={session}
+          focusedStimulusId={focusedStimulusId}
+          onFocusStimulus={onFocusStimulus}
+        />
+      )}
       <HelpBox />
       <ControlsBar
         rois={heatmapRois}
@@ -94,6 +111,7 @@ export function VisualizationView({
           compareMode={compareMode}
           compareCells={compareCells}
           comparableCellIds={comparableCellIds}
+          sessionCellIds={sessionCellIds}
           onSortDirectionToggle={onSortDirectionToggle}
           onSelectCell={onSelectCell}
           selectedRankingRoi={rankingSystem === 'roi' ? selectedRankingRoi : null}
@@ -106,6 +124,9 @@ export function VisualizationView({
           onSelectCell={onSelectCell}
           rows={rows}
           selectedCell={selectedCell}
+          session={session}
+          focusedStimulusId={focusedStimulusId}
+          onFocusStimulus={onFocusStimulus}
         />
       </div>
       <CompareDrawer
