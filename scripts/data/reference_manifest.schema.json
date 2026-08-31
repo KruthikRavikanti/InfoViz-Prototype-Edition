@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://murtylab.example/schemas/cortex-reference-manifest-v1.json",
+  "title": "Cortex NSD-1000 reference artifact manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "reference_version",
+    "checksum",
+    "dataset",
+    "rois",
+    "supported_models",
+    "image_count",
+    "reference_count",
+    "voxel_counts",
+    "clustering",
+    "artifact_schema",
+    "source_selection",
+    "artifacts",
+    "optional_artifacts",
+    "generator_git",
+    "generated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "reference_version": {
+      "$ref": "#/$defs/sha256"
+    },
+    "checksum": {
+      "$ref": "#/$defs/sha256"
+    },
+    "dataset": {
+      "const": "nsd_1000"
+    },
+    "rois": {
+      "const": [
+        "ffa",
+        "ppa",
+        "eba"
+      ]
+    },
+    "supported_models": {
+      "type": "array",
+      "minItems": 26,
+      "maxItems": 26,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "image_count": {
+      "const": 185
+    },
+    "reference_count": {
+      "const": 185
+    },
+    "image_ids_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "voxel_counts": {
+      "type": "object",
+      "required": [
+        "ffa",
+        "ppa",
+        "eba"
+      ],
+      "properties": {
+        "ffa": {
+          "const": 716
+        },
+        "ppa": {
+          "const": 753
+        },
+        "eba": {
+          "const": 2045
+        }
+      },
+      "additionalProperties": false
+    },
+    "clustering": {
+      "type": "object"
+    },
+    "artifact_schema": {
+      "type": "object",
+      "required": [
+        "format",
+        "allow_pickle",
+        "arrays"
+      ]
+    },
+    "source_selection": {
+      "type": "object",
+      "minProperties": 78
+    },
+    "artifacts": {
+      "type": "object",
+      "minProperties": 26,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "ffa",
+          "ppa",
+          "eba"
+        ],
+        "properties": {
+          "ffa": {
+            "$ref": "#/$defs/artifact"
+          },
+          "ppa": {
+            "$ref": "#/$defs/artifact"
+          },
+          "eba": {
+            "$ref": "#/$defs/artifact"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "optional_artifacts": {
+      "type": "object",
+      "required": [
+        "visual",
+        "dreamsim"
+      ],
+      "properties": {
+        "visual": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/artifact"
+            },
+            {
+              "type": "object",
+              "required": [
+                "available",
+                "feature_schema"
+              ],
+              "properties": {
+                "available": {
+                  "const": true
+                },
+                "feature_schema": {
+                  "const": "infoviz_visual_77_v1"
+                }
+              }
+            }
+          ]
+        },
+        "dreamsim": {
+          "type": "object",
+          "required": [
+            "available",
+            "reason"
+          ],
+          "properties": {
+            "available": {
+              "const": false
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "generator_git": {
+      "type": "object",
+      "required": [
+        "commit",
+        "dirty"
+      ]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "artifact": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256",
+        "size_bytes",
+        "arrays"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^(models/[a-zA-Z0-9_.-]+/(ffa|ppa|eba)|visual)\\.npz$"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "arrays": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "dtype",
+              "shape"
+            ],
+            "properties": {
+              "dtype": {
+                "type": "string"
+              },
+              "shape": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

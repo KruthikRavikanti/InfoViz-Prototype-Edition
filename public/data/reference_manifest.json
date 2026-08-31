@@ -1,0 +1,67 @@
+{
+  "checksum": "ed023e59bd270e210bb8350d348eaaf223d3992214adeb2163a496cc808cefa7",
+  "clustering": {
+    "hierarchical_out_of_sample_policy": "nearest_medoid_assignment",
+    "plot_projection": {
+      "axis_alignment": "checked_static_axes_sign_only",
+      "dimensions": 2,
+      "historical_coordinates": "preserved_exactly",
+      "method": "PCA",
+      "random_state": 42,
+      "visual_kmeans_centroids": "aligned_with_plot_axes"
+    }
+  },
+  "dataset": "nsd_1000",
+  "generated_at": "2026-08-31T00:00:00Z",
+  "image_count": 185,
+  "optional_artifacts": {
+    "dreamsim": {
+      "available": false
+    },
+    "visual": {
+      "available": true,
+      "feature_schema": "infoviz_visual_77_v1"
+    }
+  },
+  "reference_count": 185,
+  "reference_version": "ed023e59bd270e210bb8350d348eaaf223d3992214adeb2163a496cc808cefa7",
+  "rois": [
+    "ffa",
+    "ppa",
+    "eba"
+  ],
+  "schema_version": 1,
+  "supported_models": [
+    "adversarial_inceptionv3",
+    "aimv2",
+    "alexnet",
+    "alexnet_random",
+    "beit",
+    "bit",
+    "blip2",
+    "clip_rn101",
+    "clip_rn101_random",
+    "clip_rn50",
+    "clip_rn50_random",
+    "clip_vit_b32",
+    "clip_vit_b32_random",
+    "convnext",
+    "cornet_rt",
+    "cornet_s",
+    "cornet_z",
+    "cross_vit",
+    "densenet121",
+    "densenet161",
+    "densenet169",
+    "densenet201",
+    "dinov2_large",
+    "dreamsim_vitb16",
+    "dreamsim_vitb32",
+    "efficient_net"
+  ],
+  "voxel_counts": {
+    "eba": 2045,
+    "ffa": 716,
+    "ppa": 753
+  }
+}
