@@ -3,6 +3,7 @@ import {
   CortexSessionError,
   assertSessionReferenceCompatible,
   extractSessionToken,
+  resolveCortexUrl,
   validateComparisonSession,
   validateReferenceManifest,
 } from './cortexSession';
@@ -95,6 +96,14 @@ describe('Cortex comparison session validation', () => {
 });
 
 describe('session URL parsing', () => {
+  it('routes Core root-relative assets through a same-origin development proxy', () => {
+    expect(resolveCortexUrl(
+      '/comparison-sessions/token/images/asset',
+      '/cortex-core',
+      'https://forwarded-preview.example',
+    )).toBe('https://forwarded-preview.example/cortex-core/comparison-sessions/token/images/asset');
+  });
+
   it('leaves direct static visits in static mode', () => {
     expect(extractSessionToken('')).toBeNull();
     expect(extractSessionToken('#tab=visualization')).toBeNull();

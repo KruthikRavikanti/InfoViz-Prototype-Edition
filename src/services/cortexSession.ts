@@ -95,11 +95,24 @@ export function getCortexAppUrl(): string {
   return configured || DEFAULT_CORTEX_APP_URL;
 }
 
-export function resolveCortexUrl(pathOrUrl: string, baseUrl = coreBaseUrl()): string {
+export function resolveCortexUrl(
+  pathOrUrl: string,
+  baseUrl = coreBaseUrl(),
+  browserOrigin = typeof window === 'undefined' ? 'http://localhost:5174' : window.location.origin,
+): string {
   try {
-    const base = new URL(`${baseUrl.replace(/\/+$/, '')}/`);
-    const resolved = new URL(pathOrUrl, base);
-    if (resolved.origin !== base.origin) {
+    const normalizedBase = baseUrl.replace(/\/+$/, '');
+    const base = new URL(
+      `${normalizedBase.startsWith('/') ? normalizedBase : `/${normalizedBase}`}/`,
+      browserOrigin,
+    );
+    const isAbsoluteBase = /^[a-z][a-z\d+.-]*:\/\//i.test(normalizedBase);
+    const effectiveBase = isAbsoluteBase ? new URL(`${normalizedBase}/`) : base;
+    const resolvedPath = pathOrUrl.startsWith('/') && effectiveBase.pathname !== '/'
+      ? `${effectiveBase.pathname.replace(/\/+$/, '')}${pathOrUrl}`
+      : pathOrUrl;
+    const resolved = new URL(resolvedPath, effectiveBase);
+    if (resolved.origin !== effectiveBase.origin) {
       throw new Error('cross-origin session asset');
     }
     return resolved.toString();

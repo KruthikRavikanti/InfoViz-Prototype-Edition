@@ -147,12 +147,15 @@ and keeps the session only in memory.
 Copy `.env.example` to `.env` when the services use non-default origins:
 
 ```bash
-VITE_CORTEX_CORE_URL=http://localhost:5556
+VITE_CORTEX_CORE_URL=/cortex-core
+CORTEX_CORE_PROXY_TARGET=http://127.0.0.1:5556
 VITE_CORTEX_APP_URL=http://localhost:5173
 ```
 
-The dev server listens on the university machine network interface as well as localhost. For remote development,
-replace `localhost` with the machine hostname in both values and include that InfoViz origin in Core's allowed origins.
+The relative Core URL uses the Vite development proxy, so Remote SSH users only
+need to forward InfoViz's port 5174. The server also listens on the university
+machine network interface; direct network deployments may instead use an
+absolute Core URL and must include the InfoViz origin in Core's allowed origins.
 
 The session view always labels the standardized comparison separately from the user's original Cortex request:
 comparison evidence uses NSD-1000 across FFA, PPA, and EBA. Uploaded images are predictions only and are never
