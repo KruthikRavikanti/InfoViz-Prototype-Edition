@@ -4,6 +4,10 @@ export function HelpBox() {
       <summary>Quick guide</summary>
       <div>
         <p>
+          <strong>Brain &amp; voxels:</strong> open the 3D Brain Map for uploaded or reference images,
+          or explore voxel selectivity across the fixed reference set.
+        </p>
+        <p>
           <strong>Heatmap:</strong> rows are models, columns are brain regions, and color shows model alignment.
           Select a cell to explore image responses and clusters.
         </p>

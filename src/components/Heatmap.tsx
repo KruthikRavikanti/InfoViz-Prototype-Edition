@@ -1,8 +1,19 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent } from 'react';
-import { extent, scaleBand, scaleSequential } from 'd3';
+import { createPortal } from 'react-dom';
+import { scaleBand } from 'd3';
 import type { AggregateHeatmapCell, Roi, SelectedHeatmapCell, SortDirection } from '../types/data';
 import { inferModelCategory } from '../utils/modelTags';
+import {
+  clampHeatmapTooltip,
+  getHeatmapLayout,
+  getHeatmapScoreDomain,
+  HEATMAP_LAYOUT,
+  heatmapScoreColor,
+  heatmapScoreTextColor,
+  SCOREBOARD_HEATMAP_GRADIENT,
+} from '../utils/heatmapAppearance';
+import type { HeatmapScoreDomain } from '../utils/heatmapAppearance';
 
 type HeatmapProps = {
   cells: AggregateHeatmapCell[];
@@ -18,6 +29,7 @@ type HeatmapProps = {
   onSortDirectionToggle: () => void;
   onSelectCell: (cell: SelectedHeatmapCell) => void;
   selectedRankingRoi?: Roi | null;
+  colorDomain?: HeatmapScoreDomain;
 };
 
 type TooltipState = {
@@ -26,45 +38,7 @@ type TooltipState = {
   y: number;
 };
 
-const margin = { top: 96, right: 18, bottom: 52, left: 142 };
-const roiColumnWidth = 70;
-const modelRowHeight = 22;
 const sortToggleBoxSize = 30;
-
-/**
- * Perceptually sequential scale: pale cream → warm amber → slate blue.
- * Works beautifully on the off-white surface background.
- */
-function heatColor(t: number): string {
-  const s = Math.max(0, Math.min(1, t));
-
-  // Stops: [t, r, g, b]
-  const stops: Array<[number, number, number, number]> = [
-    [0.00,  242, 238, 228],  // near-white warm cream
-    [0.20,  225, 210, 175],  // light sand
-    [0.42,  210, 170, 100],  // warm amber
-    [0.65,  152, 130, 190],  // muted lavender
-    [0.82,   90,  96, 172],  // slate blue
-    [1.00,   45,  55, 130],  // deep indigo
-  ];
-
-  let i = 0;
-  while (i < stops.length - 2 && s > stops[i + 1][0]) i++;
-
-  const [ta, ra, ga, ba] = stops[i];
-  const [tb, rb, gb, bb] = stops[i + 1];
-  const local = (s - ta) / (tb - ta);
-
-  const r = Math.round(ra + (rb - ra) * local);
-  const g = Math.round(ga + (gb - ga) * local);
-  const b = Math.round(ba + (bb - ba) * local);
-  return `rgb(${r},${g},${b})`;
-}
-
-function scoreTextColor(t: number): string {
-  // light text for dark cells (upper half of scale)
-  return t > 0.62 ? 'rgba(255,255,255,.88)' : 'rgba(28,25,23,.78)';
-}
 
 function formatScore(score: number | null): string {
   return score === null ? 'N/A' : score.toFixed(3);
@@ -95,51 +69,67 @@ export function Heatmap({
   onSortDirectionToggle,
   onSelectCell,
   selectedRankingRoi = null,
+  colorDomain,
 }: HeatmapProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const hoveredCell = tooltip?.cell ?? null;
-
-  const scoredCells = useMemo(() => cells.filter((c) => c.score !== null), [cells]);
-  const [minScore = 0, maxScore = 1] = extent(scoredCells, (c) => c.score ?? undefined);
-  const adjustedMax = minScore === maxScore ? maxScore + 1 : maxScore;
-
-  const colorScale = scaleSequential<string>()
-    .domain([minScore, adjustedMax])
-    .interpolator((t) => heatColor(t));
-
-  const width = Math.max(430, margin.left + margin.right + rois.length * roiColumnWidth);
-  const heatmapHeight = Math.max(220, models.length * modelRowHeight);
-  const height = margin.top + margin.bottom + heatmapHeight;
-  const innerWidth = width - margin.left - margin.right;
+  const domain = useMemo(() => colorDomain ?? getHeatmapScoreDomain(cells), [colorDomain, cells]);
+  const [minScore, maxScore] = domain;
+  const { margin, width, height, innerWidth, innerHeight: heatmapHeight } = getHeatmapLayout(models.length, rois.length);
   const sortToggleX = margin.left - sortToggleBoxSize - 18;
-  const sortToggleY = margin.top - sortToggleBoxSize + 2;
+  const sortToggleY = margin.top - sortToggleBoxSize - 4;
 
-  const x = scaleBand<string>().domain(rois).range([0, innerWidth]).padding(0.12);
-  const y = scaleBand<string>().domain(models).range([0, heatmapHeight]).padding(0.08);
-  const canShowLabels = showScoreLabels && x.bandwidth() >= 44 && y.bandwidth() >= 18;
-  const labelSize = Math.max(8, Math.min(11, Math.min(x.bandwidth() * 0.2, y.bandwidth() * 0.55)));
-  const legendVals = [minScore, (minScore + adjustedMax) / 2, adjustedMax];
-  const legendSteps = Array.from({ length: 48 }, (_, i) => minScore + ((adjustedMax - minScore) * i) / 47);
+  const x = scaleBand<string>().domain(rois)
+    .range([0, rois.length === 1 ? HEATMAP_LAYOUT.columnPitch : innerWidth])
+    .paddingInner(HEATMAP_LAYOUT.cellGap / HEATMAP_LAYOUT.columnPitch).align(0);
+  const y = scaleBand<string>().domain(models)
+    .range([0, models.length === 1 ? HEATMAP_LAYOUT.rowPitch : heatmapHeight])
+    .paddingInner(HEATMAP_LAYOUT.cellGap / HEATMAP_LAYOUT.rowPitch).align(0);
+  const canShowLabels = showScoreLabels && x.bandwidth() >= 23.5 && y.bandwidth() >= 20;
+  const labelSize = 9.5;
+  const legendVals = minScore === maxScore ? [minScore] : [minScore, (minScore + maxScore) / 2, maxScore];
+  const hasTooltip = tooltip !== null;
+
+  useLayoutEffect(() => {
+    if (!tooltip || !tooltipRef.current) return;
+    const bounds = tooltipRef.current.getBoundingClientRect();
+    const position = clampHeatmapTooltip(tooltip.x, tooltip.y, bounds.width, bounds.height, window.innerWidth, window.innerHeight);
+    if (position.x !== tooltip.x || position.y !== tooltip.y) {
+      setTooltip((current) => current ? { ...current, ...position } : null);
+    }
+  }, [tooltip]);
+
+  useEffect(() => {
+    if (!hasTooltip) return;
+    const dismiss = () => setTooltip(null);
+    window.addEventListener('scroll', dismiss, { capture: true, passive: true });
+    window.addEventListener('resize', dismiss);
+    return () => {
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('resize', dismiss);
+    };
+  }, [hasTooltip]);
 
   function updateTooltip(cell: AggregateHeatmapCell, event: MouseEvent<SVGRectElement>) {
-    const bounds = containerRef.current?.getBoundingClientRect();
     setTooltip({
       cell,
-      x: bounds ? event.clientX - bounds.left + 14 : event.clientX,
-      y: bounds ? event.clientY - bounds.top + 14 : event.clientY,
+      x: event.clientX + 14,
+      y: event.clientY + 14,
     });
   }
 
-  function updateFocusTooltip(cell: AggregateHeatmapCell, xp: number, yp: number) {
+  function updateFocusTooltip(cell: AggregateHeatmapCell, target: SVGRectElement) {
+    const bounds = target.getBoundingClientRect();
     setTooltip({
       cell,
-      x: margin.left + xp + Math.max(x.bandwidth() / 2, 12),
-      y: margin.top + yp + Math.max(y.bandwidth() / 2, 12),
+      x: bounds.right + 8,
+      y: bounds.top,
     });
   }
 
   function handleCellKeyDown(cell: AggregateHeatmapCell, event: KeyboardEvent<SVGRectElement>, isComparable: boolean) {
+    if (event.key === 'Escape') setTooltip(null);
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       if (compareMode && !isComparable) return;
@@ -155,13 +145,24 @@ export function Heatmap({
   }
 
   return (
-    <section className="heatmap-area" aria-label="Heatmap area" ref={containerRef}>
+    <section className="heatmap-area" aria-label="Heatmap area">
       <div className="section-heading">
         <div>
           <p className="eyebrow">Overview</p>
           <h2>Model alignment</h2>
         </div>
-        <span>{cells.length} cells</span>
+        <span>{models.length} models</span>
+      </div>
+
+      <div className="heatmap-color-key" aria-label={`Alignment score color scale from ${formatScore(minScore)} to ${formatScore(maxScore)}`}>
+        <p className="heatmap-color-key-title">Alignment score</p>
+        <div className="heatmap-color-key-bar" style={{ background: minScore === maxScore ? heatmapScoreColor(minScore, domain) : SCOREBOARD_HEATMAP_GRADIENT }} />
+        <div className="heatmap-color-key-values">
+          {legendVals.map((value) => <span key={value}>{value.toFixed(2)}</span>)}
+        </div>
+        {compareMode && (
+          <div className="heatmap-color-key-unavailable"><span aria-hidden="true" />Not comparable</div>
+        )}
       </div>
 
       <div className="heatmap-scroll" onMouseLeave={() => setTooltip(null)}>
@@ -171,27 +172,8 @@ export function Heatmap({
             <p>Clear the search or reset controls to restore the heatmap.</p>
           </div>
         ) : (
-          <svg className="heatmap-svg" viewBox={`0 0 ${width} ${height}`} role="img">
+          <svg className="heatmap-svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img">
             <title>Model × ROI aggregate score heatmap</title>
-
-            {/* ── Top legend ── */}
-            <g className="heatmap-legend" transform={`translate(${margin.left},${margin.top - 70})`}>
-              {legendSteps.map((v, i) => (
-                <rect key={v} x={i * 4} y={0} width={4} height={10} fill={colorScale(v)} />
-              ))}
-              {legendVals.map((v, i) => (
-                <text key={v} x={i * 94} y={30} textAnchor={i === 2 ? 'end' : 'start'}>
-                  {v.toFixed(2)}
-                </text>
-              ))}
-              <text x={214} y={10} dominantBaseline="middle">Alignment score</text>
-              {compareMode && (
-                <g className="disabled-cell-legend" transform="translate(328,0)">
-                  <rect width={16} height={10} rx={3} />
-                  <text x={24} y={10} dominantBaseline="middle">Not comparable</text>
-                </g>
-              )}
-            </g>
 
             {/* ── Sort toggle ── */}
             <g
@@ -256,8 +238,7 @@ export function Heatmap({
                 const isComparable = comparableCellIds.has(cell.id);
                 const isDisabled = compareMode && !isComparable;
                 const hasSessionEvidence = sessionCellIds.has(cell.id);
-                const normalised = cell.score === null ? 0 : (cell.score - minScore) / (adjustedMax - minScore);
-                const fill = cell.score === null ? 'var(--bg-subtle)' : colorScale(cell.score);
+                const fill = cell.score === null ? 'var(--bg-subtle)' : heatmapScoreColor(cell.score, domain);
 
                 return (
                   <g key={cell.id}>
@@ -282,17 +263,17 @@ export function Heatmap({
                       }
                       x={xp} y={yp}
                       width={x.bandwidth()} height={y.bandwidth()}
-                      rx={5}
+                      rx={3}
                       fill={fill}
                       onMouseEnter={(e) => updateTooltip(cell, e)}
                       onMouseMove={(e) => updateTooltip(cell, e)}
-                      onFocus={() => updateFocusTooltip(cell, xp, yp)}
+                      onFocus={(event) => updateFocusTooltip(cell, event.currentTarget)}
                       onBlur={() => setTooltip(null)}
                       onKeyDown={(e) => handleCellKeyDown(cell, e, isComparable)}
                       onClick={() => { if (!isDisabled) onSelectCell(cell); }}
                     />
                     {isCompareSelected && (
-                      <text className="compare-cell-marker" x={xp + 6} y={yp + 14}>
+                      <text className="compare-cell-marker" x={xp + 4} y={yp + 9} style={{ fontSize: '8px' }}>
                         {cmpIdx === 0 ? 'A' : 'B'}
                       </text>
                     )}
@@ -310,7 +291,7 @@ export function Heatmap({
                         className="cell-score-label"
                         x={xp + x.bandwidth() / 2}
                         y={yp + y.bandwidth() / 2}
-                        fill={scoreTextColor(normalised)}
+                        fill={heatmapScoreTextColor(cell.score, domain)}
                         style={{ fontSize: `${labelSize}px` }}
                       >
                         {cell.score.toFixed(2)}
@@ -339,31 +320,13 @@ export function Heatmap({
               </g>
             </g>
 
-            {/* ── Bottom legend ── */}
-            <g className="heatmap-legend" transform={`translate(${margin.left},${height - 42})`}>
-              {legendSteps.map((v, i) => (
-                <rect key={v} x={i * 4} y={0} width={4} height={10} fill={colorScale(v)} />
-              ))}
-              {legendVals.map((v, i) => (
-                <text key={v} x={i * 94} y={30} textAnchor={i === 2 ? 'end' : 'start'}>
-                  {v.toFixed(2)}
-                </text>
-              ))}
-              <text x={214} y={10} dominantBaseline="middle">Alignment score</text>
-              {compareMode && (
-                <g className="disabled-cell-legend" transform="translate(328,0)">
-                  <rect width={16} height={10} rx={3} />
-                  <text x={24} y={10} dominantBaseline="middle">Not comparable</text>
-                </g>
-              )}
-            </g>
           </svg>
         )}
       </div>
 
       {/* ── Tooltip ── */}
-      {tooltip && (
-        <div className="heatmap-tooltip" role="tooltip" style={{ left: tooltip.x, top: tooltip.y }}>
+      {tooltip && typeof document !== 'undefined' && createPortal(
+        <div className="heatmap-tooltip" role="tooltip" ref={tooltipRef} style={{ left: tooltip.x, top: tooltip.y }}>
           <dl>
             <div><dt>ROI</dt><dd>{tooltip.cell.roi.toUpperCase()}</dd></div>
             <div>
@@ -381,7 +344,8 @@ export function Heatmap({
             <div><dt>ROI rank</dt><dd>{tooltip.cell.rankWithinRoi === null ? 'N/A' : `#${tooltip.cell.rankWithinRoi}`}</dd></div>
             <div><dt>Overall alignment</dt><dd>{formatScore(tooltip.cell.overallScore)}</dd></div>
           </dl>
-        </div>
+        </div>,
+        document.body,
       )}
     </section>
   );

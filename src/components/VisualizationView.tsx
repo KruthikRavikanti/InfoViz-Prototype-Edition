@@ -22,6 +22,7 @@ type VisualizationViewProps = {
   modelRoiColumns: ModelRoiColumn[];
   heatmapRois: Roi[];
   heatmapCells: AggregateHeatmapCell[];
+  heatmapColorDomain: readonly [number, number];
   visibleModels: string[];
   rankingSystem: RankingSystem;
   selectedRankingRoi: Roi;
@@ -52,6 +53,7 @@ export function VisualizationView({
   modelRoiColumns,
   heatmapRois,
   heatmapCells,
+  heatmapColorDomain,
   visibleModels,
   rankingSystem,
   selectedRankingRoi,
@@ -84,38 +86,41 @@ export function VisualizationView({
           onFocusStimulus={onFocusStimulus}
         />
       )}
-      <HelpBox />
-      <ControlsBar
-        rois={heatmapRois}
-        rankingSystem={rankingSystem}
-        selectedRankingRoi={selectedRankingRoi}
-        modelSearch={modelSearch}
-        showScoreLabels={showScoreLabels}
-        compareMode={compareMode}
-        compareSelectionCount={compareCells.length}
-        onRankingSystemChange={onRankingSystemChange}
-        onSelectedRankingRoiChange={onSelectedRankingRoiChange}
-        onModelSearchChange={onModelSearchChange}
-        onShowScoreLabelsChange={onShowScoreLabelsChange}
-        onCompareModeChange={onCompareModeChange}
-        onResetControls={onResetControls}
-      />
       <div className="workspace-grid">
-        <Heatmap
-          cells={heatmapCells}
-          models={visibleModels}
-          rois={heatmapRois}
-          showScoreLabels={showScoreLabels}
-          sortDirection={sortDirection}
-          selectedCell={selectedCell}
-          compareMode={compareMode}
-          compareCells={compareCells}
-          comparableCellIds={comparableCellIds}
-          sessionCellIds={sessionCellIds}
-          onSortDirectionToggle={onSortDirectionToggle}
-          onSelectCell={onSelectCell}
-          selectedRankingRoi={rankingSystem === 'roi' ? selectedRankingRoi : null}
-        />
+        <aside className="model-browser" aria-label="Model browser">
+          <ControlsBar
+            rois={heatmapRois}
+            rankingSystem={rankingSystem}
+            selectedRankingRoi={selectedRankingRoi}
+            modelSearch={modelSearch}
+            showScoreLabels={showScoreLabels}
+            compareMode={compareMode}
+            compareSelectionCount={compareCells.length}
+            onRankingSystemChange={onRankingSystemChange}
+            onSelectedRankingRoiChange={onSelectedRankingRoiChange}
+            onModelSearchChange={onModelSearchChange}
+            onShowScoreLabelsChange={onShowScoreLabelsChange}
+            onCompareModeChange={onCompareModeChange}
+            onResetControls={onResetControls}
+          />
+          <Heatmap
+            cells={heatmapCells}
+            colorDomain={heatmapColorDomain}
+            models={visibleModels}
+            rois={heatmapRois}
+            showScoreLabels={showScoreLabels}
+            sortDirection={sortDirection}
+            selectedCell={selectedCell}
+            compareMode={compareMode}
+            compareCells={compareCells}
+            comparableCellIds={comparableCellIds}
+            sessionCellIds={sessionCellIds}
+            onSortDirectionToggle={onSortDirectionToggle}
+            onSelectCell={onSelectCell}
+            selectedRankingRoi={rankingSystem === 'roi' ? selectedRankingRoi : null}
+          />
+          <HelpBox />
+        </aside>
         <DetailsPanel
           heatmapCells={heatmapCells}
           imageCount={rows.length}

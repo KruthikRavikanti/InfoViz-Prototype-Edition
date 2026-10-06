@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { ClusteringPanel } from './ClusteringPanel';
 import { ImageGrid } from './ImageGrid';
 import { SessionEvidencePanel } from './SessionEvidencePanel';
+import { SpatialTools } from './SpatialTools';
 import type {
   AggregateHeatmapCell,
   ClusteringData,
@@ -36,7 +37,7 @@ type DetailsPanelProps = {
 
 const topKOptions = [6, 9, 12];
 const voxelRois: CanonicalRoi[] = ['ffa', 'eba', 'ppa'];
-type DetailTab = 'evidence' | 'clustering';
+type DetailTab = 'evidence' | 'clustering' | 'spatial';
 type VoxelLoadStatus = 'idle' | 'loading' | 'error';
 type VoxelRoiStates = Record<CanonicalRoi, { view: ClusterView | null; status: VoxelLoadStatus }>;
 
@@ -269,6 +270,12 @@ export function DetailsPanel({
         </dl>
       </div>
 
+      <div className="explorer-actions panel-action-row" aria-label="Selection actions">
+        <button type="button" onClick={handleExport}>Export JSON</button>
+        <button type="button" onClick={handleCopy}>Copy metadata</button>
+        <span role="status" aria-live="polite">{actionMsg}</span>
+      </div>
+
       {/* Sub-tabs */}
       <div className="detail-subtabs" role="tablist" aria-label="Detail sections">
         <button
@@ -289,10 +296,27 @@ export function DetailsPanel({
         >
           Image clusters
         </button>
+        <button
+          type="button"
+          role="tab"
+          className={activeTab === 'spatial' ? 'active' : ''}
+          aria-selected={activeTab === 'spatial'}
+          onClick={() => setActiveTab('spatial')}
+        >
+          Brain &amp; voxels
+        </button>
       </div>
 
       {/* Evidence tab */}
       <section className="image-evidence-tab" hidden={activeTab !== 'evidence'} aria-label="Image responses">
+        <div className="image-evidence-toolbar">
+          <label className="evidence-control">
+            Images per group
+            <select value={topK} onChange={(e) => setTopK(Number(e.target.value))}>
+              {topKOptions.map((k) => <option key={k} value={k}>{k} highest / lowest</option>)}
+            </select>
+          </label>
+        </div>
         {sessionEvidenceView ? (
           <SessionEvidencePanel
             view={sessionEvidenceView}
@@ -306,19 +330,6 @@ export function DetailsPanel({
           </div>
         ) : (
           <>
-            <div className="image-evidence-toolbar">
-              <div className="panel-action-row" aria-live="polite">
-                <button type="button" onClick={handleExport}>Export JSON</button>
-                <button type="button" onClick={handleCopy}>Copy metadata</button>
-                {actionMsg && <span>{actionMsg}</span>}
-              </div>
-              <label className="evidence-control">
-                Images per group
-                <select value={topK} onChange={(e) => setTopK(Number(e.target.value))}>
-                  {topKOptions.map((k) => <option key={k} value={k}>{k} highest / lowest</option>)}
-                </select>
-              </label>
-            </div>
             <p className="evidence-value-label">Images ranked by mean predicted voxel response.</p>
             <div className="evidence-tier-grid">
               <ImageGrid title="Highest predicted responses" images={evidenceView.topImages} onOpenImage={setModalImage} compact />
@@ -353,8 +364,20 @@ export function DetailsPanel({
           selectedModel={selectedCell.model}
           selectedRoi={selectedCell.roi}
           selectivityAtlasAvailable={Boolean(voxelSummary)}
+          showSelectivityLauncher={false}
           focusedStimulusId={focusedStimulusId}
         />
+      </section>
+
+      <section hidden={activeTab !== 'spatial'} aria-label="Brain and voxels">
+        {activeTab === 'spatial' && (
+          <SpatialTools
+            model={selectedCell.model}
+            session={session}
+            focusedStimulusId={focusedStimulusId}
+            onFocusStimulus={onFocusStimulus}
+          />
+        )}
       </section>
 
       {modalImage && <ImageModal image={modalImage} onClose={() => setModalImage(null)} />}

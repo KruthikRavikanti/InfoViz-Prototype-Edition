@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { CortexComparisonSession } from '../types/session';
 import { CANONICAL_ROIS } from '../types/session';
-import { BrainMapDialog } from './BrainMapDialog';
 
 type SessionBannerProps = {
   session: CortexComparisonSession;
@@ -45,12 +44,6 @@ export function SessionBanner({ session, focusedStimulusId, onFocusStimulus }: S
           ))}
         </div>
       </div>
-
-      <BrainMapDialog
-        session={session}
-        focusedStimulusId={focusedStimulusId}
-        onFocusStimulus={onFocusStimulus}
-      />
 
       <details className="session-context-details">
         <summary>Comparison details</summary>

@@ -91,6 +91,18 @@ export type BrainMapAssets = {
   projection: BrainProjection;
 };
 
+/** Raw NSD Subject 1 predictions for the immutable Murty-185 reference set. */
+export type BrainMapReferenceSet = {
+  model: string;
+  referenceVersion: string;
+  responseSpace: 'nsd_1000_subject1_floc_t7_v1';
+  stimuli: Array<{
+    imageName: string;
+    imageUrl: string;
+    roiResponses: Record<CanonicalRoi, number[]>;
+  }>;
+};
+
 export type BrainMapHoverDatum = {
   hemisphere: BrainHemisphere;
   vertexIndex: number;

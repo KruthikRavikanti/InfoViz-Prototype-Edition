@@ -18,6 +18,7 @@ import {
   loadPublicReferenceManifest,
 } from './services/cortexSession';
 import { isCanonicalRoi } from './utils/sessionEvidence';
+import { getHeatmapScoreDomain } from './utils/heatmapAppearance';
 import {
   buildAggregateHeatmapCells,
   filterModelsBySearch,
@@ -208,6 +209,7 @@ export default function App() {
   const { data } = dataState;
   const heatmapRois = getDefaultHeatmapRois(data.scores);
   const aggregateModels = inferAggregateModels(data.scores, heatmapRois);
+  const heatmapColorDomain = getHeatmapScoreDomain(buildAggregateHeatmapCells(data.scores, heatmapRois, aggregateModels));
   const rankingRoi: Roi = heatmapRois.includes(selectedRankingRoi) ? selectedRankingRoi : (heatmapRois[0] ?? 'ffa');
   const orderedModels = orderAggregateModels(aggregateModels, data.scores, rankingSystem, rankingRoi, sortDirection);
   const visibleModels = filterModelsBySearch(orderedModels, modelSearch);
@@ -237,6 +239,7 @@ export default function App() {
           modelRoiColumns={data.modelRoiColumns}
           heatmapRois={heatmapRois}
           heatmapCells={heatmapCells}
+          heatmapColorDomain={heatmapColorDomain}
           visibleModels={visibleModels}
           rankingSystem={rankingSystem}
           selectedRankingRoi={rankingRoi}

@@ -167,6 +167,18 @@ describe('presentation cleanup preserves controls and scientific evidence', () =
     expect(source).toContain('mean predicted voxel responses, not model alignment scores');
   });
 
+  it('separates response, clustering, and spatial tools without hiding shared export actions', () => {
+    const markup = renderToStaticMarkup(<DetailsPanel {...detailsProps} selectedCell={cells[0]} />);
+    expect(markup).toContain('>Image responses</button>');
+    expect(markup).toContain('>Image clusters</button>');
+    expect(markup).toContain('>Brain &amp; voxels</button>');
+    expect(markup).toContain('aria-label="Brain and voxels"');
+    expect(markup).toContain('aria-label="Selection actions"');
+    expect(markup.match(/>Export JSON<\/button>/g)).toHaveLength(1);
+    expect(markup.match(/>Copy metadata<\/button>/g)).toHaveLength(1);
+    expect(markup).toContain('Compare FFA · EBA · PPA');
+  });
+
   it('opens comparison evidence only for an active comparison with two selections', () => {
     expect(renderToStaticMarkup(<CompareDrawer {...compareProps} compareMode={false} />)).toBe('');
     expect(renderToStaticMarkup(<CompareDrawer {...compareProps} compareCells={[cells[0]]} />)).toBe('');

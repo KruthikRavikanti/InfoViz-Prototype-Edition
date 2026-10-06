@@ -32,6 +32,7 @@ type ClusteringPanelProps = {
   selectedModel: string;
   selectedRoi: string;
   selectivityAtlasAvailable: boolean;
+  showSelectivityLauncher?: boolean;
   focusedStimulusId: string | null;
 };
 
@@ -1055,6 +1056,7 @@ export function ClusteringPanel({
   selectedModel,
   selectedRoi,
   selectivityAtlasAvailable,
+  showSelectivityLauncher = true,
   focusedStimulusId,
 }: ClusteringPanelProps) {
   const [isRoiComparisonOpen, setIsRoiComparisonOpen] = useState(false);
@@ -1105,7 +1107,7 @@ export function ClusteringPanel({
         >
           Compare FFA · EBA · PPA
         </button>
-        {roi && (
+        {roi && showSelectivityLauncher && (
           <VoxelSelectivityAtlasDialog
             model={selectedModel}
             available={selectivityAtlasAvailable}

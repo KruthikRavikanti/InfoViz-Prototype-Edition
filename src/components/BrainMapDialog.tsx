@@ -1,22 +1,34 @@
 import {
   Suspense,
   lazy,
+  useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type KeyboardEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { loadBrainMapAssets } from '../services/brainMapAssets';
-import type { BrainMapAssets, BrainMapHoverDatum, BrainSurfaceKind } from '../types/brainMap';
+import { BRAIN_REFERENCE_VERSION, loadBrainMapReferences } from '../services/brainReferenceAssets';
+import type { BrainMapAssets, BrainMapHoverDatum, BrainMapReferenceSet, BrainSurfaceKind } from '../types/brainMap';
 import {
   CANONICAL_ROIS,
+  SUBJECT_ONE_ROI_VOXEL_COUNTS,
   type CanonicalRoi,
   type CortexComparisonSession,
 } from '../types/session';
 import { fixedSessionResponseExtent } from '../utils/brainProjection';
+import { brainTooltipPosition } from '../utils/brainTooltipLayout';
+import {
+  brainMapImageNeighbors,
+  brainMapReferenceImages,
+  brainMapUploadedImages,
+  filterBrainMapImages,
+  type BrainMapImage,
+  type BrainMapImageSource,
+} from '../utils/brainMapSelection';
 
 const BrainMapViewer = lazy(() => import('./BrainMapViewer'));
 
@@ -32,14 +44,72 @@ type AssetState =
   | { status: 'ready'; assets: BrainMapAssets };
 
 type BrainMapDialogProps = {
-  session: CortexComparisonSession;
-  focusedStimulusId: string | null;
-  onFocusStimulus: (stimulusId: string) => void;
+  session?: CortexComparisonSession | null;
+  selectedModel?: string;
+  focusedStimulusId?: string | null;
+  onFocusStimulus?: (stimulusId: string) => void;
 };
+
+type ReferenceState =
+  | { model: string; status: 'loading' }
+  | { model: string; status: 'error'; message: string }
+  | { model: string; status: 'ready'; references: BrainMapReferenceSet };
 
 function formatResponse(value: number): string {
   if (value !== 0 && Math.abs(value) < 0.001) return value.toExponential(2);
   return value.toFixed(3);
+}
+
+function BrainMapTooltip({ hovered }: { hovered: BrainMapHoverDatum }) {
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const latestHoverRef = useRef(hovered);
+  const [position, setPosition] = useState({ left: 0, top: 0 });
+  const updatePosition = useCallback(() => {
+    const tooltip = tooltipRef.current;
+    const stage = tooltip?.parentElement;
+    if (!tooltip || !stage) return;
+    const stageBounds = stage.getBoundingClientRect();
+    const tooltipBounds = tooltip.getBoundingClientRect();
+    const nextPosition = brainTooltipPosition({
+      canvasX: latestHoverRef.current.canvasX,
+      canvasY: latestHoverRef.current.canvasY,
+      stageWidth: stageBounds.width,
+      stageHeight: stageBounds.height,
+      tooltipWidth: tooltipBounds.width,
+      tooltipHeight: tooltipBounds.height,
+    });
+    setPosition((current) => current.left === nextPosition.left && current.top === nextPosition.top
+      ? current : nextPosition);
+  }, []);
+
+  useLayoutEffect(() => {
+    latestHoverRef.current = hovered;
+    updatePosition();
+  }, [hovered, updatePosition]);
+
+  useLayoutEffect(() => {
+    const tooltip = tooltipRef.current;
+    const stage = tooltip?.parentElement;
+    if (!tooltip || !stage) return;
+    const observer = new ResizeObserver(updatePosition);
+    observer.observe(stage);
+    observer.observe(tooltip);
+    return () => observer.disconnect();
+  }, [updatePosition]);
+
+  return (
+    <div ref={tooltipRef} className="brain-map-tooltip" style={position} role="status">
+      <strong>{hovered.dominantSource.roi.toUpperCase()} · {hovered.hemisphere.toUpperCase()}</strong>
+      <span>Surface value: {formatResponse(hovered.surfaceResponse)}</span>
+      <span>Dominant source response: {formatResponse(hovered.dominantSource.response)}</span>
+      <span>ROI response index: {hovered.dominantSource.responseIndex}</span>
+      <span>Volume voxel [z, y, x]: [{hovered.volumeCoordinateZyx.join(', ')}]</span>
+      <span>Surface vertex: {hovered.vertexIndex.toLocaleString()}</span>
+      {hovered.overlappingRois.length > 1 && (
+        <span>ROI overlap: {hovered.overlappingRois.map((roi) => roi.toUpperCase()).join(', ')}</span>
+      )}
+    </div>
+  );
 }
 
 function keepFocusInsideDialog(event: KeyboardEvent<HTMLElement>) {
@@ -61,11 +131,14 @@ function keepFocusInsideDialog(event: KeyboardEvent<HTMLElement>) {
 
 function BrainMapModal({
   session,
+  selectedModel,
   focusedStimulusId,
   onFocusStimulus,
   onClose,
 }: BrainMapDialogProps & { onClose: () => void }) {
+  const model = selectedModel ?? session?.comparison.model ?? '';
   const [assetState, setAssetState] = useState<AssetState>({ status: 'loading' });
+  const [referenceState, setReferenceState] = useState<ReferenceState>({ model, status: 'loading' });
   const [surface, setSurface] = useState<BrainSurfaceKind>('inflated');
   const [enabledRois, setEnabledRois] = useState<Record<CanonicalRoi, boolean>>({
     ffa: true,
@@ -74,19 +147,47 @@ function BrainMapModal({
   });
   const [hovered, setHovered] = useState<BrainMapHoverDatum | null>(null);
   const [resetKey, setResetKey] = useState(0);
-
-  const focusedId = focusedStimulusId ?? session.stimuli[0]?.id;
-  const stimulus = session.stimuli.find((item) => item.id === focusedId) ?? session.stimuli[0];
-  const stimulusResult = session.brainMapResults?.stimuli.find((item) => item.stimulusId === stimulus?.id)
-    ?? session.brainMapResults?.stimuli[0];
+  const [imageSource, setImageSource] = useState<BrainMapImageSource>(() => (
+    brainMapUploadedImages(session, model).length ? 'uploaded' : 'reference'
+  ));
+  const [referenceId, setReferenceId] = useState<string>();
+  const [localUploadId, setLocalUploadId] = useState<string>();
+  const [imageSearch, setImageSearch] = useState('');
+  const [controlsOpen, setControlsOpen] = useState(() => (
+    typeof window === 'undefined' || typeof window.matchMedia !== 'function'
+      ? true : window.matchMedia('(min-width: 901px)').matches
+  ));
+  const references = referenceState.model === model && referenceState.status === 'ready'
+    ? referenceState.references : undefined;
+  const uploadedImages = useMemo(
+    () => brainMapUploadedImages(session, model, references),
+    [session, model, references],
+  );
+  const referenceImages = useMemo(() => brainMapReferenceImages(references), [references]);
+  const activeSource = imageSource === 'uploaded' && uploadedImages.length ? 'uploaded' : 'reference';
+  const images = activeSource === 'uploaded' ? uploadedImages : referenceImages;
+  const selectedId = activeSource === 'uploaded' ? focusedStimulusId ?? localUploadId : referenceId;
+  const stimulus = images.find((item) => item.id === selectedId) ?? images[0];
+  const stimulusResult = stimulus?.result;
+  const filteredImages = useMemo(() => filterBrainMapImages(images, imageSearch), [images, imageSearch]);
+  const imageNeighbors = brainMapImageNeighbors(filteredImages, stimulus?.id);
+  const selectedFilteredId = filteredImages.some((image) => image.id === stimulus?.id) ? stimulus?.id : '';
   const enabledRoiSet = useMemo(
     () => new Set(CANONICAL_ROIS.filter((roi) => enabledRois[roi])),
     [enabledRois],
   );
   const maxAbsResponse = useMemo(
-    () => fixedSessionResponseExtent(session.brainMapResults?.stimuli ?? []),
-    [session.brainMapResults],
+    () => fixedSessionResponseExtent([...uploadedImages, ...referenceImages].map((image) => image.result)),
+    [uploadedImages, referenceImages],
   );
+
+  function selectImage(image: BrainMapImage) {
+    setHovered(null);
+    if (image.source === 'uploaded') {
+      setLocalUploadId(image.id);
+      onFocusStimulus?.(image.id);
+    } else setReferenceId(image.id);
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -111,6 +212,40 @@ function BrainMapModal({
   }, []);
 
   useEffect(() => {
+    let ignore = false;
+    const abortController = new AbortController();
+    setReferenceState({ model, status: 'loading' });
+    loadBrainMapReferences(model, fetch, abortController.signal)
+      .then((loaded) => {
+        if (!ignore) setReferenceState({ model, status: 'ready', references: loaded });
+      })
+      .catch((error: unknown) => {
+        if (ignore) return;
+        setReferenceState({
+          model,
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Reference predictions could not be loaded.',
+        });
+      });
+    return () => {
+      ignore = true;
+      abortController.abort();
+    };
+  }, [model]);
+
+  useEffect(() => {
+    setHovered(null);
+  }, [stimulusResult]);
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const media = window.matchMedia('(min-width: 901px)');
+    const updateControls = () => setControlsOpen(media.matches);
+    media.addEventListener('change', updateControls);
+    return () => media.removeEventListener('change', updateControls);
+  }, []);
+
+  useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = previousOverflow; };
@@ -119,9 +254,10 @@ function BrainMapModal({
   const mappedCount = assetState.status === 'ready'
     ? CANONICAL_ROIS.reduce((sum, roi) => sum + assetState.assets.manifest.rois[roi].mappedResponseCount, 0)
     : null;
-  const responseCount = session.brainMapResults
-    ? CANONICAL_ROIS.reduce((sum, roi) => sum + session.brainMapResults!.roiVoxelCounts[roi], 0)
-    : 0;
+  const responseCount = CANONICAL_ROIS.reduce((sum, roi) => sum + SUBJECT_ONE_ROI_VOXEL_COUNTS[roi], 0);
+  const referenceIsLoading = referenceState.model !== model || referenceState.status === 'loading';
+  const referenceError = referenceState.model === model && referenceState.status === 'error'
+    ? referenceState.message : null;
 
   return createPortal(
     <div
@@ -146,33 +282,108 @@ function BrainMapModal({
             <p className="eyebrow">Predicted responses · NSD Subject 1</p>
             <h2 id="brain-map-modal-title">3D Brain Map</h2>
             <p id="brain-map-modal-description">
-              FFA, PPA, and EBA predictions on subject-native cortex.
+              {model} · FFA, PPA, and EBA predictions on subject-native cortex.
             </p>
           </div>
           <button type="button" className="brain-map-close" autoFocus onClick={onClose}>Close</button>
         </header>
 
-        <div className="brain-map-stimulus-bar" aria-label="Brain-map stimulus">
-          <span className="brain-map-stimulus-label">Focused stimulus</span>
-          <div className="brain-map-stimulus-options">
-            {session.stimuli.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={item.id === stimulus?.id ? 'active' : ''}
-                aria-pressed={item.id === stimulus?.id}
-                onClick={() => onFocusStimulus(item.id)}
-              >
-                <img src={item.imageUrl} alt="" />
-                <span>{item.displayName}</span>
-              </button>
-            ))}
+        <div className="brain-map-stimulus-bar" aria-label="Brain-map image selection">
+          <div className="brain-map-picker">
+            <div className="brain-map-picker-row">
+              <label className="brain-map-image-source">
+                <span>Image collection</span>
+                <select
+                  value={activeSource}
+                  onChange={(event) => {
+                    setImageSource(event.target.value as BrainMapImageSource);
+                    setImageSearch('');
+                    setHovered(null);
+                  }}
+                >
+                  <option value="uploaded" disabled={!uploadedImages.length}>Uploads ({uploadedImages.length})</option>
+                  <option value="reference">Murty-185 reference ({references ? referenceImages.length : '185'})</option>
+                </select>
+              </label>
+              <label className="brain-map-search">
+                <span className="sr-only">Search brain-map images</span>
+                <input
+                  type="search"
+                  placeholder="Search images…"
+                  value={imageSearch}
+                  onChange={(event) => setImageSearch(event.target.value)}
+                />
+              </label>
+            </div>
+            <div className="brain-map-picker-row">
+              <label className="brain-map-image-select">
+                <span className="sr-only">Brain-map image</span>
+                <select
+                  value={selectedFilteredId ?? ''}
+                  disabled={!filteredImages.length}
+                  onChange={(event) => {
+                    const image = filteredImages.find((item) => item.id === event.target.value);
+                    if (image) selectImage(image);
+                  }}
+                >
+                  <option value="" disabled>
+                    {referenceIsLoading && activeSource === 'reference'
+                      ? 'Loading reference predictions…'
+                      : filteredImages.length ? 'Select an image…' : 'No matching images'}
+                  </option>
+                  {filteredImages.map((image) => (
+                    <option key={image.id} value={image.id}>{image.displayName}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="brain-map-image-navigation">
+                <button
+                  type="button"
+                  aria-label="Previous brain-map image"
+                  disabled={!imageNeighbors.previous}
+                  onClick={() => { if (imageNeighbors.previous) selectImage(imageNeighbors.previous); }}
+                >←</button>
+                <button
+                  type="button"
+                  aria-label="Next brain-map image"
+                  disabled={!imageNeighbors.next}
+                  onClick={() => { if (imageNeighbors.next) selectImage(imageNeighbors.next); }}
+                >→</button>
+              </div>
+              <span className="brain-map-image-count" role="status">
+                {imageSearch.trim() ? `${filteredImages.length} found` : `${images.length} images`}
+              </span>
+            </div>
+            {referenceError && (
+              <p className="brain-map-reference-error" role="status">Reference predictions unavailable: {referenceError}</p>
+            )}
+            {session?.brainMapResults && session.comparison.model !== model && (
+              <p className="brain-map-reference-error">Select {session.comparison.model} to view this session’s uploads.</p>
+            )}
+            {session?.brainMapResults && session.comparison.model === model
+              && BRAIN_REFERENCE_VERSION !== session.comparison.referenceVersion && (
+              <p className="brain-map-reference-error">Uploads use a different reference bundle and cannot share this brain map.</p>
+            )}
           </div>
-          <p>One fixed scale across uploads and regions.</p>
+          <div className="brain-map-current-image" aria-live="polite">
+            {stimulus && <img src={stimulus.imageUrl} alt={stimulus.displayName} />}
+            <div>
+              <strong>{stimulus?.displayName ?? 'Choose an image'}</strong>
+              <span>{activeSource === 'uploaded' ? 'Uploaded stimulus' : 'Murty-185 reference'}</span>
+              <span>{referenceIsLoading ? 'Preparing shared response scale…' : 'Fixed scale across images and regions'}</span>
+            </div>
+          </div>
         </div>
 
         <div className="brain-map-layout">
           <aside className="brain-map-controls" aria-label="Brain map controls">
+            <details
+              className="brain-map-control-disclosure"
+              open={controlsOpen}
+              onToggle={(event) => setControlsOpen(event.currentTarget.open)}
+            >
+              <summary>Display controls</summary>
+              <div className="brain-map-control-fields">
             <fieldset>
               <legend>Cortical surface</legend>
               {(['inflated', 'pial'] as const).map((kind) => {
@@ -209,22 +420,26 @@ function BrainMapModal({
                       }))}
                     />
                     <span><strong>{roi.toUpperCase()}</strong> — {ROI_NAMES[roi]}</span>
-                    <small>{manifestRoi?.mappedResponseCount ?? '—'}/{manifestRoi?.responseCount ?? session.brainMapResults?.roiVoxelCounts[roi]}</small>
+                    <small>{manifestRoi?.mappedResponseCount ?? '—'}/{manifestRoi?.responseCount ?? '—'}</small>
                   </label>
                 );
               })}
             </fieldset>
 
-            <div className="brain-map-scale" aria-label={`Fixed session predicted response scale from minus ${formatResponse(maxAbsResponse)} to plus ${formatResponse(maxAbsResponse)}`}>
+            <div className="brain-map-scale" aria-busy={referenceIsLoading} aria-label={referenceIsLoading
+              ? 'Preparing shared predicted response scale'
+              : `Fixed image collection predicted response scale from minus ${formatResponse(maxAbsResponse)} to plus ${formatResponse(maxAbsResponse)}`}>
               <div className="brain-map-scale-heading">
                 <strong>Predicted response</strong>
-                <span>model units · fixed scale</span>
+                <span>{referenceIsLoading ? 'preparing scale' : 'model units · fixed scale'}</span>
               </div>
               <div className="brain-map-scale-gradient" aria-hidden="true" />
               <div className="brain-map-scale-labels">
-                <span>−{formatResponse(maxAbsResponse)}</span>
-                <span>0</span>
-                <span>+{formatResponse(maxAbsResponse)}</span>
+                {referenceIsLoading ? <span>Loading image collection…</span> : <>
+                  <span>−{formatResponse(maxAbsResponse)}</span>
+                  <span>0</span>
+                  <span>+{formatResponse(maxAbsResponse)}</span>
+                </>}
               </div>
             </div>
 
@@ -237,10 +452,12 @@ function BrainMapModal({
                 : `${mappedCount.toLocaleString()} of ${responseCount.toLocaleString()} voxel responses mapped. `}
               Three EBA responses are unmapped and not plotted.
             </p>
+              </div>
+            </details>
           </aside>
 
           <div className="brain-map-stage-column">
-            <div className="brain-map-stage">
+            <div className="brain-map-stage" data-image-id={stimulus?.id} data-image-source={activeSource} aria-busy={assetState.status === 'loading' || referenceIsLoading}>
               {assetState.status === 'loading' && (
                 <div className="brain-map-asset-state" role="status">
                   <span className="brain-map-spinner" aria-hidden="true" />
@@ -254,7 +471,7 @@ function BrainMapModal({
                   <p>No anatomical surface is shown when its metadata does not match the session response space.</p>
                 </div>
               )}
-              {assetState.status === 'ready' && stimulusResult && (
+              {assetState.status === 'ready' && stimulusResult && !referenceIsLoading && (
                 <Suspense fallback={<div className="brain-map-asset-state" role="status">Preparing the 3D renderer…</div>}>
                   <BrainMapViewer
                     assets={assetState.assets}
@@ -267,23 +484,13 @@ function BrainMapModal({
                   />
                 </Suspense>
               )}
-              {hovered && (
-                <div
-                  className="brain-map-tooltip"
-                  style={{ left: hovered.canvasX, top: hovered.canvasY } as CSSProperties}
-                  role="status"
-                >
-                  <strong>{hovered.dominantSource.roi.toUpperCase()} · {hovered.hemisphere.toUpperCase()}</strong>
-                  <span>Surface value: {formatResponse(hovered.surfaceResponse)}</span>
-                  <span>Dominant source response: {formatResponse(hovered.dominantSource.response)}</span>
-                  <span>ROI response index: {hovered.dominantSource.responseIndex}</span>
-                  <span>Volume voxel [z, y, x]: [{hovered.volumeCoordinateZyx.join(', ')}]</span>
-                  <span>Surface vertex: {hovered.vertexIndex.toLocaleString()}</span>
-                  {hovered.overlappingRois.length > 1 && (
-                    <span>ROI overlap: {hovered.overlappingRois.map((roi) => roi.toUpperCase()).join(', ')}</span>
-                  )}
+              {assetState.status === 'ready' && (referenceIsLoading || !stimulusResult) && (
+                <div className={`brain-map-asset-state${referenceError ? ' error' : ''}`} role={referenceError ? 'alert' : 'status'}>
+                  <strong>{referenceError ? 'Reference brain map unavailable' : 'Preparing shared response scale…'}</strong>
+                  <p>{referenceError ?? 'Preparing the verified Subject 1 voxel responses for all 185 reference images.'}</p>
                 </div>
               )}
+              {hovered && <BrainMapTooltip hovered={hovered} />}
             </div>
             <div className="brain-map-stage-footer">
               <span>Drag to rotate · scroll to zoom · hover a mapped vertex</span>
@@ -293,7 +500,7 @@ function BrainMapModal({
         </div>
 
         <footer className="brain-map-science-note">
-          <p>Model predictions, not measured BOLD signals for the uploaded image.</p>
+          <p>Model predictions, not measured BOLD signals for these images.</p>
           <details className="brain-map-mapping-details">
             <summary>Mapping details</summary>
             <p>
@@ -313,10 +520,10 @@ function BrainMapModal({
   );
 }
 
-export function BrainMapDialog({ session, focusedStimulusId, onFocusStimulus }: BrainMapDialogProps) {
+export function BrainMapDialog({ session, selectedModel, focusedStimulusId, onFocusStimulus }: BrainMapDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  if (!session.brainMapResults) return null;
+  if (!(selectedModel ?? session?.comparison.model)) return null;
 
   function close() {
     setIsOpen(false);
@@ -341,6 +548,7 @@ export function BrainMapDialog({ session, focusedStimulusId, onFocusStimulus }: 
       {isOpen && (
         <BrainMapModal
           session={session}
+          selectedModel={selectedModel}
           focusedStimulusId={focusedStimulusId}
           onFocusStimulus={onFocusStimulus}
           onClose={close}

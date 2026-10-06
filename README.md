@@ -9,8 +9,8 @@ This React/Vite visualization compares model alignment across brain regions and 
 - Opens a details panel for a selected cell.
 - Ranks images by the matching ROI/model evidence column from the CSV.
 - Supports compare mode for two evidence-backed cells.
-- Opens the Voxel Selectivity Explorer, a separate 3D view of Subject 1 predicted response profiles, alongside the four image-cluster charts.
-- Shows uploaded-stimulus predictions on the NSD Subject 1 surface in the 3D Brain Map.
+- Keeps the four image-cluster charts intact and groups the anatomical Brain Map and non-anatomical Voxel Selectivity Explorer under Brain & voxels.
+- Shows uploaded-stimulus and Murty-185 reference predictions on the NSD Subject 1 surface in the 3D Brain Map.
 - Includes a separate user study tab with an embedded form.
 
 ## Data In This Repo
@@ -105,6 +105,36 @@ The visualization follows the sibling Virtual Cortex Lab: warm ivory surfaces, a
 Source Serif 4 headings, Inter controls, and IBM Plex Mono labels. Shared theme tokens live in
 `src/styles/global.css`; chart palettes remain independent so scientific color encodings keep their meaning.
 The Cortex masthead links home and back to the Lab, using `VITE_CORTEX_APP_URL` when configured.
+
+Model search, ranking, score labels, and two-selection comparison are grouped in the model browser.
+The selected model–region workspace has **Image responses**, **Image clusters**, and **Brain & voxels**
+tabs; JSON export and metadata copying remain available across all three. The heatmap uses the quantitative
+Cortex scoreboard's cream–lavender–purple palette with compact square cells. Its full-data color scale stays
+fixed when searching; score values are unchanged and are not reinterpreted as ceiling-normalized scores.
+
+**Brain & voxels** contains the cortical 3D Brain Map and the non-anatomical Voxel Selectivity Explorer.
+The brain image picker is searchable and bounded regardless of upload count, with previous/next navigation
+and a selected-image preview. Display controls collapse on narrow screens so the cortex stays visible.
+Reference-image selection is local to the brain map; selecting an upload still updates the shared upload focus.
+
+The 3D Brain Map supports all 185 reference images for the 26 audited NSD-1000 models, even without an upload
+session. `scripts/data/build_brain_reference_artifacts.py` exports the exact raw float32 Subject 1 prefixes
+(156 FFA, 170 PPA, 518 EBA) from the existing prediction bundle; it does not run inference or use normalized
+clustering coordinates. Canonical image identities, source hashes, voxel ordering, model coverage, and response
+space are checked before export. The lazy-loaded binary assets and their index are checksum-verified in the
+browser. Uploads and references share a fixed scale only for the same model/reference bundle. These are model
+predictions, not measured BOLD responses; the existing three unmapped EBA responses remain unplotted.
+Unsupported models are explicitly unavailable rather than receiving substitute predictions. The selectivity
+atlas remains reference-only and is not refitted by uploads.
+
+Regenerate the separate reference-brain assets with the audited private source bundle present:
+
+```bash
+python scripts/data/build_brain_reference_artifacts.py
+```
+
+The generated manifest SHA-256 is pinned in `src/services/brainReferenceAssets.ts`; an intentional source-bundle
+update requires reviewing and updating that pin. Neither existing anatomy assets nor comparison artifacts are rewritten.
 
 The four-chart layout distinguishes **Predicted-response clusters**, **Visual-feature clusters**,
 **DreamSim similarity clusters**, and **Measured fMRI clusters**. Their dots are images; dots in the

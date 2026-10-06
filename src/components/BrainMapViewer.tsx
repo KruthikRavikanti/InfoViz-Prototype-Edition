@@ -11,7 +11,7 @@ import type {
 } from '../types/brainMap';
 import type { BrainMapStimulusResult, CanonicalRoi } from '../types/session';
 import { divergentResponseColor, projectHemisphereResponses } from '../utils/brainProjection';
-import { inflatedHemisphereTranslations } from '../utils/brainSurfaceLayout';
+import { brainSurfaceCameraDistance, inflatedHemisphereTranslations } from '../utils/brainSurfaceLayout';
 import { fetchVerifiedBrainAsset } from '../services/brainMapAssets';
 
 type BrainMapViewerProps = {
@@ -122,14 +122,23 @@ export default function BrainMapViewer({
 
     const surfaceRoot = new THREE.Group();
     scene.add(surfaceRoot);
+    let framingRadius = 0;
+    let framingDistance = 0;
+    function fitDistance() {
+      const distance = brainSurfaceCameraDistance(framingRadius, camera.aspect, camera.fov);
+      controls.maxDistance = Math.max(850, distance * 2);
+      camera.far = Math.max(3000, distance + framingRadius * 4);
+      camera.updateProjectionMatrix();
+      return distance;
+    }
     function frameSurface() {
       surfaceRoot.rotation.set(0, 0, 0);
       const box = new THREE.Box3().setFromObject(surfaceRoot);
       if (box.isEmpty()) return;
       const center = box.getCenter(new THREE.Vector3());
-      const size = box.getSize(new THREE.Vector3());
-      const radius = Math.max(size.x, size.y, size.z) * 0.62;
-      const distance = radius / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.25;
+      framingRadius = box.getBoundingSphere(new THREE.Sphere()).radius;
+      const distance = fitDistance();
+      framingDistance = distance;
       camera.position.copy(center).add(new THREE.Vector3(0.9, 0.28, 1.35).normalize().multiplyScalar(distance));
       controls.target.copy(center);
       controls.update();
@@ -200,6 +209,13 @@ export default function BrainMapViewer({
       renderer.setSize(Math.max(width, 1), Math.max(height, 1), false);
       camera.aspect = Math.max(width, 1) / Math.max(height, 1);
       camera.updateProjectionMatrix();
+      if (framingRadius > 0 && framingDistance > 0) {
+        const distance = fitDistance();
+        // Preserve rotation, panning, and the user's zoom relative to the fitted view.
+        camera.position.sub(controls.target).multiplyScalar(distance / framingDistance).add(controls.target);
+        framingDistance = distance;
+        controls.update();
+      }
     }
     resize();
     const resizeObserver = new ResizeObserver(resize);

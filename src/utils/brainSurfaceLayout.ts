@@ -1,5 +1,17 @@
 export type AxisBounds = { min: number; max: number };
 
+/** Fit the entire cortical bounding sphere along the narrower camera dimension. */
+export function brainSurfaceCameraDistance(radius: number, aspect: number, verticalFovDegrees = 34): number {
+  if (
+    !Number.isFinite(radius) || radius <= 0
+    || !Number.isFinite(aspect) || aspect <= 0
+    || !Number.isFinite(verticalFovDegrees) || verticalFovDegrees <= 0 || verticalFovDegrees >= 180
+  ) throw new Error('Brain surface camera bounds are invalid.');
+  const verticalFov = verticalFovDegrees * Math.PI / 180;
+  const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
+  return radius / Math.sin(Math.min(verticalFov, horizontalFov) / 2) * 1.1;
+}
+
 export function inflatedHemisphereTranslations(
   left: AxisBounds,
   right: AxisBounds,

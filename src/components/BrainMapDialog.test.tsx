@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { validateComparisonSession } from '../services/cortexSession';
+import { BRAIN_REFERENCE_VERSION } from '../services/brainReferenceAssets';
 import { rawSessionFixture } from '../test/sessionFixture';
 import { BrainMapDialog } from './BrainMapDialog';
 
@@ -29,6 +30,7 @@ afterEach(() => {
 
 function brainSession() {
   const raw = rawSessionFixture() as ReturnType<typeof rawSessionFixture> & { brain_map_results?: unknown };
+  raw.comparison.reference_version = BRAIN_REFERENCE_VERSION;
   raw.brain_map_results = {
     schema_version: 1,
     subject_id: 's1',
@@ -76,13 +78,75 @@ describe('Subject 1 brain-map launcher', () => {
 
     expect(markup).toContain('role="dialog"');
     expect(markup).toContain('Predicted responses · NSD Subject 1');
-    expect(markup).toContain('One fixed scale across uploads and regions.');
-    expect(markup).toContain('Model predictions, not measured BOLD signals for the uploaded image.');
+    expect(markup).toContain('Preparing shared response scale');
+    expect(markup).not.toContain('model units · fixed scale');
+    expect(markup).toContain('aria-busy="true"');
+    expect(markup).toContain('Model predictions, not measured BOLD signals for these images.');
     expect(markup).toContain('<details class="brain-map-mapping-details">');
     expect(markup).toContain('<summary>Mapping details</summary>');
     expect(markup).toContain('line-nearest-neighbor mapper');
     expect(markup).toContain('pooled NSD subjects');
     expect(markup).toContain('Three EBA responses are unmapped and not plotted.');
     expect(markup).toContain('Color between source voxels is not anatomical activation.');
+  });
+
+  it('offers the verified reference brain map without an uploaded session', () => {
+    const markup = renderToStaticMarkup(<BrainMapDialog selectedModel="clip_rn50" />);
+    expect(markup).toContain('3D Brain Map');
+    expect(markup).toContain('aria-haspopup="dialog"');
+    expect(markup).toContain('aria-expanded="false"');
+  });
+
+  it('uses one bounded searchable selector instead of growing a wrapping button list for many uploads', () => {
+    dialogState.open = true;
+    vi.stubGlobal('document', { body: {} });
+    const session = brainSession();
+    const stimulus = session.stimuli[0];
+    const result = session.brainMapResults!.stimuli[0];
+    session.stimuli = Array.from({ length: 1000 }, (_, index) => ({
+      ...stimulus, id: `upload-${index}`, displayName: `upload-${index}.png`,
+    }));
+    session.brainMapResults!.stimuli = session.stimuli.map((item) => ({ ...result, stimulusId: item.id }));
+    const markup = renderToStaticMarkup(
+      <BrainMapDialog session={session} selectedModel="clip_rn50" focusedStimulusId="upload-500" onFocusStimulus={vi.fn()} />,
+    );
+    expect(markup).toContain('Search brain-map images');
+    expect(markup).toContain('Brain-map image');
+    expect(markup).toContain('Uploads (1000)');
+    expect(markup).toContain('1000 images');
+    expect(markup).toContain('data-image-id="upload-500"');
+    expect(markup).toContain('data-image-source="uploaded"');
+    expect(markup).toContain('Previous brain-map image');
+    expect(markup).toContain('Next brain-map image');
+    expect(markup).toContain('Murty-185 reference (185)');
+    expect(markup).not.toContain('brain-map-stimulus-options');
+    // Only navigation and existing display controls are buttons; image names stay in native options.
+    expect(markup.match(/<button /g)).toHaveLength(5);
+  });
+
+  it('does not offer uploads from another model as reference voxel predictions', () => {
+    dialogState.open = true;
+    vi.stubGlobal('document', { body: {} });
+    const markup = renderToStaticMarkup(
+      <BrainMapDialog session={brainSession()} selectedModel="alexnet" focusedStimulusId="stimulus-a" />,
+    );
+    expect(markup).toContain('Uploads (0)');
+    expect(markup).toContain('data-image-source="reference"');
+    expect(markup).toContain('Select clip_rn50 to view this session');
+    expect(markup).not.toContain('data-image-id="stimulus-a"');
+    expect(markup).toContain('Loading reference predictions');
+  });
+
+  it('rejects incompatible upload bundles immediately, even before reference assets finish loading', () => {
+    dialogState.open = true;
+    vi.stubGlobal('document', { body: {} });
+    const session = brainSession();
+    session.comparison.referenceVersion = 'incompatible-bundle';
+    const markup = renderToStaticMarkup(
+      <BrainMapDialog session={session} selectedModel="clip_rn50" focusedStimulusId="stimulus-a" />,
+    );
+    expect(markup).toContain('Uploads (0)');
+    expect(markup).toContain('Uploads use a different reference bundle');
+    expect(markup).not.toContain('data-image-id="stimulus-a"');
   });
 });

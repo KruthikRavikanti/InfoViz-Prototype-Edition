@@ -33,7 +33,7 @@ export function ControlsBar({
 }: ControlsBarProps) {
   return (
     <section className="controls-bar" aria-label="Visualization controls">
-      <label>
+      <label className="model-search-control">
         Search models
         <input
           type="search"
@@ -43,44 +43,48 @@ export function ControlsBar({
         />
       </label>
 
-      <label>
-        Rank models
-        <select value={rankingSystem} onChange={(event) => onRankingSystemChange(event.target.value as RankingSystem)}>
-          <option value="overall">Overall alignment</option>
-          <option value="roi">Selected ROI</option>
-        </select>
-      </label>
-
-      {rankingSystem === 'roi' && (
+      <div className="model-ranking-controls">
         <label>
-          ROI
-          <select value={selectedRankingRoi} onChange={(event) => onSelectedRankingRoiChange(event.target.value)}>
-            {rois.map((roi) => (
-              <option key={roi} value={roi}>
-                {roi.toUpperCase()}
-              </option>
-            ))}
+          Rank models
+          <select value={rankingSystem} onChange={(event) => onRankingSystemChange(event.target.value as RankingSystem)}>
+            <option value="overall">Overall alignment</option>
+            <option value="roi">Selected ROI</option>
           </select>
         </label>
-      )}
 
-      <label className="toggle-control">
-        <input
-          type="checkbox"
-          checked={showScoreLabels}
-          onChange={(event) => onShowScoreLabelsChange(event.target.checked)}
-        />
-        Show scores
-      </label>
+        {rankingSystem === 'roi' && (
+          <label>
+            ROI
+            <select value={selectedRankingRoi} onChange={(event) => onSelectedRankingRoiChange(event.target.value)}>
+              {rois.map((roi) => (
+                <option key={roi} value={roi}>
+                  {roi.toUpperCase()}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
 
-      <label className="toggle-control">
-        <input
-          type="checkbox"
-          checked={compareMode}
-          onChange={(event) => onCompareModeChange(event.target.checked)}
-        />
-        Compare selections
-      </label>
+      <div className="model-display-controls">
+        <label className="toggle-control">
+          <input
+            type="checkbox"
+            checked={showScoreLabels}
+            onChange={(event) => onShowScoreLabelsChange(event.target.checked)}
+          />
+          Show scores
+        </label>
+
+        <label className="toggle-control">
+          <input
+            type="checkbox"
+            checked={compareMode}
+            onChange={(event) => onCompareModeChange(event.target.checked)}
+          />
+          Compare selections
+        </label>
+      </div>
 
       {compareMode && (
         <div className="compare-status active" aria-live="polite">
