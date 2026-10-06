@@ -44,10 +44,10 @@ export function ControlsBar({
       </label>
 
       <label>
-        Ranking
+        Rank models
         <select value={rankingSystem} onChange={(event) => onRankingSystemChange(event.target.value as RankingSystem)}>
-          <option value="overall">Overall</option>
-          <option value="roi">By ROI</option>
+          <option value="overall">Overall alignment</option>
+          <option value="roi">Selected ROI</option>
         </select>
       </label>
 
@@ -70,7 +70,7 @@ export function ControlsBar({
           checked={showScoreLabels}
           onChange={(event) => onShowScoreLabelsChange(event.target.checked)}
         />
-        Show labels
+        Show scores
       </label>
 
       <label className="toggle-control">
@@ -79,12 +79,14 @@ export function ControlsBar({
           checked={compareMode}
           onChange={(event) => onCompareModeChange(event.target.checked)}
         />
-        Compare mode
+        Compare selections
       </label>
 
-      <div className={`compare-status${compareMode ? ' active' : ''}`} aria-live="polite">
-        {compareMode ? `${compareSelectionCount} / 2 selected` : 'Compare off'}
-      </div>
+      {compareMode && (
+        <div className="compare-status active" aria-live="polite">
+          {compareSelectionCount} / 2 selected
+        </div>
+      )}
 
       <button className="reset-controls-button" type="button" onClick={onResetControls}>
         Reset

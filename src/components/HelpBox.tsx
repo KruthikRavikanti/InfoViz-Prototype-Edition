@@ -1,19 +1,19 @@
 export function HelpBox() {
   return (
     <details className="help-box">
-      <summary>How to use this tool</summary>
+      <summary>Quick guide</summary>
       <div>
         <p>
-          The heatmap is your entry point: columns are ROIs, rows are models, and color encodes the aggregate
-          alignment score. Use the controls bar to search, sort, or filter the model set.
+          <strong>Heatmap:</strong> rows are models, columns are brain regions, and color shows model alignment.
+          Select a cell to explore image responses and clusters.
         </p>
         <p>
-          Click any cell (or focus it and press Enter) to open image-level evidence in the right panel. Adjust
-          the top-k / bottom-k selector to show more or fewer images per tier.
+          <strong>Image clusters:</strong> hover to preview; click to enlarge. Compare FFA · EBA · PPA
+          traces the same image across three regions.
         </p>
         <p>
-          Enable <strong>Compare mode</strong> to select two cells, then review their image overlap and score
-          differences in the comparison overlay. Press Escape to dismiss.
+          <strong>Compare selections:</strong> choose two cells to compare rankings, image overlap, and clusters.
+          Use Enter to select a focused cell and Escape to close a comparison.
         </p>
       </div>
     </details>

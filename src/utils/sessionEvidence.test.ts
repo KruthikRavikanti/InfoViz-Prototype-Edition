@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { EvidenceImage, JsonScoreObject } from '../types/data';
 import { buildAggregateHeatmapCells } from './heatmap';
-import { mergeReferenceAndSessionRanks } from './sessionEvidence';
+import { buildOptionalSessionOverlays, buildVoxelSessionOverlays, mergeReferenceAndSessionRanks } from './sessionEvidence';
+import { validateComparisonSession } from '../services/cortexSession';
+import { rawSessionFixture } from '../test/sessionFixture';
+import type { OptionalProjectionResults } from '../types/session';
+import { jointHierarchyFixture } from '../test/jointHierarchyFixture';
 
 function reference(rank: number): EvidenceImage {
   return {
@@ -58,5 +62,92 @@ describe('session ranking merge', () => {
     const after = buildAggregateHeatmapCells(scores, ['ffa', 'ppa', 'eba'], ['clip_rn50', 'alexnet']);
 
     expect(after).toEqual(before);
+  });
+});
+
+describe('fixed-reference upload cluster overlays', () => {
+  function sessionWithDifferentAssignments() {
+    const session = validateComparisonSession(rawSessionFixture(), 'http://core.example:5558');
+    session.roiResults.eba.stimuli[0].hierarchicalAssignment.clusterId = '9';
+    session.roiResults.eba.jointHierarchy = jointHierarchyFixture();
+    return session;
+  }
+
+  it('keeps existing k-means positions and centroid metadata unchanged', () => {
+    const session = sessionWithDifferentAssignments();
+    const [overlay] = buildVoxelSessionOverlays(session, 'eba');
+    expect(overlay).toMatchObject({
+      x: 1.2, y: -1.8, clusterId: '2', distance: .42,
+      assignmentMethod: 'nearest-centroid assignment', color: '#1c1917',
+    });
+    expect(overlay.medoidImageName).toBeUndefined();
+  });
+
+  it('uses joint membership, not nearest-medoid assignment, with fixed verified axes', () => {
+    const session = sessionWithDifferentAssignments();
+    const original = structuredClone(session);
+    const [overlay] = buildVoxelSessionOverlays(session, 'eba', 'hierarchical_correlation', { xSign: 1, ySign: -1 });
+    expect(overlay).toMatchObject({
+      x: 1.2, y: 1.8, clusterId: '1', distance: .23,
+      assignmentMethod: 'joint hierarchical clustering', medoidImageName: 'reference-b.png',
+      color: '#1c1917',
+    });
+    expect(session).toEqual(original);
+  });
+
+  it('does not draw hierarchical uploads when the axes are unchecked', () => {
+    const session = sessionWithDifferentAssignments();
+    expect(buildVoxelSessionOverlays(session, 'eba', 'hierarchical_correlation')).toEqual([]);
+    expect(buildVoxelSessionOverlays(session, 'eba', 'hierarchical_correlation', null)).toEqual([]);
+  });
+
+  const visualResults: OptionalProjectionResults = {
+    jointHierarchy: jointHierarchyFixture(),
+    stimuli: [{
+      stimulusId: 'stimulus-a',
+      projection: { x: 3, y: -7, clusterId: '2', centroidDistance: 9, nearestReferenceMembers: [] },
+      hierarchicalAssignment: {
+        method: 'nearest-medoid assignment', clusterId: '8', distance: .3,
+        medoid: { imageName: 'image_004.png', imageUrl: '/images/image_004.png', distance: .3 },
+      },
+    }],
+  };
+
+  it('uses optional visual joint membership and the verified x flip', () => {
+    const session = sessionWithDifferentAssignments();
+    const original = structuredClone(visualResults);
+    const [overlay] = buildOptionalSessionOverlays(session, visualResults, 'hierarchical_correlation', { xSign: -1, ySign: 1 });
+    expect(overlay).toMatchObject({
+      x: -3, y: -7, clusterId: '1', distance: .23,
+      assignmentMethod: 'joint hierarchical clustering', medoidImageName: 'reference-b.png',
+    });
+    expect(visualResults).toEqual(original);
+  });
+
+  it('skips optional hierarchical uploads with missing projection, joint hierarchy, or alignment', () => {
+    const session = sessionWithDifferentAssignments();
+    const signs = { xSign: 1, ySign: 1 } as const;
+    expect(buildOptionalSessionOverlays(session, undefined, 'hierarchical_correlation', signs)).toEqual([]);
+    expect(buildOptionalSessionOverlays(session, visualResults, 'hierarchical_correlation')).toEqual([]);
+    const withoutProjection = structuredClone(visualResults);
+    withoutProjection.stimuli[0].projection = null;
+    expect(buildOptionalSessionOverlays(session, withoutProjection, 'hierarchical_correlation', signs)).toEqual([]);
+    const withoutJoint = structuredClone(visualResults);
+    delete withoutJoint.jointHierarchy;
+    expect(buildOptionalSessionOverlays(session, withoutJoint, 'hierarchical_correlation', signs)).toEqual([]);
+  });
+
+  it('does not silently fall back to approximate assignments for legacy hierarchical sessions', () => {
+    const session = sessionWithDifferentAssignments();
+    delete session.roiResults.eba.jointHierarchy;
+    expect(buildVoxelSessionOverlays(session, 'eba', 'hierarchical_correlation', { xSign: 1, ySign: 1 })).toEqual([]);
+  });
+
+  it('can describe a cluster whose medoid is itself an uploaded image', () => {
+    const session = sessionWithDifferentAssignments();
+    session.roiResults.eba.jointHierarchy!.medoidIndices[1] = 2;
+    session.roiResults.eba.jointHierarchy!.members[2].distanceToMedoid = 0;
+    const [overlay] = buildVoxelSessionOverlays(session, 'eba', 'hierarchical_correlation', { xSign: 1, ySign: 1 });
+    expect(overlay.medoidImageName).toBe('uploaded.png');
   });
 });

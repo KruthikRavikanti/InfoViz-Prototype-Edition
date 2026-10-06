@@ -107,11 +107,20 @@ export type ClusterGroup = {
   points: ClusterPoint[];
 };
 
+/** Sign-only mapping from saved upload PCA axes into the displayed reference PCA axes. */
+export type ProjectionAxisAlignment = {
+  xSign: 1 | -1;
+  ySign: 1 | -1;
+};
+
 export type ClusterView = {
   summary: ClusterSummary | null;
   points: ClusterPoint[];
   groups: ClusterGroup[];
   coordinateMode: 'plot' | 'pca' | 'tsne' | null;
+  uploadAxisAlignment?: ProjectionAxisAlignment | null;
+  /** A session-specific hierarchy over the reference images and uploaded stimuli. */
+  jointHierarchy?: import('./session').JointHierarchy;
 };
 
 export type ImageCategory = 'Faces' | 'Places' | 'Body Part';

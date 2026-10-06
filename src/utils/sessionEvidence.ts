@@ -1,4 +1,4 @@
-import type { EvidenceImage, ModelRoiColumn, Roi, SelectedHeatmapCell, WideCsvRow } from '../types/data';
+import type { ClusteringMethod, EvidenceImage, ModelRoiColumn, ProjectionAxisAlignment, Roi, SelectedHeatmapCell, WideCsvRow } from '../types/data';
 import type {
   CanonicalRoi,
   CortexComparisonSession,
@@ -10,6 +10,9 @@ import type {
 } from '../types/session';
 import { CANONICAL_ROIS } from '../types/session';
 import { findModelRoiColumn, rankImagesByColumn } from './evidence';
+import { jointClusterMedoidName } from './jointClustering';
+
+export const UPLOADED_STIMULUS_MARKER_COLOR = '#1c1917';
 
 export type SessionEvidenceView = {
   roi: CanonicalRoi;
@@ -54,7 +57,7 @@ function uploadToEvidence(stimulus: SessionStimulus, result: StimulusRoiResult):
     rank: result.sessionRank,
     origin: 'uploaded',
     stimulusId: stimulus.id,
-    markerColor: stimulus.color,
+    markerColor: UPLOADED_STIMULUS_MARKER_COLOR,
     referenceRank: result.referenceRank,
     referencePercentile: result.referencePercentile,
     sessionRank: result.sessionRank,
@@ -151,40 +154,77 @@ export function buildSessionEvidenceView(
 export function buildVoxelSessionOverlays(
   session: CortexComparisonSession,
   roi: CanonicalRoi,
+  method: ClusteringMethod = 'kmeans_euclidean',
+  alignment?: ProjectionAxisAlignment | null,
 ): SessionClusterOverlay[] {
-  return session.roiResults[roi].stimuli.map((result) => {
-    const stimulus = session.stimuli.find((candidate) => candidate.id === result.stimulusId)!;
-    return {
+  const hierarchical = method === 'hierarchical_correlation';
+  // The stored upload PCA coordinates follow the k-means reference axes.
+  // Hierarchical plots can flip those axes, so never draw an unchecked overlay.
+  const axisAlignment = hierarchical ? alignment : { xSign: 1, ySign: 1 };
+  if (!axisAlignment) return [];
+  const jointHierarchy = session.roiResults[roi].jointHierarchy;
+  if (hierarchical && !jointHierarchy) return [];
+  const jointUploads = new Map(jointHierarchy?.members
+    .filter((member) => member.kind === 'uploaded').map((member) => [member.id, member]));
+  const stimuli = new Map(session.stimuli.map((stimulus) => [stimulus.id, stimulus]));
+
+  return session.roiResults[roi].stimuli.flatMap((result) => {
+    const stimulus = stimuli.get(result.stimulusId);
+    if (!stimulus) return [];
+    const member = jointUploads.get(result.stimulusId);
+    if (hierarchical && !member) return [];
+    return [{
       stimulusId: stimulus.id,
       displayName: stimulus.displayName,
       imageUrl: stimulus.imageUrl,
-      color: stimulus.color,
-      x: result.voxelProjection.x,
-      y: result.voxelProjection.y,
-      clusterId: result.voxelProjection.clusterId,
-      distance: result.voxelProjection.centroidDistance,
-    };
+      color: UPLOADED_STIMULUS_MARKER_COLOR,
+      x: result.voxelProjection.x * axisAlignment.xSign,
+      y: result.voxelProjection.y * axisAlignment.ySign,
+      clusterId: member && hierarchical ? member.clusterId : result.voxelProjection.clusterId,
+      distance: member && hierarchical ? member.distanceToMedoid : result.voxelProjection.centroidDistance,
+      assignmentMethod: hierarchical ? 'joint hierarchical clustering' as const : 'nearest-centroid assignment' as const,
+      ...(hierarchical && jointHierarchy && member
+        ? { medoidImageName: jointClusterMedoidName(jointHierarchy, member.clusterId, session) }
+        : {}),
+    }];
   });
 }
 
 export function buildOptionalSessionOverlays(
   session: CortexComparisonSession,
   results: OptionalProjectionResults | undefined,
+  method: ClusteringMethod = 'kmeans_euclidean',
+  alignment?: ProjectionAxisAlignment | null,
 ): SessionClusterOverlay[] {
   if (!results) return [];
+  const hierarchical = method === 'hierarchical_correlation';
+  const axisAlignment = hierarchical ? alignment : { xSign: 1, ySign: 1 };
+  if (!axisAlignment) return [];
+  const jointHierarchy = results.jointHierarchy;
+  if (hierarchical && !jointHierarchy) return [];
+  const jointUploads = new Map(jointHierarchy?.members
+    .filter((member) => member.kind === 'uploaded').map((member) => [member.id, member]));
+  const stimuli = new Map(session.stimuli.map((stimulus) => [stimulus.id, stimulus]));
+
   return results.stimuli.flatMap((result) => {
     if (!result.projection) return [];
-    const stimulus = session.stimuli.find((candidate) => candidate.id === result.stimulusId);
+    const member = jointUploads.get(result.stimulusId);
+    if (hierarchical && !member) return [];
+    const stimulus = stimuli.get(result.stimulusId);
     if (!stimulus) return [];
     return [{
       stimulusId: stimulus.id,
       displayName: stimulus.displayName,
       imageUrl: stimulus.imageUrl,
-      color: stimulus.color,
-      x: result.projection.x,
-      y: result.projection.y,
-      clusterId: result.projection.clusterId,
-      distance: result.projection.centroidDistance,
+      color: UPLOADED_STIMULUS_MARKER_COLOR,
+      x: result.projection.x * axisAlignment.xSign,
+      y: result.projection.y * axisAlignment.ySign,
+      clusterId: hierarchical && member ? member.clusterId : result.projection.clusterId,
+      distance: hierarchical && member ? member.distanceToMedoid : result.projection.centroidDistance,
+      assignmentMethod: hierarchical ? 'joint hierarchical clustering' as const : 'nearest-centroid assignment' as const,
+      ...(hierarchical && jointHierarchy && member
+        ? { medoidImageName: jointClusterMedoidName(jointHierarchy, member.clusterId, session) }
+        : {}),
     }];
   });
 }

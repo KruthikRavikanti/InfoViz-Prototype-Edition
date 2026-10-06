@@ -1,6 +1,6 @@
-# Cortex Visualization Prototype
+# Cortex Model & Stimulus Explorer
 
-This repository contains the current React/Vite prototype for comparing brain-region alignment scores across computer vision models and then drilling into image-level evidence for selected ROI x model pairs.
+This React/Vite visualization compares model alignment across brain regions and explores image responses for selected model–region pairs.
 
 ## What The App Does
 
@@ -9,6 +9,8 @@ This repository contains the current React/Vite prototype for comparing brain-re
 - Opens a details panel for a selected cell.
 - Ranks images by the matching ROI/model evidence column from the CSV.
 - Supports compare mode for two evidence-backed cells.
+- Opens the Voxel Selectivity Explorer, a separate 3D view of Subject 1 predicted response profiles, alongside the four image-cluster charts.
+- Shows uploaded-stimulus predictions on the NSD Subject 1 surface in the 3D Brain Map.
 - Includes a separate user study tab with an embedded form.
 
 ## Data In This Repo
@@ -27,6 +29,8 @@ The app loads data from `public/data/`:
   - DreamSim embedding clusters for the 185 images
 - `ground_truth_clusters/` and `ground_truth_clusters_hierarchical_corr/`
   - patient/ROI ground-truth fMRI clusters
+- `voxel_selectivity_atlas/`
+  - lazy-loaded, model-specific Subject 1 voxel-selectivity artifacts derived from the 185 reference predictions
 
 The app also serves image assets from `public/images/`.
 
@@ -61,6 +65,23 @@ python scripts/data/cluster_runner.py dreamsim-hierarchical \
   --out_dir public/data/dreamsim_clusters_hierarchical_corr
 ```
 
+Regenerate the Subject 1 artifacts for the Voxel Selectivity Explorer:
+
+```bash
+python scripts/data/build_selectivity_atlas_artifacts.py
+```
+
+This artifact builder follows the reviewed mentor pipeline exactly for clustering: per-voxel z-scoring across the
+185 images, PCA to 35 dimensions, L2 normalization, and Euclidean KMeans at fixed `k=14`. It uses only the audited
+Subject 1 prefixes (156 FFA, 518 EBA, and 170 PPA voxels) and fits them jointly so cluster labels have one shared
+meaning across ROIs. The 3D cosine-UMAP coordinates are display-only and are not anatomical positions.
+
+The supplied mentor script states that `k=14` was split-half stable, but it does not run that analysis. The browser
+therefore describes the 14 clusters as exploratory and keeps the analysis and six freshly computed split-half
+adjusted Rand indices in a collapsible **Method & quality** section. These diagnostics do not establish `k=14`
+as an optimal or biological parcellation. The source values are
+model predictions for the category-imbalanced Murty-185 stimulus set, not measured Subject 1 activity.
+
 ## Current Evidence Coverage
 
 The evidence pipeline is real, but partial.
@@ -77,6 +98,34 @@ This means the heatmap can show more models than the evidence panel can explain.
 - TypeScript
 - Vite
 - D3 utilities for loading and processing data
+
+## Visual Identity
+
+The visualization follows the sibling Virtual Cortex Lab: warm ivory surfaces, aubergine accents,
+Source Serif 4 headings, Inter controls, and IBM Plex Mono labels. Shared theme tokens live in
+`src/styles/global.css`; chart palettes remain independent so scientific color encodings keep their meaning.
+The Cortex masthead links home and back to the Lab, using `VITE_CORTEX_APP_URL` when configured.
+
+The four-chart layout distinguishes **Predicted-response clusters**, **Visual-feature clusters**,
+**DreamSim similarity clusters**, and **Measured fMRI clusters**. Their dots are images; dots in the
+Voxel Selectivity Explorer are voxels. Model alignment scores and mean predicted voxel responses
+are labeled separately. Fit metrics, source columns, mapping provenance, and extra comparison
+galleries remain available in expandable details rather than crowding the main views.
+
+In hierarchical mode, new upload sessions jointly cluster the 185 reference images and all uploads in the
+predicted-response and compatible visual-feature charts. Core uses the full reference-standardized vectors,
+pairwise correlation distance, average linkage, and the best silhouette among 2–5 cluster cuts. Cluster labels,
+combined sizes, representative previews, and the interactive dendrogram all use this session-specific fit.
+Uploads are actual tree leaves; medoids summarize the resulting clusters rather than assigning membership.
+Reference normalization and PCA display positions stay fixed. Upload coordinates are aligned only after
+all reference image IDs and coordinates pass a sign-only check; unverified axes suppress scatter markers
+without hiding the joint tree. The fit is computed once per new upload/model session and persisted, not
+recalculated on hover or refresh. Cluster labels and reference memberships may change between datasets;
+these exploratory predicted-response groups are not validated neural categories.
+
+Legacy sessions without a joint tree show reference-only hierarchical plots and instructions to reopen
+Explore visualization in Virtual Cortex. They never silently fall back to nearest-medoid assignments.
+k-means remains a fixed-reference overlay. DreamSim and measured-fMRI upload safeguards remain unchanged.
 
 ## Project Structure
 
@@ -140,22 +189,25 @@ If you want the Git history to stop tracking those files, remove them from the i
 ## Cortex comparison-session mode
 
 The standalone visualization remains the default. When Virtual Cortex opens a URL such as
-`http://localhost:5174/#session=<opaque-token>`, InfoViz retrieves the temporary comparison from Cortex Core,
+`http://localhost:5173/infoviz/#session=<opaque-token>`, InfoViz retrieves the temporary comparison from Cortex Core,
 validates it against the local reference manifest, removes the token from browser history after a successful load,
 and keeps the session only in memory.
 
-Copy `.env.example` to `.env` when the services use non-default origins:
+The sibling-repository development defaults are already equivalent to:
 
 ```bash
 VITE_CORTEX_CORE_URL=/cortex-core
 CORTEX_CORE_PROXY_TARGET=http://127.0.0.1:5556
+VITE_INFOVIZ_BASE_PATH=/infoviz/
 VITE_CORTEX_APP_URL=http://localhost:5173
 ```
 
-The relative Core URL uses the Vite development proxy, so Remote SSH users only
-need to forward InfoViz's port 5174. The server also listens on the university
-machine network interface; direct network deployments may instead use an
-absolute Core URL and must include the InfoViz origin in Core's allowed origins.
+In the three-service development setup, Cortex App proxies `/infoviz/` to this
+server. Remote SSH users therefore forward only Cortex App's port 5173; the
+browser never connects directly to ports 5174 or 5556. A direct visit to
+`http://localhost:5174` redirects to `/infoviz/` and remains standalone static
+mode. Set `VITE_INFOVIZ_BASE_PATH=/` only when a deployment must live at the
+origin root.
 
 The session view always labels the standardized comparison separately from the user's original Cortex request:
 comparison evidence uses NSD-1000 across FFA, PPA, and EBA. Uploaded images are predictions only and are never

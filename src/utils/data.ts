@@ -8,12 +8,13 @@ import type {
   WideCsvRow,
 } from '../types/data';
 import { loadClusteringData } from './clustering';
+import { publicPath } from './publicPath';
 
 const DEFAULT_ROI_FALLBACK: Roi[] = ['ffa', 'ppa', 'eba'];
 
-export const CSV_PATH = '/data/combined_image_means.csv';
-export const SCORES_PATH = '/data/murty185_zero_index.json';
-export const IMAGE_BASE_PATH = '/images';
+export const CSV_PATH = publicPath('/data/combined_image_means.csv');
+export const SCORES_PATH = publicPath('/data/murty185_zero_index.json');
+export const IMAGE_BASE_PATH = publicPath('/images');
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);

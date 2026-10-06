@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ClusteringPanel } from './ClusteringPanel';
 import { ImageGrid } from './ImageGrid';
 import { SessionEvidencePanel } from './SessionEvidencePanel';
@@ -12,12 +13,13 @@ import type {
   SelectedHeatmapCell,
   WideCsvRow,
 } from '../types/data';
-import type { CortexComparisonSession } from '../types/session';
+import type { CanonicalRoi, CortexComparisonSession } from '../types/session';
 import { copyText, downloadJson } from '../utils/browserActions';
 import { CLUSTERING_METHODS, findVoxelClusterSummary, loadVoxelClusterView } from '../utils/clustering';
 import { buildEvidenceView } from '../utils/evidence';
 import { inferModelCategory } from '../utils/modelTags';
 import { buildSessionEvidenceView } from '../utils/sessionEvidence';
+import { buildJointClusterView } from '../utils/jointClustering';
 
 type DetailsPanelProps = {
   heatmapCells: AggregateHeatmapCell[];
@@ -33,15 +35,53 @@ type DetailsPanelProps = {
 };
 
 const topKOptions = [6, 9, 12];
+const voxelRois: CanonicalRoi[] = ['ffa', 'eba', 'ppa'];
 type DetailTab = 'evidence' | 'clustering';
+type VoxelLoadStatus = 'idle' | 'loading' | 'error';
+type VoxelRoiStates = Record<CanonicalRoi, { view: ClusterView | null; status: VoxelLoadStatus }>;
+
+function makeVoxelRoiStates(status: VoxelLoadStatus = 'idle'): VoxelRoiStates {
+  return {
+    ffa: { view: null, status },
+    eba: { view: null, status },
+    ppa: { view: null, status },
+  };
+}
 
 function fmt(score: number | null) { return score === null ? '—' : score.toFixed(3); }
 function fmtV(v: number)           { return v.toFixed(3); }
 
 function ImageModal({ image, onClose }: { image: EvidenceImage; onClose: () => void }) {
   const [missing, setMissing] = useState(false);
-  return (
-    <div className="image-modal-backdrop" role="presentation" onClick={onClose}>
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const activeElement = document.activeElement;
+    const underlyingDialog = Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]'))
+      .find((dialog) => !dialog.contains(closeButtonRef.current));
+    const previousFocus = activeElement === document.body
+      ? underlyingDialog?.querySelector<HTMLElement>('button:not([disabled]), [tabindex="0"]') ?? activeElement
+      : activeElement;
+    closeButtonRef.current?.focus();
+    return () => {
+      if (previousFocus instanceof HTMLElement || previousFocus instanceof SVGElement) {
+        if (previousFocus.isConnected) previousFocus.focus();
+      }
+    };
+  }, []);
+
+  return createPortal(
+    <div className="image-modal-backdrop" role="presentation" onClick={onClose}
+         onKeyDown={(event) => {
+           if (event.key === 'Escape') {
+             event.preventDefault();
+             event.stopPropagation();
+             onClose();
+           } else if (event.key === 'Tab') {
+             event.preventDefault();
+             closeButtonRef.current?.focus();
+           }
+         }}>
       <div className="image-modal" role="dialog" aria-modal="true" aria-label={image.imageName}
            onClick={(e) => e.stopPropagation()}>
         <div className="image-modal-header">
@@ -49,19 +89,20 @@ function ImageModal({ image, onClose }: { image: EvidenceImage; onClose: () => v
             <h3>{image.imageName}</h3>
             <p>{image.valueLabel ?? `Value: ${fmtV(image.value)}`}</p>
           </div>
-          <button type="button" onClick={onClose}>Close</button>
+          <button ref={closeButtonRef} type="button" onClick={onClose}>Close</button>
         </div>
         {missing
           ? <span className="modal-missing-image">Image unavailable</span>
           : <img src={image.imageUrl} alt={image.imageName} onError={() => setMissing(true)} />}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
 export function DetailsPanel({
   heatmapCells: _heatmapCells,
-  imageCount,
+  imageCount: _imageCount,
   clustering,
   modelRoiColumns,
   onSelectCell: _onSelectCell,
@@ -75,8 +116,7 @@ export function DetailsPanel({
   const [activeTab, setActiveTab] = useState<DetailTab>('clustering');
   const [modalImage, setModalImage] = useState<EvidenceImage | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
-  const [voxelView, setVoxelView] = useState<ClusterView | null>(null);
-  const [voxelStatus, setVoxelStatus] = useState<'idle' | 'loading' | 'error'>('idle');
+  const [voxelRoiStates, setVoxelRoiStates] = useState<VoxelRoiStates>(() => makeVoxelRoiStates());
   const [clusteringMethod, setClusteringMethod] = useState<ClusteringMethod>('kmeans_euclidean');
 
   const evidenceView = useMemo(
@@ -101,6 +141,9 @@ export function DetailsPanel({
     () => (selectedCell ? findVoxelClusterSummary(activeVoxelSummaries, selectedCell) : null),
     [activeVoxelSummaries, selectedCell],
   );
+  const selectedVoxelRoi = selectedCell
+    ? voxelRois.find((roi) => roi === selectedCell.roi) ?? null
+    : null;
 
   useEffect(() => {
     if (selectedCell) {
@@ -110,21 +153,51 @@ export function DetailsPanel({
 
   useEffect(() => {
     let ignore = false;
-    if (!selectedCell || !voxelSummary) {
-      setVoxelView(null);
-      setVoxelStatus('idle');
+    const selectedModel = selectedCell?.model;
+    if (!selectedModel) {
+      setVoxelRoiStates(makeVoxelRoiStates());
       return () => { ignore = true; };
     }
-    setVoxelStatus('loading');
-    setVoxelView(null);
-    loadVoxelClusterView(activeVoxelSummaries, selectedCell)
-      .then((v) => { if (!ignore) { setVoxelView(v); setVoxelStatus('idle'); } })
-      .catch(() => { if (!ignore) { setVoxelView(null); setVoxelStatus('error'); } });
+
+    setVoxelRoiStates(makeVoxelRoiStates('loading'));
+
+    voxelRois.forEach((roi) => {
+      loadVoxelClusterView(activeVoxelSummaries, { model: selectedModel, roi })
+        .then((view) => {
+          if (ignore) return;
+          setVoxelRoiStates((current) => ({
+            ...current,
+            [roi]: { view, status: 'idle' },
+          }));
+        })
+        .catch(() => {
+          if (ignore) return;
+          setVoxelRoiStates((current) => ({
+            ...current,
+            [roi]: { view: null, status: 'error' },
+          }));
+        });
+    });
+
     return () => { ignore = true; };
-  }, [activeVoxelSummaries, selectedCell, voxelSummary]);
+  }, [activeVoxelSummaries, selectedCell?.model]);
 
   function payload() {
     if (!selectedCell) return null;
+    const activeSession = session?.comparison.model === selectedCell.model ? session : null;
+    const views = Object.fromEntries(voxelRois.map((roi) => {
+      const referenceView = voxelRoiStates[roi].view;
+      const hierarchy = activeSession?.roiResults[roi].jointHierarchy;
+      const view = clusteringMethod === 'hierarchical_correlation' && referenceView && hierarchy && activeSession
+        ? buildJointClusterView(referenceView, hierarchy, activeSession) ?? referenceView
+        : referenceView;
+      return [roi, view];
+    })) as Record<CanonicalRoi, ClusterView | null>;
+    const activeView = selectedVoxelRoi ? views[selectedVoxelRoi] : null;
+    const visualHierarchy = activeSession?.visualResults?.jointHierarchy;
+    const visualView = clusteringMethod === 'hierarchical_correlation' && activeVisualView && visualHierarchy && activeSession
+      ? buildJointClusterView(activeVisualView, visualHierarchy, activeSession) ?? activeVisualView
+      : activeVisualView;
     return {
       roi: selectedCell.roi,
       model: selectedCell.model,
@@ -137,9 +210,11 @@ export function DetailsPanel({
         : null,
       clustering: {
         clusteringMethod,
-        voxelSummary,
-        voxelClusters: voxelView,
-        visualSummary: activeVisualSummary,
+        voxelSummary: activeView?.summary ?? voxelSummary,
+        voxelClusters: activeView,
+        voxelClustersByRoi: views,
+        visualSummary: visualView?.summary ?? activeVisualSummary,
+        visualClusters: visualView,
         dreamsimSummary: activeDreamsimSummary,
       },
       sessionEvidence: sessionEvidenceView,
@@ -164,19 +239,11 @@ export function DetailsPanel({
   if (!selectedCell) {
     return (
       <aside className="details-panel" aria-label="Details panel">
-        <p className="eyebrow">Inspector</p>
-        <h2>Cell details</h2>
-        <p style={{ marginTop: 8, marginBottom: 14, fontSize: '.82rem' }}>
-          Click a heatmap cell to see image-level evidence ranked by response strength.
-        </p>
+        <p className="eyebrow">Explore</p>
+        <h2>Choose a model &amp; region</h2>
         <div className="empty-state-card">
-          <h3>Nothing selected</h3>
-          <p>Pick any cell in the heatmap, or enable compare mode to select two.</p>
+          <p>Select a heatmap cell to explore image responses and clusters.</p>
         </div>
-        <dl className="details-list">
-          <div><dt>Selection</dt><dd>None</dd></div>
-          <div><dt>Loaded images</dt><dd>{imageCount}</dd></div>
-        </dl>
       </aside>
     );
   }
@@ -187,7 +254,7 @@ export function DetailsPanel({
 
       {/* Header */}
       <div className="evidence-panel-header">
-        <p className="eyebrow">Selected cell</p>
+        <p className="eyebrow">Model &amp; region</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           <span className="model-tag" style={{ textTransform: 'uppercase', fontWeight: 700 }}>
             {selectedCell.roi}
@@ -196,9 +263,9 @@ export function DetailsPanel({
         </div>
         <h2>{selectedCell.model}</h2>
         <dl className="selected-score-strip">
-          <div><dt>Score</dt><dd>{fmt(selectedCell.score)}</dd></div>
+          <div><dt>Alignment</dt><dd>{fmt(selectedCell.score)}</dd></div>
           <div><dt>ROI rank</dt><dd>{selectedCell.rankWithinRoi === null ? '—' : `#${selectedCell.rankWithinRoi}`}</dd></div>
-          <div><dt>Overall</dt><dd>{fmt(selectedCell.overallScore)}</dd></div>
+          <div><dt>Overall alignment</dt><dd>{fmt(selectedCell.overallScore)}</dd></div>
         </dl>
       </div>
 
@@ -211,7 +278,7 @@ export function DetailsPanel({
           aria-selected={activeTab === 'evidence'}
           onClick={() => setActiveTab('evidence')}
         >
-          Image evidence
+          Image responses
         </button>
         <button
           type="button"
@@ -220,12 +287,12 @@ export function DetailsPanel({
           aria-selected={activeTab === 'clustering'}
           onClick={() => setActiveTab('clustering')}
         >
-          Clustering
+          Image clusters
         </button>
       </div>
 
       {/* Evidence tab */}
-      <section className="image-evidence-tab" hidden={activeTab !== 'evidence'} aria-label="Image evidence">
+      <section className="image-evidence-tab" hidden={activeTab !== 'evidence'} aria-label="Image responses">
         {sessionEvidenceView ? (
           <SessionEvidencePanel
             view={sessionEvidenceView}
@@ -234,10 +301,8 @@ export function DetailsPanel({
           />
         ) : !evidenceView ? (
           <div className="evidence-empty-state">
-            <h3>No image-level data</h3>
-            <p>
-              No CSV column found for <strong>{selectedCell.model}_{selectedCell.roi}</strong>.
-            </p>
+            <h3>Image responses unavailable</h3>
+            <p>No per-image responses are available for this model and region.</p>
           </div>
         ) : (
           <>
@@ -248,32 +313,34 @@ export function DetailsPanel({
                 {actionMsg && <span>{actionMsg}</span>}
               </div>
               <label className="evidence-control">
-                Images per tier
+                Images per group
                 <select value={topK} onChange={(e) => setTopK(Number(e.target.value))}>
-                  {topKOptions.map((k) => <option key={k} value={k}>Top / bottom {k}</option>)}
+                  {topKOptions.map((k) => <option key={k} value={k}>{k} highest / lowest</option>)}
                 </select>
               </label>
-              <dl className="summary-card-grid evidence-mini-stats">
-                <div><dt>Max value</dt><dd>{fmtV(evidenceView.stats.max)}</dd></div>
-                <div><dt>Min value</dt><dd>{fmtV(evidenceView.stats.min)}</dd></div>
-              </dl>
             </div>
-            <p className="evidence-column-note">
-              Column: <strong>{evidenceView.columnName}</strong>
-            </p>
+            <p className="evidence-value-label">Images ranked by mean predicted voxel response.</p>
             <div className="evidence-tier-grid">
-              <ImageGrid title="Top images" images={evidenceView.topImages} onOpenImage={setModalImage} compact />
-              <ImageGrid title="Bottom images" images={evidenceView.bottomImages} onOpenImage={setModalImage} compact />
+              <ImageGrid title="Highest predicted responses" images={evidenceView.topImages} onOpenImage={setModalImage} compact />
+              <ImageGrid title="Lowest predicted responses" images={evidenceView.bottomImages} onOpenImage={setModalImage} compact />
             </div>
+            <details className="evidence-source-details">
+              <summary>Response details</summary>
+              <p>Values are mean predicted voxel responses, not model alignment scores.</p>
+              <dl className="summary-card-grid evidence-mini-stats">
+                <div><dt>Highest response</dt><dd>{fmtV(evidenceView.stats.max)}</dd></div>
+                <div><dt>Lowest response</dt><dd>{fmtV(evidenceView.stats.min)}</dd></div>
+              </dl>
+              <p className="evidence-column-note">Source column: <strong>{evidenceView.columnName}</strong></p>
+            </details>
           </>
         )}
       </section>
 
       {/* Clustering tab */}
-      <section hidden={activeTab !== 'clustering'} aria-label="Clustering">
+      <section hidden={activeTab !== 'clustering'} aria-label="Image clusters">
         <ClusteringPanel
-          voxelView={voxelView}
-          voxelStatus={voxelStatus}
+          voxelRoiStates={voxelRoiStates}
           clusteringMethod={clusteringMethod}
           clusteringMethodOptions={CLUSTERING_METHODS}
           onClusteringMethodChange={setClusteringMethod}
@@ -283,7 +350,9 @@ export function DetailsPanel({
           groundTruthPatients={activeGroundTruthPatients}
           onOpenImage={setModalImage}
           session={sessionEvidenceView ? session : null}
+          selectedModel={selectedCell.model}
           selectedRoi={selectedCell.roi}
+          selectivityAtlasAvailable={Boolean(voxelSummary)}
           focusedStimulusId={focusedStimulusId}
         />
       </section>

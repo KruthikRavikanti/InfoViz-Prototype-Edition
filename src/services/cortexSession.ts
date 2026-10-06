@@ -1,11 +1,15 @@
 import {
   CANONICAL_ROIS,
+  SUBJECT_ONE_ROI_VOXEL_COUNTS,
+  type BrainMapResults,
   type CanonicalRoi,
   type CortexComparisonSession,
   type FeatureHierarchicalAssignment,
   type FeatureProjection,
   type FeatureReferenceNeighbor,
   type HierarchicalAssignment,
+  type JointHierarchy,
+  type JointHierarchyMember,
   type OptionalProjectionResults,
   type PublicReferenceManifest,
   type ReferenceNeighbor,
@@ -15,10 +19,11 @@ import {
   type StimulusRoiResult,
   type VoxelProjection,
 } from '../types/session';
+import { publicPath } from '../utils/publicPath';
 
-const DEFAULT_CORTEX_CORE_URL = 'http://localhost:5556';
+const DEFAULT_CORTEX_CORE_URL = '/cortex-core';
 const DEFAULT_CORTEX_APP_URL = 'http://localhost:5173';
-const PUBLIC_REFERENCE_MANIFEST_PATH = '/data/reference_manifest.json';
+const PUBLIC_REFERENCE_MANIFEST_PATH = publicPath('/data/reference_manifest.json');
 
 type JsonObject = Record<string, unknown>;
 
@@ -150,7 +155,7 @@ function parseNeighbor(value: unknown, label: string, baseUrl: string): Referenc
   }
   return {
     imageName,
-    imageUrl: `/images/${encodeURIComponent(imageName)}`,
+    imageUrl: publicPath(`/images/${encodeURIComponent(imageName)}`),
     value: finite(raw.value, `${label}.value`),
     rank,
     ...(distance === undefined ? {} : { distance }),
@@ -186,6 +191,161 @@ function parseHierarchicalAssignment(value: unknown, label: string, baseUrl: str
     clusterId: identifier(raw.cluster_id, `${label}.cluster_id`),
     medoid: parseNeighbor(raw.medoid, `${label}.medoid`, baseUrl),
     distance: finite(raw.distance, `${label}.distance`),
+  };
+}
+
+type JointHierarchyContext = {
+  referenceCount: number;
+  uploadedIds: string[];
+};
+
+function correlationDistance(value: unknown, label: string): number {
+  const parsed = finite(value, label);
+  if (parsed < 0 || parsed > 2) {
+    throw new CortexSessionError('invalid', `${label} must be between 0 and 2.`);
+  }
+  return parsed;
+}
+
+function parseJointHierarchy(
+  value: unknown,
+  label: string,
+  context: JointHierarchyContext,
+): JointHierarchy {
+  const raw = object(value, label);
+  const requiredMetadata = {
+    schema_version: 1,
+    method: 'hierarchical_correlation',
+    distance_metric: 'correlation',
+    linkage_method: 'average',
+    normalization: 'reference_zscore',
+  };
+  for (const [key, expected] of Object.entries(requiredMetadata)) {
+    if (raw[key] !== expected) {
+      throw new CortexSessionError('invalid', `${label}.${key} must be ${JSON.stringify(expected)}.`);
+    }
+  }
+
+  const referenceCount = integer(raw.reference_count, `${label}.reference_count`);
+  const uploadedCount = integer(raw.uploaded_count, `${label}.uploaded_count`);
+  if (referenceCount !== context.referenceCount || uploadedCount !== context.uploadedIds.length) {
+    throw new CortexSessionError('invalid', `${label} contains inconsistent reference or uploaded image counts.`);
+  }
+  const memberCount = referenceCount + uploadedCount;
+  const clusterCount = integer(raw.cluster_count, `${label}.cluster_count`);
+  if (clusterCount < 1 || clusterCount > 5 || clusterCount >= memberCount) {
+    throw new CortexSessionError('invalid', `${label}.cluster_count is out of range.`);
+  }
+  const silhouette = raw.silhouette === null
+    ? null
+    : finite(raw.silhouette, `${label}.silhouette`);
+  if (
+    (silhouette !== null && (silhouette < -1 || silhouette > 1))
+    || ((clusterCount === 1) !== (silhouette === null))
+  ) {
+    throw new CortexSessionError('invalid', `${label}.silhouette must be in [-1, 1] for multiple clusters, or null for one cluster.`);
+  }
+  const members = array(raw.members, `${label}.members`).map((entry, index): JointHierarchyMember => {
+    const memberLabel = `${label}.members[${index}]`;
+    const member = object(entry, memberLabel);
+    const kind = index < referenceCount ? 'reference' : 'uploaded';
+    if (member.kind !== kind) {
+      throw new CortexSessionError('invalid', `${memberLabel}.kind must be "${kind}"; reference members must precede uploads.`);
+    }
+    const id = string(member.id, `${memberLabel}.id`);
+    if (kind === 'uploaded' && id !== context.uploadedIds[index - referenceCount]) {
+      throw new CortexSessionError('invalid', `${memberLabel}.id does not match the uploaded stimulus order.`);
+    }
+    const clusterId = integer(member.cluster_id, `${memberLabel}.cluster_id`);
+    if (clusterId < 0 || clusterId >= clusterCount) {
+      throw new CortexSessionError('invalid', `${memberLabel}.cluster_id is out of range.`);
+    }
+    return {
+      kind,
+      id,
+      clusterId: String(clusterId),
+      distanceToMedoid: correlationDistance(member.distance_to_medoid, `${memberLabel}.distance_to_medoid`),
+    };
+  });
+  if (members.length !== memberCount) {
+    throw new CortexSessionError('invalid', `${label}.members must contain every reference and uploaded image exactly once.`);
+  }
+  const referenceIds = members.slice(0, referenceCount).map((member) => member.id);
+  if (new Set(referenceIds).size !== referenceCount) {
+    throw new CortexSessionError('invalid', `${label}.members contains duplicate reference image IDs.`);
+  }
+  if (new Set(members.map((member) => member.clusterId)).size !== clusterCount) {
+    throw new CortexSessionError('invalid', `${label}.members must contain contiguous, non-empty cluster IDs.`);
+  }
+
+  const rawLinkage = array(raw.linkage, `${label}.linkage`);
+  if (rawLinkage.length !== memberCount - 1) {
+    throw new CortexSessionError('invalid', `${label}.linkage must contain one merge for every non-root tree node.`);
+  }
+  const descendantCounts = Array.from({ length: memberCount }, () => 1);
+  const usedNodes = new Set<number>();
+  let previousDistance = 0;
+  const linkage = rawLinkage.map((entry, index): [number, number, number, number] => {
+    const rowLabel = `${label}.linkage[${index}]`;
+    const row = array(entry, rowLabel);
+    if (row.length !== 4) {
+      throw new CortexSessionError('invalid', `${rowLabel} must contain two child indices, a distance, and a descendant count.`);
+    }
+    const left = integer(row[0], `${rowLabel}[0]`);
+    const right = integer(row[1], `${rowLabel}[1]`);
+    const parent = memberCount + index;
+    if (
+      left < 0 || right < 0 || left >= parent || right >= parent
+      || left === right || usedNodes.has(left) || usedNodes.has(right)
+    ) {
+      throw new CortexSessionError('invalid', `${rowLabel} contains invalid or reused child nodes.`);
+    }
+    const distance = correlationDistance(row[2], `${rowLabel}[2]`);
+    if (distance < previousDistance - 1e-12) {
+      throw new CortexSessionError('invalid', `${rowLabel}[2] must preserve monotonic average-linkage distances.`);
+    }
+    const count = integer(row[3], `${rowLabel}[3]`);
+    if (count !== descendantCounts[left] + descendantCounts[right]) {
+      throw new CortexSessionError('invalid', `${rowLabel}[3] does not match its descendant count.`);
+    }
+    usedNodes.add(left);
+    usedNodes.add(right);
+    descendantCounts.push(count);
+    previousDistance = distance;
+    return [left, right, distance, count];
+  });
+  const root = 2 * memberCount - 2;
+  if (usedNodes.size !== root || descendantCounts[root] !== memberCount) {
+    throw new CortexSessionError('invalid', `${label}.linkage does not form one complete tree.`);
+  }
+
+  const medoidIndices = array(raw.medoid_indices, `${label}.medoid_indices`).map((entry, clusterId) => {
+    const index = integer(entry, `${label}.medoid_indices[${clusterId}]`);
+    if (index < 0 || index >= memberCount || members[index].clusterId !== String(clusterId)) {
+      throw new CortexSessionError('invalid', `${label}.medoid_indices[${clusterId}] must identify a member of that cluster.`);
+    }
+    if (members[index].distanceToMedoid > 1e-12) {
+      throw new CortexSessionError('invalid', `${label}.medoid_indices[${clusterId}] must identify a representative with zero self-distance.`);
+    }
+    return index;
+  });
+  if (medoidIndices.length !== clusterCount) {
+    throw new CortexSessionError('invalid', `${label}.medoid_indices must contain one representative per cluster.`);
+  }
+
+  return {
+    schemaVersion: 1,
+    method: 'hierarchical_correlation',
+    distanceMetric: 'correlation',
+    linkageMethod: 'average',
+    normalization: 'reference_zscore',
+    referenceCount,
+    uploadedCount,
+    clusterCount,
+    silhouette,
+    members,
+    linkage,
+    medoidIndices,
   };
 }
 
@@ -232,13 +392,21 @@ function parseStimulusRoiResult(value: unknown, label: string, baseUrl: string):
   };
 }
 
-function parseRoiResult(value: unknown, roi: CanonicalRoi, baseUrl: string): SessionRoiResult {
+function parseRoiResult(
+  value: unknown,
+  roi: CanonicalRoi,
+  baseUrl: string,
+  jointContext: JointHierarchyContext,
+): SessionRoiResult {
   const raw = object(value, `roi_results.${roi}`);
   return {
     stimuli: array(raw.stimuli, `roi_results.${roi}.stimuli`).map((stimulus, index) =>
       parseStimulusRoiResult(stimulus, `roi_results.${roi}.stimuli[${index}]`, baseUrl)),
     topReferences: parseNeighborList(raw.top_references, `roi_results.${roi}.top_references`, baseUrl),
     bottomReferences: parseNeighborList(raw.bottom_references, `roi_results.${roi}.bottom_references`, baseUrl),
+    ...(raw.joint_hierarchy === undefined ? {} : {
+      jointHierarchy: parseJointHierarchy(raw.joint_hierarchy, `roi_results.${roi}.joint_hierarchy`, jointContext),
+    }),
   };
 }
 
@@ -250,7 +418,7 @@ function parseFeatureNeighbor(
   if (typeof value === 'string' && value.trim() !== '') {
     return {
       imageName: value,
-      imageUrl: `/images/${encodeURIComponent(value)}`,
+      imageUrl: publicPath(`/images/${encodeURIComponent(value)}`),
       distance: fallbackDistance ?? 0,
     };
   }
@@ -259,7 +427,7 @@ function parseFeatureNeighbor(
   if (raw.image_url !== undefined && raw.image_url !== null) string(raw.image_url, `${label}.image_url`);
   return {
     imageName,
-    imageUrl: `/images/${encodeURIComponent(imageName)}`,
+    imageUrl: publicPath(`/images/${encodeURIComponent(imageName)}`),
     distance: raw.distance === undefined && fallbackDistance !== undefined
       ? fallbackDistance
       : finite(raw.distance, `${label}.distance`),
@@ -292,7 +460,11 @@ function parseFeatureHierarchicalAssignment(value: unknown, label: string): Feat
   };
 }
 
-function parseOptionalProjectionResults(value: unknown, label: string): OptionalProjectionResults {
+function parseOptionalProjectionResults(
+  value: unknown,
+  label: string,
+  jointContext: JointHierarchyContext,
+): OptionalProjectionResults {
   const raw = object(value, label);
   return {
     stimuli: array(raw.stimuli, `${label}.stimuli`).map((entry, index) => {
@@ -309,6 +481,72 @@ function parseOptionalProjectionResults(value: unknown, label: string): Optional
           : parseFeatureHierarchicalAssignment(item.hierarchical_assignment, `${itemLabel}.hierarchical_assignment`),
       };
     }),
+    ...(raw.joint_hierarchy === undefined ? {} : {
+      jointHierarchy: parseJointHierarchy(raw.joint_hierarchy, `${label}.joint_hierarchy`, jointContext),
+    }),
+  };
+}
+
+function parseBrainMapResults(value: unknown): BrainMapResults {
+  const label = 'brain_map_results';
+  const raw = object(value, label);
+  if (raw.schema_version !== 1) {
+    throw new CortexSessionError('invalid', `${label}.schema_version must be 1.`);
+  }
+  if (raw.subject_id !== 's1') {
+    throw new CortexSessionError('invalid', `${label}.subject_id must be "s1".`);
+  }
+  if (raw.response_space !== 'nsd_1000_subject1_floc_t7_v1') {
+    throw new CortexSessionError(
+      'invalid',
+      `${label}.response_space must be "nsd_1000_subject1_floc_t7_v1".`,
+    );
+  }
+
+  const rawCounts = object(raw.roi_voxel_counts, `${label}.roi_voxel_counts`);
+  const roiVoxelCounts = Object.fromEntries(CANONICAL_ROIS.map((roi) => {
+    const count = integer(rawCounts[roi], `${label}.roi_voxel_counts.${roi}`);
+    if (count !== SUBJECT_ONE_ROI_VOXEL_COUNTS[roi]) {
+      throw new CortexSessionError(
+        'invalid',
+        `${label}.roi_voxel_counts.${roi} must be ${SUBJECT_ONE_ROI_VOXEL_COUNTS[roi]}.`,
+      );
+    }
+    return [roi, count];
+  })) as Record<CanonicalRoi, number>;
+
+  const stimuli = array(raw.stimuli, `${label}.stimuli`).map((value, stimulusIndex) => {
+    const stimulusLabel = `${label}.stimuli[${stimulusIndex}]`;
+    const stimulus = object(value, stimulusLabel);
+    const rawResponses = object(stimulus.roi_responses, `${stimulusLabel}.roi_responses`);
+    const roiResponses = Object.fromEntries(CANONICAL_ROIS.map((roi) => {
+      const expectedLength = roiVoxelCounts[roi];
+      const responses = array(rawResponses[roi], `${stimulusLabel}.roi_responses.${roi}`).map(
+        (response, responseIndex) => finite(
+          response,
+          `${stimulusLabel}.roi_responses.${roi}[${responseIndex}]`,
+        ),
+      );
+      if (responses.length !== expectedLength) {
+        throw new CortexSessionError(
+          'invalid',
+          `${stimulusLabel}.roi_responses.${roi} must contain ${expectedLength} responses.`,
+        );
+      }
+      return [roi, responses];
+    })) as Record<CanonicalRoi, number[]>;
+    return {
+      stimulusId: string(stimulus.stimulus_id, `${stimulusLabel}.stimulus_id`),
+      roiResponses,
+    };
+  });
+
+  return {
+    schemaVersion: 1,
+    subjectId: 's1',
+    responseSpace: 'nsd_1000_subject1_floc_t7_v1',
+    roiVoxelCounts,
+    stimuli,
   };
 }
 
@@ -366,8 +604,12 @@ export function validateComparisonSession(
   }
 
   const rawRoiResults = object(raw.roi_results, 'roi_results');
+  const jointContext: JointHierarchyContext = {
+    referenceCount: comparison.reference_count,
+    uploadedIds: stimuli.map((stimulus) => stimulus.id),
+  };
   const roiResults = Object.fromEntries(
-    CANONICAL_ROIS.map((roi) => [roi, parseRoiResult(rawRoiResults[roi], roi, baseUrl)]),
+    CANONICAL_ROIS.map((roi) => [roi, parseRoiResult(rawRoiResults[roi], roi, baseUrl, jointContext)]),
   ) as Record<CanonicalRoi, SessionRoiResult>;
   const expectedIds = [...stimuli.map((stimulus) => stimulus.id)].sort();
   for (const roi of CANONICAL_ROIS) {
@@ -387,15 +629,45 @@ export function validateComparisonSession(
 
   const visualResults = raw.visual_results === undefined || raw.visual_results === null
     ? undefined
-    : parseOptionalProjectionResults(raw.visual_results, 'visual_results');
+    : parseOptionalProjectionResults(raw.visual_results, 'visual_results', jointContext);
   const dreamsimResults = raw.dreamsim_results === undefined || raw.dreamsim_results === null
     ? undefined
-    : parseOptionalProjectionResults(raw.dreamsim_results, 'dreamsim_results');
+    : parseOptionalProjectionResults(raw.dreamsim_results, 'dreamsim_results', jointContext);
   for (const [label, results] of [['visual_results', visualResults], ['dreamsim_results', dreamsimResults]] as const) {
     if (!results) continue;
     const actualIds = results.stimuli.map((stimulus) => stimulus.stimulusId).sort();
     if (actualIds.length !== expectedIds.length || actualIds.some((id, index) => id !== expectedIds[index])) {
       throw new CortexSessionError('invalid', `${label} does not contain every uploaded stimulus exactly once.`);
+    }
+  }
+
+  const jointHierarchies = [
+    ...CANONICAL_ROIS.map((roi) => roiResults[roi].jointHierarchy),
+    visualResults?.jointHierarchy,
+    dreamsimResults?.jointHierarchy,
+  ].filter((hierarchy): hierarchy is JointHierarchy => hierarchy !== undefined);
+  const firstJointHierarchy = jointHierarchies[0];
+  if (firstJointHierarchy) {
+    const referenceIds = new Set(
+      firstJointHierarchy.members.slice(0, firstJointHierarchy.referenceCount).map((member) => member.id),
+    );
+    for (const hierarchy of jointHierarchies.slice(1)) {
+      if (hierarchy.members.slice(0, hierarchy.referenceCount).some((member) => !referenceIds.has(member.id))) {
+        throw new CortexSessionError('invalid', 'Joint hierarchies do not contain the same reference image IDs.');
+      }
+    }
+  }
+
+  const brainMapResults = raw.brain_map_results === undefined || raw.brain_map_results === null
+    ? undefined
+    : parseBrainMapResults(raw.brain_map_results);
+  if (brainMapResults) {
+    const actualIds = brainMapResults.stimuli.map((stimulus) => stimulus.stimulusId).sort();
+    if (actualIds.length !== expectedIds.length || actualIds.some((id, index) => id !== expectedIds[index])) {
+      throw new CortexSessionError(
+        'invalid',
+        'brain_map_results does not contain every uploaded stimulus exactly once.',
+      );
     }
   }
 
@@ -419,6 +691,7 @@ export function validateComparisonSession(
     roiResults,
     ...(visualResults ? { visualResults } : {}),
     ...(dreamsimResults ? { dreamsimResults } : {}),
+    ...(brainMapResults ? { brainMapResults } : {}),
   };
 }
 

@@ -86,16 +86,16 @@ function CellCard({
         </div>
       </div>
       <dl className="compare-metrics">
-        <div><dt>Score</dt><dd>{fmt(cell.score)}</dd></div>
+        <div><dt>Alignment</dt><dd>{fmt(cell.score)}</dd></div>
         <div><dt>ROI rank</dt><dd>{cell.rankWithinRoi === null ? '—' : `#${cell.rankWithinRoi}`}</dd></div>
       </dl>
       {evidenceView ? (
         <>
-          <ImageGrid title={`Top ${label}`}    images={evidenceView.topImages}    onOpenImage={onOpenImage} compact />
-          <ImageGrid title={`Bottom ${label}`} images={evidenceView.bottomImages} onOpenImage={onOpenImage} compact />
+          <ImageGrid title={`Highest responses · ${label}`} images={evidenceView.topImages} onOpenImage={onOpenImage} compact />
+          <ImageGrid title={`Lowest responses · ${label}`} images={evidenceView.bottomImages} onOpenImage={onOpenImage} compact />
         </>
       ) : (
-        <p className="compare-empty">No matching CSV column found.</p>
+        <p className="compare-empty">Image responses unavailable.</p>
       )}
     </article>
   );
@@ -129,7 +129,7 @@ function ClusterOverlapMatrix({ comparison }: { comparison: ClusterComparisonSum
                 <span
                   className="compare-cluster-matrix-cell"
                   key={`${aLabel}-${bLabel}`}
-                  style={{ backgroundColor: `rgba(42,125,91,${0.08 + intensity * 0.48})` }}
+                  style={{ backgroundColor: `color-mix(in srgb, var(--accent) ${(0.08 + intensity * 0.48) * 100}%, transparent)` }}
                   title={`A${aLabel} / B${bLabel}: ${count} images`}
                 >
                   {count}
@@ -159,7 +159,7 @@ function ClusterComparisonSection({
     return (
       <section className="compare-cluster-section">
         <div>
-          <h3>Voxel clustering similarity</h3>
+          <h3>Cluster agreement</h3>
           <p>Loading cluster assignments…</p>
         </div>
       </section>
@@ -170,7 +170,7 @@ function ClusterComparisonSection({
     return (
       <section className="compare-cluster-section">
         <div>
-          <h3>Voxel clustering similarity</h3>
+          <h3>Cluster agreement</h3>
           <p>No cluster assignments were available for both selected cells.</p>
         </div>
       </section>
@@ -180,8 +180,8 @@ function ClusterComparisonSection({
   return (
     <section className="compare-cluster-section">
       <div>
-        <h3>Voxel clustering similarity</h3>
-        <p>Labels are compared as partitions, so cluster names do not need to match.</p>
+        <h3>Cluster agreement</h3>
+        <p>Compare predicted-response image clusters; cluster labels need not match.</p>
       </div>
 
       <div className="compare-cluster-grid">
@@ -194,21 +194,26 @@ function ClusterComparisonSection({
                 <span>{method.description}</span>
               </div>
               <dl className="compare-cluster-metrics">
-                <div><dt>ARI</dt><dd>{fmt(comparison.adjustedRandIndex)}</dd></div>
-                <div><dt>NMI</dt><dd>{fmt(comparison.normalizedMutualInformation)}</dd></div>
-                <div><dt>Pair agreement</dt><dd>{fmtRatio(comparison.pairAgreement)}</dd></div>
-                <div><dt>Co-cluster Jaccard</dt><dd>{fmtRatio(comparison.coClusterJaccard)}</dd></div>
-                <div><dt>Images</dt><dd>{comparison.sharedImageCount}</dd></div>
-                <div><dt>Clusters A/B</dt><dd>{comparison.clusterCountA} / {comparison.clusterCountB}</dd></div>
+                <div><dt title="Adjusted Rand index: agreement between image cluster assignments, adjusted for chance">ARI</dt><dd>{fmt(comparison.adjustedRandIndex)}</dd></div>
+                <div><dt title="Normalized mutual information between image cluster assignments">NMI</dt><dd>{fmt(comparison.normalizedMutualInformation)}</dd></div>
               </dl>
-              <ClusterOverlapMatrix comparison={comparison} />
-              <div className="compare-cluster-intersections">
-                {comparison.largestIntersections.map((intersection) => (
-                  <span key={`${intersection.aLabel}-${intersection.bLabel}`}>
-                    A{intersection.aLabel} / B{intersection.bLabel}: {intersection.count}
-                  </span>
-                ))}
-              </div>
+              <details className="compare-cluster-details">
+                <summary>Overlap matrix &amp; details</summary>
+                <dl className="compare-cluster-metrics">
+                  <div><dt>Pair agreement</dt><dd>{fmtRatio(comparison.pairAgreement)}</dd></div>
+                  <div><dt>Co-cluster Jaccard</dt><dd>{fmtRatio(comparison.coClusterJaccard)}</dd></div>
+                  <div><dt>Images</dt><dd>{comparison.sharedImageCount}</dd></div>
+                  <div><dt>Clusters A/B</dt><dd>{comparison.clusterCountA} / {comparison.clusterCountB}</dd></div>
+                </dl>
+                <ClusterOverlapMatrix comparison={comparison} />
+                <div className="compare-cluster-intersections">
+                  {comparison.largestIntersections.map((intersection) => (
+                    <span key={`${intersection.aLabel}-${intersection.bLabel}`}>
+                      A{intersection.aLabel} / B{intersection.bLabel}: {intersection.count}
+                    </span>
+                  ))}
+                </div>
+              </details>
             </article>
           );
         })}
@@ -310,14 +315,14 @@ export function CompareDrawer({
         className="compare-drawer compare-modal"
         role="dialog"
         aria-modal="true"
-        aria-label="Compare two cells"
+        aria-label="Compare selections"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Heading */}
         <div className="compare-drawer-heading">
           <div>
-            <h2>Compare</h2>
-            <p>Image overlap, score differences, and rank similarity between the two selected cells.</p>
+            <h2>Compare selections</h2>
+            <p>Compare image responses, rankings, and clusters for A and B.</p>
           </div>
           <button className="compare-close-button" type="button" onClick={() => onCompareModeChange(false)}>
             Close &thinsp; <kbd style={{ fontFamily: 'inherit', fontSize: '.72rem', opacity: .7 }}>Esc</kbd>
@@ -325,8 +330,6 @@ export function CompareDrawer({
         </div>
 
         <div className="compare-drawer-body">
-          <p className="compare-selection-note">{compareCells.length} / 2 cells selected</p>
-
           {/* Side-by-side cards */}
           <div className="compare-card-grid">
             <CellCard label="A" cell={cellA} evidenceView={evidenceA} onOpenImage={setModalImage} />
@@ -337,28 +340,22 @@ export function CompareDrawer({
           {summary ? (
             <section className="compare-overlap-section">
               <div className="compare-badge-row">
-                <span className="compare-rank-similarity">
-                  Rank similarity: {fmtPercent(summary.rankSimilarity.similarityScore)}
+                <span className="compare-rank-similarity" title="Spearman correlation between the two image-response rankings">
+                  Rank correlation (ρ): {fmt(summary.rankSimilarity.spearmanRho)}
                 </span>
-                <span>Spearman rho: {fmt(summary.rankSimilarity.spearmanRho)}</span>
-                <span>Images ranked: {summary.rankSimilarity.sharedImageCount}</span>
-                <span>Top overlap: {summary.top.overlap.length}</span>
-                <span>Bottom overlap: {summary.bottom.overlap.length}</span>
-                <span>Score diff A–B: {fmtDiff(summary.aggregateScoreDifference)}</span>
-                <span>Mean diff A–B: {fmtDiff(summary.imageMeanDifference)}</span>
+                <span>Highest-response overlap: {summary.top.overlap.length}</span>
+                <span>Lowest-response overlap: {summary.bottom.overlap.length}</span>
+                <span>Alignment Δ (A−B): {fmtDiff(summary.aggregateScoreDifference)}</span>
               </div>
-
-              <p className="compare-summary-note">
-                {summary.top.overlap.length > 0 || summary.bottom.overlap.length > 0 ? (
-                  <>
-                    These cells share <strong>{summary.top.overlap.length}</strong> top images
-                    and <strong>{summary.bottom.overlap.length}</strong> bottom images — useful for
-                    "same evidence, different score" inspection.
-                  </>
-                ) : (
-                  'No shared images in the current evidence window. Any aggregate similarity likely comes from different stimuli.'
-                )}
-              </p>
+              <details className="compare-metric-details">
+                <summary>More response metrics</summary>
+                <dl className="compare-metrics">
+                  <div><dt>Images ranked</dt><dd>{summary.rankSimilarity.sharedImageCount}</dd></div>
+                  <div><dt>Mean response Δ (A−B)</dt><dd>{fmtDiff(summary.imageMeanDifference)}</dd></div>
+                  <div><dt>Rescaled rank correlation</dt><dd>{fmtPercent(summary.rankSimilarity.similarityScore)}</dd></div>
+                </dl>
+                <p>The percentage is (ρ + 1) / 2 × 100, not the percentage of matching images.</p>
+              </details>
 
               <div className="panel-action-row">
                 <button type="button" onClick={handleExport}>Export JSON</button>
@@ -366,20 +363,23 @@ export function CompareDrawer({
 
               <ClusterComparisonSection status={clusterComparisonStatus} comparisons={clusterComparisons} />
 
-              <div className="compare-overlap-grid">
-                <ImageGrid title="Overlapping top"    images={summary.top.overlap}   onOpenImage={setModalImage} compact />
-                <ImageGrid title="Unique to A (top)"  images={summary.top.uniqueA}   onOpenImage={setModalImage} compact />
-                <ImageGrid title="Unique to B (top)"  images={summary.top.uniqueB}   onOpenImage={setModalImage} compact />
-              </div>
-              <div className="compare-overlap-grid">
-                <ImageGrid title="Overlapping bottom"    images={summary.bottom.overlap}  onOpenImage={setModalImage} compact />
-                <ImageGrid title="Unique to A (bottom)"  images={summary.bottom.uniqueA}  onOpenImage={setModalImage} compact />
-                <ImageGrid title="Unique to B (bottom)"  images={summary.bottom.uniqueB}  onOpenImage={setModalImage} compact />
-              </div>
+              <details className="compare-image-details">
+                <summary>Shared &amp; unique images</summary>
+                <div className="compare-overlap-grid">
+                  <ImageGrid title="Shared highest" images={summary.top.overlap} onOpenImage={setModalImage} compact />
+                  <ImageGrid title="Highest · A only" images={summary.top.uniqueA} onOpenImage={setModalImage} compact />
+                  <ImageGrid title="Highest · B only" images={summary.top.uniqueB} onOpenImage={setModalImage} compact />
+                </div>
+                <div className="compare-overlap-grid">
+                  <ImageGrid title="Shared lowest" images={summary.bottom.overlap} onOpenImage={setModalImage} compact />
+                  <ImageGrid title="Lowest · A only" images={summary.bottom.uniqueA} onOpenImage={setModalImage} compact />
+                  <ImageGrid title="Lowest · B only" images={summary.bottom.uniqueB} onOpenImage={setModalImage} compact />
+                </div>
+              </details>
             </section>
           ) : (
             <p className="compare-empty">
-              Both cells need matching CSV columns before image overlap can be computed.
+              Image responses are required for both selections to compare overlap.
             </p>
           )}
         </div>

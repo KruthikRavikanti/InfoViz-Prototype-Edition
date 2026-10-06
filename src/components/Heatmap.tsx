@@ -159,7 +159,7 @@ export function Heatmap({
       <div className="section-heading">
         <div>
           <p className="eyebrow">Overview</p>
-          <h2>Aggregate score by model &amp; ROI</h2>
+          <h2>Model alignment</h2>
         </div>
         <span>{cells.length} cells</span>
       </div>
@@ -184,7 +184,7 @@ export function Heatmap({
                   {v.toFixed(2)}
                 </text>
               ))}
-              <text x={214} y={10} dominantBaseline="middle">Aggregate score</text>
+              <text x={214} y={10} dominantBaseline="middle">Alignment score</text>
               {compareMode && (
                 <g className="disabled-cell-legend" transform="translate(328,0)">
                   <rect width={16} height={10} rx={3} />
@@ -228,7 +228,7 @@ export function Heatmap({
                     y={-3}
                     width={(x.bandwidth() || 0) + 6}
                     height={heatmapHeight + 6}
-                    fill="#FEF3C7"
+                    fill="var(--accent-light)"
                     fillOpacity={0.55}
                   />
                   <circle cx={(x(selectedRankingRoi) ?? 0) - 3}                     cy={-3}              r="5" className="roi-corner-dot" />
@@ -257,7 +257,7 @@ export function Heatmap({
                 const isDisabled = compareMode && !isComparable;
                 const hasSessionEvidence = sessionCellIds.has(cell.id);
                 const normalised = cell.score === null ? 0 : (cell.score - minScore) / (adjustedMax - minScore);
-                const fill = cell.score === null ? '#EDE9E3' : colorScale(cell.score);
+                const fill = cell.score === null ? 'var(--bg-subtle)' : colorScale(cell.score);
 
                 return (
                   <g key={cell.id}>
@@ -349,7 +349,7 @@ export function Heatmap({
                   {v.toFixed(2)}
                 </text>
               ))}
-              <text x={214} y={10} dominantBaseline="middle">Aggregate score</text>
+              <text x={214} y={10} dominantBaseline="middle">Alignment score</text>
               {compareMode && (
                 <g className="disabled-cell-legend" transform="translate(328,0)">
                   <rect width={16} height={10} rx={3} />
@@ -371,15 +371,15 @@ export function Heatmap({
               <dd>{tooltip.cell.model} <span className="model-tag">{inferModelCategory(tooltip.cell.model)}</span></dd>
             </div>
             <div>
-              <dt>Score</dt>
+              <dt>Alignment</dt>
               <dd>
                 {compareMode && !comparableCellIds.has(tooltip.cell.id)
-                  ? 'No CSV data'
+                  ? 'Image responses unavailable'
                   : formatScore(tooltip.cell.score)}
               </dd>
             </div>
             <div><dt>ROI rank</dt><dd>{tooltip.cell.rankWithinRoi === null ? 'N/A' : `#${tooltip.cell.rankWithinRoi}`}</dd></div>
-            <div><dt>Overall</dt><dd>{formatScore(tooltip.cell.overallScore)}</dd></div>
+            <div><dt>Overall alignment</dt><dd>{formatScore(tooltip.cell.overallScore)}</dd></div>
           </dl>
         </div>
       )}

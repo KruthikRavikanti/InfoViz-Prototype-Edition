@@ -9,13 +9,13 @@ export function UserStudyView() {
       <div className="user-study-header">
         <div>
           <p className="eyebrow">User study</p>
-          <h2 id="user-study-title">Complete the study form here</h2>
+          <h2 id="user-study-title">Study form</h2>
           <p>
-            You can switch back to the visualization tab at any time. The form may take a second to load.
+            Return to the visualization at any time.
           </p>
         </div>
         <a href={FORM_URL} target="_blank" rel="noreferrer">
-          Open form in new tab
+          Open in new tab
         </a>
       </div>
       <div className="form-frame-shell">
@@ -28,7 +28,7 @@ export function UserStudyView() {
         </iframe>
       </div>
       <p className="form-fallback-note">
-        If the embedded form does not load, use the external link above to open it directly.
+        Form not loading? Open it in a new tab.
       </p>
     </section>
   );

@@ -76,3 +76,50 @@ export function rawReferenceManifestFixture() {
     rois: ['ffa', 'ppa', 'eba'],
   };
 }
+
+export function rawJointHierarchyFixture(uploadedIds = ['stimulus-a']) {
+  const referenceCount = 185;
+  const memberCount = referenceCount + uploadedIds.length;
+  const split = Math.floor(memberCount / 2);
+  const members = [
+    ...Array.from({ length: referenceCount }, (_, index) => ({
+      kind: 'reference',
+      id: `image_${String(index + 1).padStart(3, '0')}.png`,
+      cluster_id: index < split ? 0 : 1,
+      distance_to_medoid: index === 0 || index === split ? 0 : 0.2,
+    })),
+    ...uploadedIds.map((id, index) => ({
+      kind: 'uploaded',
+      id,
+      cluster_id: referenceCount + index < split ? 0 : 1,
+      distance_to_medoid: 0.2,
+    })),
+  ];
+  const linkage: [number, number, number, number][] = [];
+  const mergeChain = (first: number, end: number) => {
+    let node = first;
+    for (let index = first + 1; index < end; index += 1) {
+      const parent = memberCount + linkage.length;
+      linkage.push([node, index, 0.2, index - first + 1]);
+      node = parent;
+    }
+    return node;
+  };
+  const left = mergeChain(0, split);
+  const right = mergeChain(split, memberCount);
+  linkage.push([left, right, 1, memberCount]);
+  return {
+    schema_version: 1,
+    method: 'hierarchical_correlation',
+    distance_metric: 'correlation',
+    linkage_method: 'average',
+    normalization: 'reference_zscore',
+    reference_count: referenceCount,
+    uploaded_count: uploadedIds.length,
+    cluster_count: 2,
+    silhouette: 0.8 as number | null,
+    members,
+    linkage,
+    medoid_indices: [0, split],
+  };
+}

@@ -1,55 +1,57 @@
 import { csv, json } from 'd3';
 import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringData, ClusteringMethod, EvidenceImage, GroundTruthPatient, GroundTruthRoiView, ImageCategory, Roi, SelectedHeatmapCell } from '../types/data';
+import { publicPath } from './publicPath';
+import { inferClusterProjectionAlignment } from './clusterProjectionAlignment';
 
-const IMAGE_CATEGORIES_PATH = '/data/murty185Classification.csv';
-const IMAGE_BASE_PATH = '/images';
+const IMAGE_CATEGORIES_PATH = publicPath('/data/murty185Classification.csv');
+const IMAGE_BASE_PATH = publicPath('/images');
 
 export const CLUSTERING_METHODS: Array<{ id: ClusteringMethod; label: string; description: string }> = [
-  { id: 'kmeans_euclidean', label: 'KMeans', description: 'Euclidean distance' },
+  { id: 'kmeans_euclidean', label: 'k-means', description: 'Euclidean distance' },
   { id: 'hierarchical_correlation', label: 'Hierarchical', description: 'Correlation distance' },
 ];
 export const VOXEL_CLUSTERING_METHODS = CLUSTERING_METHODS;
 
 const VOXEL_CLUSTER_SOURCES: Record<ClusteringMethod, { summaryPath: string; basePath: string }> = {
   kmeans_euclidean: {
-    summaryPath: '/data/voxel_clusters/voxel_cluster_summary.json',
-    basePath: '/data/voxel_clusters',
+    summaryPath: publicPath('/data/voxel_clusters/voxel_cluster_summary.json'),
+    basePath: publicPath('/data/voxel_clusters'),
   },
   hierarchical_correlation: {
-    summaryPath: '/data/voxel_clusters_hierarchical_corr/voxel_cluster_summary.json',
-    basePath: '/data/voxel_clusters_hierarchical_corr',
+    summaryPath: publicPath('/data/voxel_clusters_hierarchical_corr/voxel_cluster_summary.json'),
+    basePath: publicPath('/data/voxel_clusters_hierarchical_corr'),
   },
 };
 
 const VISUAL_CLUSTER_SOURCES: Record<ClusteringMethod, { summaryPath: string; clustersPath: string; linkagePath?: string; dendrogramPath?: string }> = {
   kmeans_euclidean: {
-    summaryPath: '/data/visual_clusters/visual_cluster_summary.json',
-    clustersPath: '/data/visual_clusters/visual_clusters.csv',
+    summaryPath: publicPath('/data/visual_clusters/visual_cluster_summary.json'),
+    clustersPath: publicPath('/data/visual_clusters/visual_clusters.csv'),
   },
   hierarchical_correlation: {
-    summaryPath: '/data/visual_clusters_hierarchical_corr/visual_cluster_summary.json',
-    clustersPath: '/data/visual_clusters_hierarchical_corr/visual_clusters.csv',
-    linkagePath: '/data/visual_clusters_hierarchical_corr/visual_linkage.csv',
-    dendrogramPath: '/data/visual_clusters_hierarchical_corr/visual_dendrogram.png',
+    summaryPath: publicPath('/data/visual_clusters_hierarchical_corr/visual_cluster_summary.json'),
+    clustersPath: publicPath('/data/visual_clusters_hierarchical_corr/visual_clusters.csv'),
+    linkagePath: publicPath('/data/visual_clusters_hierarchical_corr/visual_linkage.csv'),
+    dendrogramPath: publicPath('/data/visual_clusters_hierarchical_corr/visual_dendrogram.png'),
   },
 };
 
 const DREAMSIM_CLUSTER_SOURCES: Record<ClusteringMethod, { summaryPath: string; clustersPath: string; linkagePath?: string; dendrogramPath?: string }> = {
   kmeans_euclidean: {
-    summaryPath: '/data/dreamsim_clusters/dreamsim_cluster_summary.json',
-    clustersPath: '/data/dreamsim_clusters/dreamsim_clusters.csv',
+    summaryPath: publicPath('/data/dreamsim_clusters/dreamsim_cluster_summary.json'),
+    clustersPath: publicPath('/data/dreamsim_clusters/dreamsim_clusters.csv'),
   },
   hierarchical_correlation: {
-    summaryPath: '/data/dreamsim_clusters_hierarchical_corr/dreamsim_cluster_summary.json',
-    clustersPath: '/data/dreamsim_clusters_hierarchical_corr/dreamsim_clusters.csv',
-    linkagePath: '/data/dreamsim_clusters_hierarchical_corr/dreamsim_linkage.csv',
-    dendrogramPath: '/data/dreamsim_clusters_hierarchical_corr/dreamsim_dendrogram.png',
+    summaryPath: publicPath('/data/dreamsim_clusters_hierarchical_corr/dreamsim_cluster_summary.json'),
+    clustersPath: publicPath('/data/dreamsim_clusters_hierarchical_corr/dreamsim_clusters.csv'),
+    linkagePath: publicPath('/data/dreamsim_clusters_hierarchical_corr/dreamsim_linkage.csv'),
+    dendrogramPath: publicPath('/data/dreamsim_clusters_hierarchical_corr/dreamsim_dendrogram.png'),
   },
 };
 
 const GROUND_TRUTH_CLUSTER_SOURCES: Record<ClusteringMethod, { basePath: string }> = {
-  kmeans_euclidean: { basePath: '/data/ground_truth_clusters' },
-  hierarchical_correlation: { basePath: '/data/ground_truth_clusters_hierarchical_corr' },
+  kmeans_euclidean: { basePath: publicPath('/data/ground_truth_clusters') },
+  hierarchical_correlation: { basePath: publicPath('/data/ground_truth_clusters_hierarchical_corr') },
 };
 
 // All patient/ROI combos that have files in ground_truth_clusters/
@@ -157,12 +159,12 @@ function browserDataPath(path: string | undefined): string | undefined {
   }
 
   if (path.startsWith('/data/')) {
-    return path;
+    return publicPath(path);
   }
 
   const publicDataIndex = path.indexOf('/data/');
   if (publicDataIndex !== -1) {
-    return path.slice(publicDataIndex);
+    return publicPath(path.slice(publicDataIndex));
   }
 
   return undefined;
@@ -267,14 +269,30 @@ export function buildClusterView(summary: ClusterSummary | null, points: Cluster
 
 export function findVoxelClusterSummary(
   voxelSummaries: ClusterSummary[],
-  selectedCell: SelectedHeatmapCell,
+  selectedCell: Pick<SelectedHeatmapCell, 'model' | 'roi'>,
 ): ClusterSummary | null {
   return voxelSummaries.find((summary) => summary.model === selectedCell.model && summary.roi === selectedCell.roi) ?? null;
 }
 
+const clusterPointsCache = new Map<string, Promise<ClusterPoint[]>>();
+
+function loadClusterPoints(filePath: string): Promise<ClusterPoint[]> {
+  const cached = clusterPointsCache.get(filePath);
+  if (cached) return cached;
+
+  const loading = csv(filePath, (row, index) => parseClusterPoint(row as RawClusterRow, index))
+    .then((rows) => rows.filter((point): point is ClusterPoint => point !== null))
+    .catch((error: unknown) => {
+      clusterPointsCache.delete(filePath);
+      throw error;
+    });
+  clusterPointsCache.set(filePath, loading);
+  return loading;
+}
+
 export async function loadVoxelClusterView(
   voxelSummaries: ClusterSummary[],
-  selectedCell: SelectedHeatmapCell,
+  selectedCell: Pick<SelectedHeatmapCell, 'model' | 'roi'>,
 ): Promise<ClusterView | null> {
   const summary = findVoxelClusterSummary(voxelSummaries, selectedCell);
 
@@ -288,11 +306,24 @@ export async function loadVoxelClusterView(
     return buildClusterView(summary, []);
   }
 
-  const points = await csv(filePath, (row, index) => parseClusterPoint(row as RawClusterRow, index)).then((rows) =>
-    rows.filter((point): point is ClusterPoint => point !== null),
-  );
+  const alignmentReferencePath = summary.clusteringMethod === 'hierarchical'
+    ? deriveVoxelClusterPath(summary, VOXEL_CLUSTER_SOURCES.kmeans_euclidean.basePath)
+    : null;
+  const [points, alignmentReferencePoints] = await Promise.all([
+    loadClusterPoints(filePath),
+    alignmentReferencePath
+      ? loadClusterPoints(alignmentReferencePath).catch(() => null)
+      : Promise.resolve(null),
+  ]);
+  const view = buildClusterView(summary, points);
+  if (view && summary.clusteringMethod === 'hierarchical') {
+    view.uploadAxisAlignment = inferClusterProjectionAlignment(
+      alignmentReferencePoints ? buildClusterView(summary, alignmentReferencePoints) : null,
+      view,
+    );
+  }
 
-  return buildClusterView(summary, points);
+  return view;
 }
 
 async function loadVoxelSummaries(method: ClusteringMethod): Promise<ClusterSummary[]> {
@@ -485,6 +516,13 @@ export async function loadClusteringData(): Promise<ClusteringData> {
     loadGroundTruthPatients('kmeans_euclidean'),
     loadGroundTruthPatients('hierarchical_correlation'),
   ]);
+
+  if (hierarchicalVisualClusters.view) {
+    hierarchicalVisualClusters.view.uploadAxisAlignment = inferClusterProjectionAlignment(
+      kmeansVisualClusters.view,
+      hierarchicalVisualClusters.view,
+    );
+  }
 
   return {
     voxelSummaries: kmeansVoxelSummaries,

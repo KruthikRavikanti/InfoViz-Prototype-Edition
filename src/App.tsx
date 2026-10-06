@@ -186,8 +186,8 @@ export default function App() {
       <main className="app-shell">
         <div className="status-panel">
           <p className="eyebrow">Loading</p>
-          <h1>{sessionState.status === 'loading' ? 'Loading your Cortex comparison' : 'Reading model response data'}</h1>
-          <p>Loading historical model evidence and the temporary comparison context.</p>
+          <h1>{sessionState.status === 'loading' ? 'Loading your comparison' : 'Loading the explorer'}</h1>
+          <p>{sessionState.status === 'loading' ? 'Preparing uploaded stimuli and Murty reference images.' : 'Preparing model scores and image responses.'}</p>
         </div>
       </main>
     );

@@ -1,0 +1,312 @@
+{
+  "artifact": "voxel-selectivity-atlas",
+  "clusterCount": 14,
+  "dataset": "nsd_1000",
+  "embeddingIsAnatomical": false,
+  "imageCount": 185,
+  "imageIdsSha256": "1057a45119e774b1bd9c3462664d2d8003ca8d6a1b42c1691f084ce10533a7ca",
+  "k14StabilityCaveat": "The mentor reported k=14 as split-half stable (ARI >= 0.70) in the original analysis. The six deterministic split-half ARIs reported here are a limited diagnostic on these 185 predicted-response profiles, not a revalidation of the original stability-based k-selection analysis. Treat k=14 as a fixed exploratory resolution, not a newly validated optimum.",
+  "method": {
+    "clusterCount": 14,
+    "clustering": "K-means in L2-normalized PCA selectivity space",
+    "embedding": "3D UMAP (n_neighbors=25, min_dist=0.1, metric=cosine, random_state=42); display only",
+    "embeddingUsedForClustering": false,
+    "id": "mentor-selectivity-k14-v1",
+    "kmeansNInit": 25,
+    "kmeansRandomState": 0,
+    "l2Normalization": true,
+    "normalization": "per-voxel z-score across images (ddof=0, epsilon=1e-9)",
+    "objectClustered": "voxels",
+    "pcaComponents": 35
+  },
+  "models": {
+    "adversarial_inceptionv3": {
+      "pointCount": 844,
+      "pointsBytes": 49958,
+      "pointsSha256": "319edfcb4252e9041b7a901d04e01aac32d50e81d01234cbea6165b86ff9baa8",
+      "pointsUrl": "adversarial_inceptionv3/points.csv",
+      "summaryBytes": 19494,
+      "summarySha256": "8bca2867ac28f0743d55279362927f759a615775c2f34b19087cc0e13fc910a0",
+      "summaryUrl": "adversarial_inceptionv3/summary.json"
+    },
+    "aimv2": {
+      "pointCount": 844,
+      "pointsBytes": 49843,
+      "pointsSha256": "14f9548de8cf331c84494733a641b42aad851fbf4ca11cc0c3057bb30e78c7db",
+      "pointsUrl": "aimv2/points.csv",
+      "summaryBytes": 19424,
+      "summarySha256": "63d09f2e364d6ac60e4c8e98d3b88e4974beeb31a8f743408fc5735cbf2912d8",
+      "summaryUrl": "aimv2/summary.json"
+    },
+    "alexnet": {
+      "pointCount": 844,
+      "pointsBytes": 49995,
+      "pointsSha256": "db85984811dfa72b27a5b3bebaae5dc43374fdcb3ca87690594ace3b17eebcb3",
+      "pointsUrl": "alexnet/points.csv",
+      "summaryBytes": 19426,
+      "summarySha256": "eadf68252833e5d2484160685a1933f369cafa053be700f83546653a5b2aab2e",
+      "summaryUrl": "alexnet/summary.json"
+    },
+    "alexnet_random": {
+      "pointCount": 844,
+      "pointsBytes": 52010,
+      "pointsSha256": "015a7b96b61dab03f944aebc396b53bcc4f8c95cf177238b0e1c88dc218a46ad",
+      "pointsUrl": "alexnet_random/points.csv",
+      "summaryBytes": 19399,
+      "summarySha256": "2ed6b3a6f71fe36b7c8843b9f9085fdf809c3430bcd667b0b66fe5782c621616",
+      "summaryUrl": "alexnet_random/summary.json"
+    },
+    "beit": {
+      "pointCount": 844,
+      "pointsBytes": 49799,
+      "pointsSha256": "cc98636f4466492567847dd448ab15e82458a5d68cadf919d35cc504f03efda3",
+      "pointsUrl": "beit/points.csv",
+      "summaryBytes": 19418,
+      "summarySha256": "59090c8e18f7246580469baef3e4e9c22273d91ca54ee75732085e703a5299f3",
+      "summaryUrl": "beit/summary.json"
+    },
+    "bit": {
+      "pointCount": 844,
+      "pointsBytes": 50149,
+      "pointsSha256": "1fc66bb70dcb0bd827337904208df6b38a134137386f57b5a6097b5ce6f0dfc0",
+      "pointsUrl": "bit/points.csv",
+      "summaryBytes": 19423,
+      "summarySha256": "e0d6a728e52f7d08a4fe50036bf803a5ee261cf600af6d030eecf7501ddd90d3",
+      "summaryUrl": "bit/summary.json"
+    },
+    "blip2": {
+      "pointCount": 844,
+      "pointsBytes": 49993,
+      "pointsSha256": "7190e91b6316c15b082838fa407483c3222592bdf8ab047e9da75449608db26c",
+      "pointsUrl": "blip2/points.csv",
+      "summaryBytes": 19425,
+      "summarySha256": "f56e893f516a4bc3ce4511e92904addf2568b5d9299c2051176e415aba2baa75",
+      "summaryUrl": "blip2/summary.json"
+    },
+    "clip_rn101": {
+      "pointCount": 844,
+      "pointsBytes": 49732,
+      "pointsSha256": "3c4bfe346aefe0e05a60fce90fccfa9427665f9691992543f7e7a089fce61572",
+      "pointsUrl": "clip_rn101/points.csv",
+      "summaryBytes": 19438,
+      "summarySha256": "4f9fab28b9b898932d745026ca76a506a5645a8c9953375346de76bd8dc791bb",
+      "summaryUrl": "clip_rn101/summary.json"
+    },
+    "clip_rn101_random": {
+      "pointCount": 844,
+      "pointsBytes": 49881,
+      "pointsSha256": "baba9c812b15229a4dfb17bd6f97eb76c6500281a2839afbc73f5bf53c8e550f",
+      "pointsUrl": "clip_rn101_random/points.csv",
+      "summaryBytes": 19477,
+      "summarySha256": "e14a1ffbed6514fde1d0236688ce3cd86e57d1ff64ec533860b6d289d9d90bf5",
+      "summaryUrl": "clip_rn101_random/summary.json"
+    },
+    "clip_rn50": {
+      "pointCount": 844,
+      "pointsBytes": 49763,
+      "pointsSha256": "d670fd87bf5eedaa6d5f27142e136d7c8e0c9f7f3b532b001acc10eb12647dca",
+      "pointsUrl": "clip_rn50/points.csv",
+      "summaryBytes": 19436,
+      "summarySha256": "03605f51d5155c40eb8052a8603ebcab0006a7a3d0467bc9d1f8c98214ed419f",
+      "summaryUrl": "clip_rn50/summary.json"
+    },
+    "clip_rn50_random": {
+      "pointCount": 844,
+      "pointsBytes": 49241,
+      "pointsSha256": "e74c47b9a27124eccc459ebaf4afd81fc5ee59e1c67fd45172d36a122e9f6294",
+      "pointsUrl": "clip_rn50_random/points.csv",
+      "summaryBytes": 19473,
+      "summarySha256": "6fc8d84970dfa233812c5d65bc6469e5a3b27d3ec9c39f7a96365a35ceb59c1b",
+      "summaryUrl": "clip_rn50_random/summary.json"
+    },
+    "clip_vit_b32": {
+      "pointCount": 844,
+      "pointsBytes": 50023,
+      "pointsSha256": "6090759057dbc2f5d016b80623a10ed21e0098652bc39e5758eed0cea668c4d8",
+      "pointsUrl": "clip_vit_b32/points.csv",
+      "summaryBytes": 19447,
+      "summarySha256": "48e1e981231aefe6ff97d251c7bd3f54540b1f97f87410b88bbd6613d3adbfed",
+      "summaryUrl": "clip_vit_b32/summary.json"
+    },
+    "clip_vit_b32_random": {
+      "pointCount": 844,
+      "pointsBytes": 49371,
+      "pointsSha256": "95eca0fe2f8d95cccb39b56a5043793d50b65f8d789162e6b52b7b7ab74fed14",
+      "pointsUrl": "clip_vit_b32_random/points.csv",
+      "summaryBytes": 19479,
+      "summarySha256": "a3c3af2200231ee90e7e0ede9a9b00928b0ab42e0c330cbf47f24fa87fc69bee",
+      "summaryUrl": "clip_vit_b32_random/summary.json"
+    },
+    "convnext": {
+      "pointCount": 844,
+      "pointsBytes": 50643,
+      "pointsSha256": "5928cc84d39d5a7ebbb4f5a962cb2b1d84da3922a6a5cb5c9f46f9520f437e21",
+      "pointsUrl": "convnext/points.csv",
+      "summaryBytes": 19435,
+      "summarySha256": "1ee46982a5d2f582731d0fef473e1733e0ad2f9eb05304091058576f6bf8ed0e",
+      "summaryUrl": "convnext/summary.json"
+    },
+    "cornet_rt": {
+      "pointCount": 844,
+      "pointsBytes": 49815,
+      "pointsSha256": "c8951004f81ee0a48319bbb0bdb2db8fa760d456d5ac65a9b9d92c0fae2bef4a",
+      "pointsUrl": "cornet_rt/points.csv",
+      "summaryBytes": 19429,
+      "summarySha256": "7a1549fe8217038d77913a2d0583c02fbab3db6d6306baf5ad1d188a03a6a3b9",
+      "summaryUrl": "cornet_rt/summary.json"
+    },
+    "cornet_s": {
+      "pointCount": 844,
+      "pointsBytes": 50687,
+      "pointsSha256": "ca01ee21762b33be2b7ae97047c3a48f7fda5af8ae46e51044e195115ff99811",
+      "pointsUrl": "cornet_s/points.csv",
+      "summaryBytes": 19439,
+      "summarySha256": "9c9b86c45a59ba1ae3bdecc3b6440c9c2b19e95e05f08f2110ce061675ebe9ce",
+      "summaryUrl": "cornet_s/summary.json"
+    },
+    "cornet_z": {
+      "pointCount": 844,
+      "pointsBytes": 49901,
+      "pointsSha256": "093f466b7939e0b6fc278ef3a29702637ce04f44f0bc1e45a826018cd33819c7",
+      "pointsUrl": "cornet_z/points.csv",
+      "summaryBytes": 19442,
+      "summarySha256": "5a743b50d459144a21578c964e1ff3fd99ae99edbc1994472901b20619a0f87e",
+      "summaryUrl": "cornet_z/summary.json"
+    },
+    "cross_vit": {
+      "pointCount": 844,
+      "pointsBytes": 49651,
+      "pointsSha256": "8458bc7a7061711f83119514b84b46cb206871421180277b6acedf11db197b86",
+      "pointsUrl": "cross_vit/points.csv",
+      "summaryBytes": 19432,
+      "summarySha256": "dcbfdc037a5912d63f558bc264f92c5a2f407db86be94fd996d6b2aff265e0ff",
+      "summaryUrl": "cross_vit/summary.json"
+    },
+    "densenet121": {
+      "pointCount": 844,
+      "pointsBytes": 50156,
+      "pointsSha256": "b77c871a9b09fb0ecda0ebbc28931594c8f3b77eee083a8f56c054cd90053409",
+      "pointsUrl": "densenet121/points.csv",
+      "summaryBytes": 19429,
+      "summarySha256": "eaa38713bb68c5a6d900739c28eab25b1592d70003934e04cef90f4bc0115948",
+      "summaryUrl": "densenet121/summary.json"
+    },
+    "densenet161": {
+      "pointCount": 844,
+      "pointsBytes": 50666,
+      "pointsSha256": "fa3dcb9ed9dc1d332e61c5e57cb1186f95ade357b6648a3d13e5c9248241abec",
+      "pointsUrl": "densenet161/points.csv",
+      "summaryBytes": 19443,
+      "summarySha256": "1864f8f4abfc47246892559f03a61d9c11b69e0d45fb15b4a19fd3254b7e406c",
+      "summaryUrl": "densenet161/summary.json"
+    },
+    "densenet169": {
+      "pointCount": 844,
+      "pointsBytes": 49937,
+      "pointsSha256": "0259720bc8a7ae3af9ec1cba1b1351c360cc37defa3667fe215cee96ccfa9a38",
+      "pointsUrl": "densenet169/points.csv",
+      "summaryBytes": 19447,
+      "summarySha256": "7ad6ba4ed597160b27a53bc0029d929fe28db4de1f9538e28e665e4f61345a38",
+      "summaryUrl": "densenet169/summary.json"
+    },
+    "densenet201": {
+      "pointCount": 844,
+      "pointsBytes": 50566,
+      "pointsSha256": "2a3c185873494f0f0f922591d52e2fc6e121b3eaa5748ab2d94eb32d02b25418",
+      "pointsUrl": "densenet201/points.csv",
+      "summaryBytes": 19446,
+      "summarySha256": "ca1d2fbc51f1d9fb85d632d4e885e700551af558c727e14c22b94bcfc1b0a497",
+      "summaryUrl": "densenet201/summary.json"
+    },
+    "dinov2_large": {
+      "pointCount": 844,
+      "pointsBytes": 50623,
+      "pointsSha256": "47daa8703b128b1345d3e890f2a2187bfc1ed1996a5b67f8f38e6ce81b4028f6",
+      "pointsUrl": "dinov2_large/points.csv",
+      "summaryBytes": 19455,
+      "summarySha256": "60bd3634035153d5be1d3729624746430b11dcec32600ce23c541b18db3d51d1",
+      "summaryUrl": "dinov2_large/summary.json"
+    },
+    "dreamsim_vitb16": {
+      "pointCount": 844,
+      "pointsBytes": 50006,
+      "pointsSha256": "00a0d831e14ce15a6390fa160369c8195efadda9a0e420a27d75a30f6b5aecef",
+      "pointsUrl": "dreamsim_vitb16/points.csv",
+      "summaryBytes": 19457,
+      "summarySha256": "e5a5f3e9d554db7ffbcdc8b28e4eefc921978cfcfca4e8fa1b2c0ac2332cbe8a",
+      "summaryUrl": "dreamsim_vitb16/summary.json"
+    },
+    "dreamsim_vitb32": {
+      "pointCount": 844,
+      "pointsBytes": 49521,
+      "pointsSha256": "db1b702b8cebb8a6d527c5eb6d5e879e3f392ab6c1c8b6d531230871e4347ce7",
+      "pointsUrl": "dreamsim_vitb32/points.csv",
+      "summaryBytes": 19445,
+      "summarySha256": "dfc15758cab8300b9900ad1a1cfa1ce23fdd927bf4248b7999edb04e668cb464",
+      "summaryUrl": "dreamsim_vitb32/summary.json"
+    },
+    "efficient_net": {
+      "pointCount": 844,
+      "pointsBytes": 49921,
+      "pointsSha256": "844d94457eba81a922e9fb27560cfdc526ea18c911963ff064a998e0fddfd51f",
+      "pointsUrl": "efficient_net/points.csv",
+      "summaryBytes": 19458,
+      "summarySha256": "b1d6ffb4dae326ef147e928ad879f2b5f4417a870f7a4533cfe3b9136b08cd80",
+      "summaryUrl": "efficient_net/summary.json"
+    }
+  },
+  "referenceVersion": "ed023e59bd270e210bb8350d348eaaf223d3992214adeb2163a496cc808cefa7",
+  "responseKind": "model_predictions",
+  "responseSpace": "nsd_1000_subject1_floc_t7_v1",
+  "roiOrder": [
+    "ffa",
+    "eba",
+    "ppa"
+  ],
+  "rois": {
+    "eba": {
+      "count": 518,
+      "offset": 156
+    },
+    "ffa": {
+      "count": 156,
+      "offset": 0
+    },
+    "ppa": {
+      "count": 170,
+      "offset": 674
+    }
+  },
+  "schemaVersion": 1,
+  "stimulusSet": "murty185",
+  "subject": "s1",
+  "supportedModels": [
+    "adversarial_inceptionv3",
+    "aimv2",
+    "alexnet",
+    "alexnet_random",
+    "beit",
+    "bit",
+    "blip2",
+    "clip_rn101",
+    "clip_rn101_random",
+    "clip_rn50",
+    "clip_rn50_random",
+    "clip_vit_b32",
+    "clip_vit_b32_random",
+    "convnext",
+    "cornet_rt",
+    "cornet_s",
+    "cornet_z",
+    "cross_vit",
+    "densenet121",
+    "densenet161",
+    "densenet169",
+    "densenet201",
+    "dinov2_large",
+    "dreamsim_vitb16",
+    "dreamsim_vitb32",
+    "efficient_net"
+  ],
+  "voxelCount": 844
+}

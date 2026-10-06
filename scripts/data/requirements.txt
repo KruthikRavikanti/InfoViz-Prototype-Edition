@@ -1,7 +1,12 @@
 matplotlib
-numpy
+nibabel==5.3.2
+numba==0.60.0
+numpy==2.0.2
 pandas
 pillow
-scikit-learn
-scipy
+pynndescent==0.6.0
+scikit-learn==1.6.1
+scipy==1.13.1
 torch
+trimesh==4.8.3
+umap-learn==0.5.7

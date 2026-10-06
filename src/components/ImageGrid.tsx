@@ -33,9 +33,9 @@ function ImageCard({ image, onOpenImage }: ImageCardProps) {
         ) : (
           <img src={image.imageUrl} alt={image.imageName} loading="lazy" onError={() => setImageMissing(true)} />
         )}
-        {image.origin && (
-          <span className={`image-origin-badge image-origin-badge--${image.origin}`}>
-            {image.origin === 'uploaded' ? 'Uploaded' : 'Reference'}
+        {image.origin === 'uploaded' && (
+          <span className="image-origin-badge image-origin-badge--uploaded">
+            Uploaded
           </span>
         )}
       </button>

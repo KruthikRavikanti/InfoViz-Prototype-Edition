@@ -25,6 +25,28 @@ export type HierarchicalAssignment = {
   distance: number;
 };
 
+export type JointHierarchyMember = {
+  kind: 'reference' | 'uploaded';
+  id: string;
+  clusterId: string;
+  distanceToMedoid: number;
+};
+
+export type JointHierarchy = {
+  schemaVersion: 1;
+  method: 'hierarchical_correlation';
+  distanceMetric: 'correlation';
+  linkageMethod: 'average';
+  normalization: 'reference_zscore';
+  referenceCount: number;
+  uploadedCount: number;
+  clusterCount: number;
+  silhouette: number | null;
+  members: JointHierarchyMember[];
+  linkage: [number, number, number, number][];
+  medoidIndices: number[];
+};
+
 export type SessionStimulus = {
   id: string;
   displayName: string;
@@ -54,6 +76,7 @@ export type SessionRoiResult = {
   stimuli: StimulusRoiResult[];
   topReferences: ReferenceNeighbor[];
   bottomReferences: ReferenceNeighbor[];
+  jointHierarchy?: JointHierarchy;
 };
 
 export type FeatureReferenceNeighbor = {
@@ -85,6 +108,26 @@ export type OptionalProjectionStimulus = {
 
 export type OptionalProjectionResults = {
   stimuli: OptionalProjectionStimulus[];
+  jointHierarchy?: JointHierarchy;
+};
+
+export const SUBJECT_ONE_ROI_VOXEL_COUNTS: Record<CanonicalRoi, number> = {
+  ffa: 156,
+  ppa: 170,
+  eba: 518,
+};
+
+export type BrainMapStimulusResult = {
+  stimulusId: string;
+  roiResponses: Record<CanonicalRoi, number[]>;
+};
+
+export type BrainMapResults = {
+  schemaVersion: 1;
+  subjectId: 's1';
+  responseSpace: 'nsd_1000_subject1_floc_t7_v1';
+  roiVoxelCounts: Record<CanonicalRoi, number>;
+  stimuli: BrainMapStimulusResult[];
 };
 
 export type CortexComparisonSession = {
@@ -107,6 +150,7 @@ export type CortexComparisonSession = {
   roiResults: Record<CanonicalRoi, SessionRoiResult>;
   visualResults?: OptionalProjectionResults;
   dreamsimResults?: OptionalProjectionResults;
+  brainMapResults?: BrainMapResults;
 };
 
 export type PublicReferenceManifest = {
@@ -140,4 +184,6 @@ export type SessionClusterOverlay = {
   y: number;
   clusterId: string;
   distance: number;
+  assignmentMethod: 'nearest-centroid assignment' | 'nearest-medoid assignment' | 'joint hierarchical clustering';
+  medoidImageName?: string;
 };
