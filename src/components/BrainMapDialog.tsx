@@ -1,15 +1,14 @@
 import {
   Suspense,
   lazy,
-  useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type KeyboardEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { BrainMapTooltip } from './BrainMapTooltip';
 import { loadBrainMapAssets } from '../services/brainMapAssets';
 import { BRAIN_REFERENCE_VERSION, loadBrainMapReferences } from '../services/brainReferenceAssets';
 import type { BrainMapAssets, BrainMapHoverDatum, BrainMapReferenceSet, BrainSurfaceKind } from '../types/brainMap';
@@ -20,7 +19,7 @@ import {
   type CortexComparisonSession,
 } from '../types/session';
 import { fixedSessionResponseExtent } from '../utils/brainProjection';
-import { brainTooltipPosition } from '../utils/brainTooltipLayout';
+import { buildBrainVoxelImagePeaks } from '../utils/brainVoxelImagePeaks';
 import {
   brainMapImageNeighbors,
   brainMapReferenceImages,
@@ -58,58 +57,6 @@ type ReferenceState =
 function formatResponse(value: number): string {
   if (value !== 0 && Math.abs(value) < 0.001) return value.toExponential(2);
   return value.toFixed(3);
-}
-
-function BrainMapTooltip({ hovered }: { hovered: BrainMapHoverDatum }) {
-  const tooltipRef = useRef<HTMLDivElement | null>(null);
-  const latestHoverRef = useRef(hovered);
-  const [position, setPosition] = useState({ left: 0, top: 0 });
-  const updatePosition = useCallback(() => {
-    const tooltip = tooltipRef.current;
-    const stage = tooltip?.parentElement;
-    if (!tooltip || !stage) return;
-    const stageBounds = stage.getBoundingClientRect();
-    const tooltipBounds = tooltip.getBoundingClientRect();
-    const nextPosition = brainTooltipPosition({
-      canvasX: latestHoverRef.current.canvasX,
-      canvasY: latestHoverRef.current.canvasY,
-      stageWidth: stageBounds.width,
-      stageHeight: stageBounds.height,
-      tooltipWidth: tooltipBounds.width,
-      tooltipHeight: tooltipBounds.height,
-    });
-    setPosition((current) => current.left === nextPosition.left && current.top === nextPosition.top
-      ? current : nextPosition);
-  }, []);
-
-  useLayoutEffect(() => {
-    latestHoverRef.current = hovered;
-    updatePosition();
-  }, [hovered, updatePosition]);
-
-  useLayoutEffect(() => {
-    const tooltip = tooltipRef.current;
-    const stage = tooltip?.parentElement;
-    if (!tooltip || !stage) return;
-    const observer = new ResizeObserver(updatePosition);
-    observer.observe(stage);
-    observer.observe(tooltip);
-    return () => observer.disconnect();
-  }, [updatePosition]);
-
-  return (
-    <div ref={tooltipRef} className="brain-map-tooltip" style={position} role="status">
-      <strong>{hovered.dominantSource.roi.toUpperCase()} · {hovered.hemisphere.toUpperCase()}</strong>
-      <span>Surface value: {formatResponse(hovered.surfaceResponse)}</span>
-      <span>Dominant source response: {formatResponse(hovered.dominantSource.response)}</span>
-      <span>ROI response index: {hovered.dominantSource.responseIndex}</span>
-      <span>Volume voxel [z, y, x]: [{hovered.volumeCoordinateZyx.join(', ')}]</span>
-      <span>Surface vertex: {hovered.vertexIndex.toLocaleString()}</span>
-      {hovered.overlappingRois.length > 1 && (
-        <span>ROI overlap: {hovered.overlappingRois.map((roi) => roi.toUpperCase()).join(', ')}</span>
-      )}
-    </div>
-  );
 }
 
 function keepFocusInsideDialog(event: KeyboardEvent<HTMLElement>) {
@@ -166,6 +113,9 @@ function BrainMapModal({
   const referenceImages = useMemo(() => brainMapReferenceImages(references), [references]);
   const activeSource = imageSource === 'uploaded' && uploadedImages.length ? 'uploaded' : 'reference';
   const images = activeSource === 'uploaded' ? uploadedImages : referenceImages;
+  // Search only narrows the picker, not the collection used for voxel rankings.
+  // Precompute once per collection so pointer movement only performs a lookup.
+  const imagePeaks = useMemo(() => buildBrainVoxelImagePeaks(images, activeSource), [images, activeSource]);
   const selectedId = activeSource === 'uploaded' ? focusedStimulusId ?? localUploadId : referenceId;
   const stimulus = images.find((item) => item.id === selectedId) ?? images[0];
   const stimulusResult = stimulus?.result;
@@ -490,10 +440,10 @@ function BrainMapModal({
                   <p>{referenceError ?? 'Preparing the verified Subject 1 voxel responses for all 185 reference images.'}</p>
                 </div>
               )}
-              {hovered && <BrainMapTooltip hovered={hovered} />}
+              {hovered && stimulus && <BrainMapTooltip hovered={hovered} imagePeaks={imagePeaks} displayedImageName={stimulus.displayName} />}
             </div>
             <div className="brain-map-stage-footer">
-              <span>Drag to rotate · scroll to zoom · hover a mapped vertex</span>
+              <span>Drag to rotate · scroll to zoom · hover for voxel details and its highest-response image</span>
               <span>Keyboard: arrow keys rotate · +/− zoom</span>
             </div>
           </div>
@@ -503,6 +453,11 @@ function BrainMapModal({
           <p>Model predictions, not measured BOLD signals for these images.</p>
           <details className="brain-map-mapping-details">
             <summary>Mapping details</summary>
+            <p>
+              Hover previews rank raw predicted responses for the displayed image’s dominant source voxel,
+              not the blended surface vertex. Only the active image collection is compared; searching
+              narrows the image picker, not this ranking. Hovering does not change the displayed brain image.
+            </p>
             <p>
               Subject 1 fLoc-defined FFA, PPA, and EBA output voxels at <em>t</em> &gt; 7 are projected onto
               the subject-native cortical surface using a line-nearest-neighbor mapper.

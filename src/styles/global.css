@@ -2979,6 +2979,22 @@ button.cluster-size-chip:hover {
 }
 
 .brain-map-tooltip strong { margin-bottom: 2px; color: var(--text-2); font-size: .69rem; }
+.brain-map-tooltip-displayed-image { overflow-wrap: anywhere; }
+
+.brain-map-voxel-peak {
+  display: grid;
+  gap: 4px;
+  margin-top: 5px;
+  padding-top: 7px;
+  border-top: 1px solid var(--border);
+}
+.brain-map-voxel-peak-preview { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 8px; align-items: center; }
+.brain-map-voxel-peak-preview img,
+.brain-map-voxel-peak-missing { width: 72px; height: 72px; border-radius: var(--r-sm); background: var(--bg-subtle); }
+.brain-map-voxel-peak-preview img { display: block; object-fit: contain; }
+.brain-map-voxel-peak-preview > div { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+.brain-map-voxel-peak-missing { display: grid; place-items: center; text-align: center; padding: 5px; }
+.brain-map-voxel-peak-note { font-size: .61rem; color: var(--text-4); }
 
 .brain-map-stage-footer {
   display: flex;

@@ -117,6 +117,12 @@ The brain image picker is searchable and bounded regardless of upload count, wit
 and a selected-image preview. Display controls collapse on narrow screens so the cortex stays visible.
 Reference-image selection is local to the brain map; selecting an upload still updates the shared upload focus.
 
+Hovering a mapped vertex preserves its voxel details and previews the image with the highest raw predicted
+response at its dominant source voxel. Rankings use only the active **Uploads** or **Murty-185** collection;
+picker search does not change that scope, and hovering does not select another brain image. The signed maximum
+is used (the least-negative prediction if all are negative), with exact ties flagged and the first image shown.
+This is an in-collection prediction maximum, not measured activation or a maximum of the blended surface value.
+
 The 3D Brain Map supports all 185 reference images for the 26 audited NSD-1000 models, even without an upload
 session. `scripts/data/build_brain_reference_artifacts.py` exports the exact raw float32 Subject 1 prefixes
 (156 FFA, 170 PPA, 518 EBA) from the existing prediction bundle; it does not run inference or use normalized
