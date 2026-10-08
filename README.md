@@ -133,6 +133,16 @@ predictions, not measured BOLD responses; the existing three unmapped EBA respon
 Unsupported models are explicitly unavailable rather than receiving substitute predictions. The selectivity
 atlas remains reference-only and is not refitted by uploads.
 
+The selectivity orientation widget labels the saved coordinates as **UMAP 1, 2, and 3** and follows the camera.
+These are arbitrary similarity-space axes, not left/right, anterior/posterior, or superior/inferior directions.
+ROI visibility changes and resizing preserve the view; **Reset view** restores the full model overview.
+Focus the plot to rotate with arrow keys, zoom with +/−, inspect individual visible voxels with [ / ] or
+Page Up/Down (Home/End jump to the endpoints), and select their cluster with Enter/Space. Mouse and keyboard
+inspection show the same voxel/cluster/PCA-distance details, with tooltips kept inside the plot.
+The selectivity manifest digest is pinned in `src/services/selectivityAtlasAssets.ts` before either model
+availability or atlas data are trusted. An intentional artifact regeneration requires reviewing the bundle
+and updating that pin; child summary and point files remain independently checksum-verified.
+
 Regenerate the separate reference-brain assets with the audited private source bundle present:
 
 ```bash

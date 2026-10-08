@@ -14,6 +14,15 @@ import { publicPath } from '../utils/publicPath';
 
 export const SELECTIVITY_ATLAS_MANIFEST_PATH = publicPath('/data/voxel_selectivity_atlas/manifest.json');
 
+const MANIFEST_SHA256 = '7244cead1cc3a9d6fb0074590eed025889994d23eecce432271cb8b38b28881e';
+// The reviewed reference bundle's exact roster; public assets are not JS modules in Vite.
+const EXPECTED_MODELS: readonly string[] = [
+  'adversarial_inceptionv3', 'aimv2', 'alexnet', 'alexnet_random', 'beit', 'bit', 'blip2',
+  'clip_rn101', 'clip_rn101_random', 'clip_rn50', 'clip_rn50_random', 'clip_vit_b32',
+  'clip_vit_b32_random', 'convnext', 'cornet_rt', 'cornet_s', 'cornet_z', 'cross_vit',
+  'densenet121', 'densenet161', 'densenet169', 'densenet201', 'dinov2_large',
+  'dreamsim_vitb16', 'dreamsim_vitb32', 'efficient_net',
+];
 const EXPECTED_ROI_ORDER: SelectivityAtlasRoi[] = ['ffa', 'eba', 'ppa'];
 const EXPECTED_ROIS: Record<SelectivityAtlasRoi, { offset: number; count: number }> = {
   ffa: { offset: 0, count: 156 },
@@ -193,8 +202,10 @@ export function validateSelectivityAtlasManifest(value: unknown): SelectivityAtl
     .map((entry, index) => string(entry, `selectivity-atlas manifest.supportedModels[${index}]`));
   if (
     supportedModels.length !== 26
+    || supportedModels.length !== EXPECTED_MODELS.length
     || raw.subject !== 's1'
     || supportedModels.some((model) => !/^[a-z0-9_]+$/.test(model))
+    || supportedModels.some((model) => !EXPECTED_MODELS.includes(model))
     || new Set(supportedModels).size !== supportedModels.length
     || supportedModels.some((model) => !models[model])
     || Object.keys(models).some((model) => !supportedModels.includes(model))
@@ -248,7 +259,8 @@ function validateStimuli(value: unknown, label: string): SelectivityAtlasStimulu
   const stimuli = array(value, label).map((entry, index) => {
     const raw = object(entry, `${label}[${index}]`);
     const imageId = string(raw.imageId, `${label}[${index}].imageId`);
-    if (!/^image_\d{3}\.png$/.test(imageId)) {
+    const imageIndex = Number(imageId.slice(6, 9));
+    if (!/^image_\d{3}\.png$/.test(imageId) || imageIndex < 1 || imageIndex > 185) {
       throw new SelectivityAtlasAssetError(`${label}[${index}].imageId is not canonical.`);
     }
     return { imageId, meanZ: finite(raw.meanZ, `${label}[${index}].meanZ`) };
@@ -274,13 +286,17 @@ function validateCluster(value: unknown, label: string): SelectivityAtlasCluster
   ) {
     throw new SelectivityAtlasAssetError(`${label}.roiCounts do not sum to size.`);
   }
+  const meanSilhouette = raw.meanSilhouette === null
+    ? null
+    : finite(raw.meanSilhouette, `${label}.meanSilhouette`);
+  if (meanSilhouette !== null && (meanSilhouette < -1 || meanSilhouette > 1)) {
+    throw new SelectivityAtlasAssetError(`${label}.meanSilhouette must be between -1 and 1.`);
+  }
   return {
     label: integer(raw.label, `${label}.label`),
     size,
     roiCounts,
-    meanSilhouette: raw.meanSilhouette === null
-      ? null
-      : finite(raw.meanSilhouette, `${label}.meanSilhouette`),
+    meanSilhouette,
     preferredImages: validateStimuli(raw.preferredImages, `${label}.preferredImages`),
     suppressedImages: validateStimuli(raw.suppressedImages, `${label}.suppressedImages`),
   };
@@ -523,19 +539,29 @@ async function verifySha256(text: string, expected: string, label: string): Prom
   if (actual !== expected) throw new SelectivityAtlasAssetError(`${label} failed its SHA-256 check.`);
 }
 
-export async function loadSelectivityAtlasAssets(
-  model: string,
+/** Verify the reviewed artifact manifest before trusting its model assets or availability. */
+export async function loadSelectivityAtlasManifest(
   fetcher: FetchLike = fetch,
   signal?: AbortSignal,
-): Promise<SelectivityAtlasAssets> {
+): Promise<SelectivityAtlasManifest> {
+  if (signal?.aborted) throw new DOMException('The request was aborted.', 'AbortError');
   const manifestText = await fetchText(SELECTIVITY_ATLAS_MANIFEST_PATH, fetcher, signal);
+  await verifySha256(manifestText, MANIFEST_SHA256, 'Selectivity atlas manifest');
   let rawManifest: unknown;
   try {
     rawManifest = JSON.parse(manifestText);
   } catch {
     throw new SelectivityAtlasAssetError('The selectivity-atlas manifest is not valid JSON.');
   }
-  const manifest = validateSelectivityAtlasManifest(rawManifest);
+  return validateSelectivityAtlasManifest(rawManifest);
+}
+
+export async function loadSelectivityAtlasAssets(
+  model: string,
+  fetcher: FetchLike = fetch,
+  signal?: AbortSignal,
+): Promise<SelectivityAtlasAssets> {
+  const manifest = await loadSelectivityAtlasManifest(fetcher, signal);
   const entry = manifest.models[model];
   if (!entry) throw new SelectivityAtlasAssetError(`No Subject 1 selectivity atlas is available for ${model}.`);
   const summaryUrl = resolveAssetUrl(entry.summaryUrl, SELECTIVITY_ATLAS_MANIFEST_PATH);

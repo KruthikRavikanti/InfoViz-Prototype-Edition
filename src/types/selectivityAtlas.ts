@@ -114,4 +114,6 @@ export type SelectivityAtlasAssets = {
 export type SelectivityAtlasHoverDatum = SelectivityAtlasPoint & {
   canvasX: number;
   canvasY: number;
+  /** Keyboard inspection can retain identity even when the voxel is outside the camera frustum. */
+  outsideView?: boolean;
 };

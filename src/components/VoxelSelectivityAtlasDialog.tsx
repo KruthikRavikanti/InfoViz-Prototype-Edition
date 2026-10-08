@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { loadSelectivityAtlasAssets } from '../services/selectivityAtlasAssets';
+import { VoxelSelectivityAtlasTooltip } from './VoxelSelectivityAtlasTooltip';
 import type {
   SelectivityAtlasAssets,
   SelectivityAtlasCluster,
@@ -253,6 +254,7 @@ function VoxelSelectivityAtlasModal({
                     {assetState.assets.summary.method.pcaComponents} PCA dimensions, and L2-normalized.
                     K-means groups these profiles into {assetState.assets.summary.clusterCount} clusters;
                     UMAP provides the 3D display only.
+                    Its axes have arbitrary orientation, not anatomical directions or activity units.
                   </p>
                   <dl className="selectivity-atlas-diagnostics">
                     <div><dt>Silhouette</dt><dd>{assetState.assets.summary.silhouette.toFixed(3)}</dd></div>
@@ -307,19 +309,20 @@ function VoxelSelectivityAtlasModal({
                     </div>
                   )}
                   {hovered && (
-                    <div
-                      className="selectivity-atlas-tooltip"
-                      style={{ left: hovered.canvasX, top: hovered.canvasY } as CSSProperties}
-                      role="status"
-                    >
-                      <strong>{hovered.roi.toUpperCase()} voxel {hovered.roiVoxelIndex}</strong>
-                      <span>Cluster C{hovered.clusterLabel}</span>
-                      <span>PCA centroid distance {hovered.distanceToCentroid.toFixed(3)}</span>
-                    </div>
+                    <VoxelSelectivityAtlasTooltip hovered={hovered} />
                   )}
                 </div>
                 <div className="selectivity-atlas-stage-footer">
-                  <span>Drag to rotate · scroll to zoom · click a dot to select</span>
+                  <div className="selectivity-atlas-interaction-help">
+                    <span>Drag to rotate · scroll to zoom · click a dot to select</span>
+                    <details className="selectivity-atlas-keyboard-help">
+                      <summary>Keyboard controls</summary>
+                      <p id="selectivity-atlas-keyboard-instructions">
+                        Focus the plot. Arrow keys rotate; + / − zoom. [ / ] or Page Up / Down browse voxels;
+                        Home / End jump to the first / last. Enter or Space selects the voxel’s cluster.
+                      </p>
+                    </details>
+                  </div>
                   <button
                     type="button"
                     className="selectivity-atlas-reset"

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type {
@@ -7,6 +7,16 @@ import type {
   SelectivityAtlasRoi,
 } from '../types/selectivityAtlas';
 import { SELECTIVITY_CLUSTER_COLORS } from '../utils/selectivityAtlas';
+import {
+  SELECTIVITY_DEFAULT_CAMERA_DIRECTION,
+  orbitSelectivityCamera,
+  resizedSelectivityCameraDistance,
+  selectivityBoundsCenter,
+  selectivityFrameDistance,
+  selectivityNavigationIndex,
+  selectivityOrientationAxes,
+  type SelectivityPosition,
+} from '../utils/selectivityViewerLayout';
 
 type VoxelSelectivityAtlasViewerProps = {
   points: SelectivityAtlasPoint[];
@@ -25,6 +35,7 @@ type Runtime = {
   controls: OrbitControls;
   pointCloud: THREE.Points;
   framePoints: () => void;
+  clearHover: () => void;
 };
 
 function disposePointCloud(pointCloud: THREE.Points) {
@@ -64,6 +75,12 @@ export default function VoxelSelectivityAtlasViewer({
 }: VoxelSelectivityAtlasViewerProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const runtimeRef = useRef<Runtime | null>(null);
+  const orientationRef = useRef<SVGSVGElement | null>(null);
+  const fullPositions = useMemo<SelectivityPosition[]>(
+    () => points.map((point) => [point.umapX, point.umapY, point.umapZ]),
+    [points],
+  );
+  const fullPositionsRef = useRef(fullPositions);
   const visiblePointsRef = useRef<SelectivityAtlasPoint[]>([]);
   const selectedClusterRef = useRef(selectedCluster);
   const onHoverRef = useRef(onHover);
@@ -88,9 +105,10 @@ export default function VoxelSelectivityAtlasViewer({
     renderer.domElement.className = 'selectivity-atlas-webgl-canvas';
     renderer.domElement.tabIndex = 0;
     renderer.domElement.setAttribute('role', 'img');
+    renderer.domElement.setAttribute('aria-describedby', 'selectivity-atlas-keyboard-instructions');
     renderer.domElement.setAttribute(
       'aria-label',
-      'Interactive 3D UMAP of Subject 1 voxel selectivity. Drag to rotate, scroll to zoom, and hover a voxel.',
+      'Interactive 3D UMAP of Subject 1 voxel selectivity. Drag or use arrow keys to rotate; scroll or plus and minus to zoom; brackets or Page Up and Page Down to browse voxels; Home and End for first and last; Enter or Space to select a cluster.',
     );
     mountElement.appendChild(renderer.domElement);
 
@@ -113,39 +131,141 @@ export default function VoxelSelectivityAtlasViewer({
     );
     scene.add(pointCloud);
 
+    const focusTextureCanvas = document.createElement('canvas');
+    focusTextureCanvas.width = 64;
+    focusTextureCanvas.height = 64;
+    const focusContext = focusTextureCanvas.getContext('2d');
+    if (focusContext) {
+      focusContext.strokeStyle = '#ffffff';
+      focusContext.lineWidth = 10;
+      focusContext.beginPath();
+      focusContext.arc(32, 32, 24, 0, Math.PI * 2);
+      focusContext.stroke();
+      focusContext.strokeStyle = '#292524';
+      focusContext.lineWidth = 5;
+      focusContext.stroke();
+    }
+    const focusTexture = new THREE.CanvasTexture(focusTextureCanvas);
+    const focusMarker = new THREE.Points(
+      new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(3), 3)),
+      new THREE.PointsMaterial({
+        size: 18,
+        sizeAttenuation: false,
+        map: focusTexture,
+        transparent: true,
+        depthWrite: false,
+        depthTest: false,
+      }),
+    );
+    focusMarker.visible = false;
+    focusMarker.frustumCulled = false;
+    focusMarker.renderOrder = 2;
+    scene.add(focusMarker);
+
+    let focusedIndex: number | null = null;
+    let hoverMode: 'pointer' | 'keyboard' | null = null;
+    let pointerStart: { x: number; y: number } | null = null;
+    let pointerDragged = false;
+    let initiallyFramed = false;
+    const projectedPoint = new THREE.Vector3();
+
+    function clearHover() {
+      focusedIndex = null;
+      hoverMode = null;
+      focusMarker.visible = false;
+      delete renderer.domElement.dataset.focusedVoxelIndex;
+      onHoverRef.current(null);
+      renderer.domElement.style.cursor = 'grab';
+    }
+
+    function showFocusMarker(point: SelectivityAtlasPoint) {
+      const position = focusMarker.geometry.getAttribute('position');
+      position.setXYZ(0, point.umapX, point.umapY, point.umapZ);
+      position.needsUpdate = true;
+      focusMarker.visible = true;
+      renderer.domElement.dataset.focusedVoxelIndex = String(point.voxelIndex);
+    }
+
+    function showKeyboardHover() {
+      if (hoverMode !== 'keyboard' || focusedIndex === null) return;
+      const point = visiblePointsRef.current[focusedIndex];
+      if (!point) { clearHover(); return; }
+      camera.updateMatrixWorld();
+      projectedPoint.set(point.umapX, point.umapY, point.umapZ).project(camera);
+      const rect = renderer.domElement.getBoundingClientRect();
+      const outsideView = !Number.isFinite(projectedPoint.x) || !Number.isFinite(projectedPoint.y) || !Number.isFinite(projectedPoint.z)
+        || projectedPoint.z < -1 || projectedPoint.z > 1 || Math.abs(projectedPoint.x) > 1 || Math.abs(projectedPoint.y) > 1;
+      showFocusMarker(point);
+      focusMarker.visible = !outsideView;
+      onHoverRef.current({
+        ...point,
+        canvasX: Number.isFinite(projectedPoint.x) ? (projectedPoint.x + 1) * rect.width / 2 : rect.width / 2,
+        canvasY: Number.isFinite(projectedPoint.y) ? (1 - projectedPoint.y) * rect.height / 2 : rect.height / 2,
+        outsideView,
+      });
+    }
+
+    function flushOrbitDamping() {
+      const enabled = controls.enableDamping;
+      controls.enableDamping = false;
+      controls.update();
+      controls.enableDamping = enabled;
+    }
+
     function framePoints() {
-      const position = pointCloud.geometry.getAttribute('position');
-      if (!position || position.count === 0) return;
-      pointCloud.rotation.set(0, 0, 0);
-      const box = new THREE.Box3().setFromObject(pointCloud);
-      const center = box.getCenter(new THREE.Vector3());
-      const cameraOffset = new THREE.Vector3(1, 0.55, 1.35).normalize();
-      const lookDirection = cameraOffset.clone().negate();
-      const cameraRight = new THREE.Vector3().crossVectors(lookDirection, camera.up).normalize();
-      const cameraUp = new THREE.Vector3().crossVectors(cameraRight, lookDirection).normalize();
-      const relativePoint = new THREE.Vector3();
-      const tanHalfFov = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-      const frameFraction = 0.78;
-      let distance = 2;
-      for (let index = 0; index < position.count; index += 1) {
-        relativePoint.fromBufferAttribute(position, index).sub(center);
-        const depthOffset = relativePoint.dot(lookDirection);
-        const horizontalDistance = Math.abs(relativePoint.dot(cameraRight))
-          / (tanHalfFov * Math.max(camera.aspect, 0.01) * frameFraction) - depthOffset;
-        const verticalDistance = Math.abs(relativePoint.dot(cameraUp))
-          / (tanHalfFov * frameFraction) - depthOffset;
-        distance = Math.max(distance, horizontalDistance, verticalDistance, 0.1 - depthOffset);
-      }
+      clearHover();
+      const allPositions = fullPositionsRef.current;
+      if (allPositions.length === 0) return;
+      flushOrbitDamping();
+      const centerCoordinates = selectivityBoundsCenter(allPositions);
+      const center = new THREE.Vector3(...centerCoordinates);
+      const distance = selectivityFrameDistance(allPositions, centerCoordinates, camera.aspect, camera.fov);
+      const cameraOffset = new THREE.Vector3(...SELECTIVITY_DEFAULT_CAMERA_DIRECTION).normalize();
+      controls.maxDistance = Math.max(120, distance * 5);
       camera.position.copy(center).add(cameraOffset.multiplyScalar(distance));
       controls.target.copy(center);
       controls.update();
+      initiallyFramed = true;
     }
-    runtimeRef.current = { renderer, scene, background, camera, controls, pointCloud, framePoints };
+    runtimeRef.current = { renderer, scene, background, camera, controls, pointCloud, framePoints, clearHover };
+
+    const orientationAxes = Array.from(orientationRef.current?.querySelectorAll<SVGGElement>('[data-umap-axis]') ?? [])
+      .map((group) => ({
+        group,
+        line: group.querySelector('line'),
+        endpoint: group.querySelector('circle'),
+        label: group.querySelector('text'),
+      }));
+    const lastOrientation = new THREE.Quaternion(0, 0, 0, 0);
+
+    function updateOrientation() {
+      if (camera.quaternion.equals(lastOrientation)) return;
+      lastOrientation.copy(camera.quaternion);
+      const axes = selectivityOrientationAxes(camera.quaternion.toArray());
+      orientationAxes.forEach(({ group, line, endpoint, label }, index) => {
+        const [x, y, z] = axes[index];
+        const endX = 74 + x * 25;
+        const endY = 62 - y * 25;
+        line?.setAttribute('x2', String(endX));
+        line?.setAttribute('y2', String(endY));
+        endpoint?.setAttribute('cx', String(endX));
+        endpoint?.setAttribute('cy', String(endY));
+        label?.setAttribute('x', String(74 + x * 42));
+        label?.setAttribute('y', String(62 - y * 42));
+        group.style.opacity = String(0.65 + 0.35 * (z + 1) / 2);
+      });
+    }
+
+    function handleViewChange() {
+      updateOrientation();
+      if (hoverMode === 'keyboard') showKeyboardHover();
+      else if (hoverMode === 'pointer') clearHover();
+    }
+    controls.addEventListener('change', handleViewChange);
 
     const raycaster = new THREE.Raycaster();
     raycaster.params.Points = { threshold: 0.18 };
     const pointer = new THREE.Vector2();
-    let hoveredIndex: number | null = null;
 
     function hitAt(event: PointerEvent): { index: number; point: SelectivityAtlasPoint } | null {
       const rect = renderer.domElement.getBoundingClientRect();
@@ -159,14 +279,19 @@ export default function VoxelSelectivityAtlasViewer({
     }
 
     function handlePointerMove(event: PointerEvent) {
-      const hit = hitAt(event);
-      if (!hit) {
-        hoveredIndex = null;
-        renderer.domElement.style.cursor = 'grab';
-        onHoverRef.current(null);
+      if (event.buttons !== 0) {
+        if (pointerStart && Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 4) pointerDragged = true;
+        clearHover();
         return;
       }
-      hoveredIndex = hit.index;
+      const hit = hitAt(event);
+      if (!hit) {
+        clearHover();
+        return;
+      }
+      focusedIndex = hit.index;
+      hoverMode = 'pointer';
+      showFocusMarker(hit.point);
       const rect = renderer.domElement.getBoundingClientRect();
       renderer.domElement.style.cursor = 'crosshair';
       onHoverRef.current({
@@ -177,48 +302,78 @@ export default function VoxelSelectivityAtlasViewer({
     }
 
     function handleClick(event: PointerEvent) {
+      // Orbit drag ends with a click event too; do not accidentally select a cluster.
+      if (pointerDragged || (pointerStart && Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 4)) return;
       const hit = hitAt(event);
       if (hit) onSelectClusterRef.current(hit.point.clusterLabel);
     }
 
-    function clearHover() {
-      hoveredIndex = null;
-      onHoverRef.current(null);
-      renderer.domElement.style.cursor = 'grab';
+    function handlePointerDown(event: PointerEvent) {
+      pointerStart = { x: event.clientX, y: event.clientY };
+      pointerDragged = false;
+      clearHover();
     }
 
     function handleKeyboard(event: KeyboardEvent) {
       const step = Math.PI / 36;
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      const navigationIndex = selectivityNavigationIndex(visiblePointsRef.current.length, focusedIndex, event.key);
+      if (navigationIndex !== null) {
         event.preventDefault();
-        pointCloud.rotation.y += event.key === 'ArrowLeft' ? -step : step;
-      } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        focusedIndex = navigationIndex;
+        hoverMode = 'keyboard';
+        showKeyboardHover();
+      } else if (event.key.startsWith('Arrow')) {
         event.preventDefault();
-        pointCloud.rotation.x += event.key === 'ArrowUp' ? -step : step;
+        flushOrbitDamping();
+        const azimuth = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0;
+        const polar = event.key === 'ArrowUp' ? -step : event.key === 'ArrowDown' ? step : 0;
+        camera.position.fromArray(orbitSelectivityCamera(camera.position.toArray(), controls.target.toArray(), azimuth, polar));
+        controls.update();
       } else if (event.key === '+' || event.key === '=') {
         event.preventDefault();
         camera.position.lerp(controls.target, 0.08);
       } else if (event.key === '-' || event.key === '_') {
         event.preventDefault();
         camera.position.sub(controls.target).multiplyScalar(1.08).add(controls.target);
-      } else if ((event.key === 'Enter' || event.key === ' ') && hoveredIndex !== null) {
+      } else if ((event.key === 'Enter' || event.key === ' ') && focusedIndex !== null) {
         event.preventDefault();
-        const point = visiblePointsRef.current[hoveredIndex];
+        const point = visiblePointsRef.current[focusedIndex];
         if (point) onSelectClusterRef.current(point.clusterLabel);
       }
     }
 
+    renderer.domElement.addEventListener('pointerdown', handlePointerDown);
     renderer.domElement.addEventListener('pointermove', handlePointerMove);
     renderer.domElement.addEventListener('pointerleave', clearHover);
     renderer.domElement.addEventListener('click', handleClick);
     renderer.domElement.addEventListener('keydown', handleKeyboard);
+    renderer.domElement.addEventListener('blur', clearHover);
 
     function resize() {
       const { width, height } = mountElement.getBoundingClientRect();
+      const oldAspect = camera.aspect;
+      const newAspect = Math.max(width, 1) / Math.max(height, 1);
+      if (initiallyFramed && oldAspect !== newAspect) {
+        flushOrbitDamping();
+        const offset = camera.position.clone().sub(controls.target);
+        const allPositions = fullPositionsRef.current;
+        const center = selectivityBoundsCenter(allPositions);
+        const direction = offset.toArray();
+        const oldFit = selectivityFrameDistance(allPositions, center, oldAspect, camera.fov, direction);
+        const newFit = selectivityFrameDistance(allPositions, center, newAspect, camera.fov, direction);
+        const distance = resizedSelectivityCameraDistance(offset.length(), oldFit, newFit);
+        controls.maxDistance = Math.max(120, newFit * 5, distance);
+        camera.position.copy(controls.target).add(offset.setLength(distance));
+      }
       renderer.setSize(Math.max(width, 1), Math.max(height, 1), false);
-      camera.aspect = Math.max(width, 1) / Math.max(height, 1);
+      camera.aspect = newAspect;
       camera.updateProjectionMatrix();
-      framePoints();
+      if (!initiallyFramed) framePoints();
+      else {
+        controls.update();
+        if (hoverMode === 'keyboard') showKeyboardHover();
+        else clearHover();
+      }
     }
     resize();
     const observer = new ResizeObserver(resize);
@@ -226,6 +381,7 @@ export default function VoxelSelectivityAtlasViewer({
     let animationFrame = 0;
     function render() {
       controls.update();
+      updateOrientation();
       renderer.render(scene, camera);
       animationFrame = window.requestAnimationFrame(render);
     }
@@ -234,12 +390,17 @@ export default function VoxelSelectivityAtlasViewer({
     return () => {
       window.cancelAnimationFrame(animationFrame);
       observer.disconnect();
+      renderer.domElement.removeEventListener('pointerdown', handlePointerDown);
       renderer.domElement.removeEventListener('pointermove', handlePointerMove);
       renderer.domElement.removeEventListener('pointerleave', clearHover);
       renderer.domElement.removeEventListener('click', handleClick);
       renderer.domElement.removeEventListener('keydown', handleKeyboard);
+      renderer.domElement.removeEventListener('blur', clearHover);
+      controls.removeEventListener('change', handleViewChange);
       controls.dispose();
       disposePointCloud(pointCloud);
+      disposePointCloud(focusMarker);
+      focusTexture.dispose();
       renderer.dispose();
       renderer.domElement.remove();
       runtimeRef.current = null;
@@ -248,8 +409,15 @@ export default function VoxelSelectivityAtlasViewer({
   }, []);
 
   useEffect(() => {
+    if (fullPositionsRef.current === fullPositions) return;
+    fullPositionsRef.current = fullPositions;
+    runtimeRef.current?.framePoints();
+  }, [fullPositions]);
+
+  useEffect(() => {
     const runtime = runtimeRef.current;
     if (!runtime) return;
+    runtime.clearHover();
     const visible = points.filter((point) => enabledRois.has(point.roi));
     visiblePointsRef.current = visible;
     const positions = new Float32Array(visible.length * 3);
@@ -263,20 +431,40 @@ export default function VoxelSelectivityAtlasViewer({
     runtime.pointCloud.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     updatePointColors(runtime.pointCloud, visible, selectedClusterRef.current, runtime.background);
     runtime.pointCloud.geometry.computeBoundingSphere();
-    onHoverRef.current(null);
-    window.requestAnimationFrame(runtime.framePoints);
+    runtime.renderer.domElement.dataset.visiblePointCount = String(visible.length);
   }, [enabledRois, points]);
 
   useEffect(() => {
     const runtime = runtimeRef.current;
     if (!runtime) return;
     updatePointColors(runtime.pointCloud, visiblePointsRef.current, selectedCluster, runtime.background);
-    onHoverRef.current(null);
+    runtime.clearHover();
   }, [selectedCluster]);
 
   useEffect(() => {
     if (resetKey > 0) runtimeRef.current?.framePoints();
   }, [resetKey]);
 
-  return <div className="selectivity-atlas-viewer-shell" ref={mountRef} />;
+  return (
+    <div className="selectivity-atlas-viewer-shell" ref={mountRef}>
+      <svg
+        ref={orientationRef}
+        className="selectivity-atlas-orientation"
+        viewBox="0 0 148 124"
+        role="img"
+        aria-label="UMAP 1, UMAP 2, and UMAP 3 axis orientation. Arbitrary similarity-space directions, not anatomical axes."
+      >
+        <title>Positive UMAP axes in the current camera view; arbitrary similarity-space directions, not anatomy.</title>
+        <circle className="selectivity-atlas-orientation-origin" cx="74" cy="62" r="2" />
+        {[1, 2, 3].map((axis) => (
+          <g key={axis} className="selectivity-atlas-orientation-axis" data-umap-axis={axis}>
+            <line x1="74" y1="62" x2="74" y2="62" />
+            <circle cx="74" cy="62" r="2.5" />
+            <text x="74" y="62" textAnchor="middle" dominantBaseline="central">UMAP {axis}</text>
+          </g>
+        ))}
+        <text className="selectivity-atlas-orientation-caption" x="74" y="116" textAnchor="middle">Similarity axes</text>
+      </svg>
+    </div>
+  );
 }

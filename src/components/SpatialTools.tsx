@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrainMapDialog } from './BrainMapDialog';
 import { VoxelSelectivityAtlasDialog } from './VoxelSelectivityAtlasDialog';
-import { SELECTIVITY_ATLAS_MANIFEST_PATH, validateSelectivityAtlasManifest } from '../services/selectivityAtlasAssets';
+import { loadSelectivityAtlasManifest } from '../services/selectivityAtlasAssets';
 import type { CortexComparisonSession } from '../types/session';
 
 type SpatialToolsProps = {
@@ -18,11 +18,7 @@ export function SpatialTools({ model, session, focusedStimulusId, onFocusStimulu
   useEffect(() => {
     const controller = new AbortController();
     let ignore = false;
-    fetch(SELECTIVITY_ATLAS_MANIFEST_PATH, { signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error('Voxel selectivity availability could not be loaded.');
-        return validateSelectivityAtlasManifest(await response.json());
-      })
+    loadSelectivityAtlasManifest(fetch, controller.signal)
       .then((manifest) => {
         if (!ignore) setAtlasModels(new Set(manifest.supportedModels));
       })

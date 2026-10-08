@@ -3316,6 +3316,22 @@ button.cluster-size-chip:hover {
 .selectivity-atlas-stage-heading > p:last-child { grid-column: 1 / -1; color: var(--text-3); font-size: .67rem; }
 .selectivity-atlas-stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 .selectivity-atlas-viewer-shell { position: absolute; inset: 0; }
+.selectivity-atlas-orientation {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 2;
+  width: 148px;
+  height: 124px;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.selectivity-atlas-orientation text { fill: currentColor; }
+.selectivity-atlas-orientation circle { fill: currentColor; }
+.selectivity-atlas-orientation-axis line { stroke: currentColor; stroke-width: 1.5; }
 .selectivity-atlas-webgl-canvas { display: block; width: 100%; height: 100%; cursor: grab; outline: none; }
 .selectivity-atlas-webgl-canvas:active { cursor: grabbing; }
 .selectivity-atlas-webgl-canvas:focus-visible { box-shadow: inset 0 0 0 3px var(--accent-mid); }
@@ -3336,7 +3352,7 @@ button.cluster-size-chip:hover {
   display: grid;
   gap: 2px;
   width: 205px;
-  transform: translate(12px, 12px);
+  max-width: calc(100% - 16px);
   border: 1px solid rgba(68, 64, 60, .22);
   border-radius: var(--r-md);
   padding: 8px 9px;
@@ -3360,6 +3376,12 @@ button.cluster-size-chip:hover {
   color: var(--text-4);
   font-size: .67rem;
 }
+
+.selectivity-atlas-interaction-help { min-width: 0; }
+.selectivity-atlas-keyboard-help { margin-top: 3px; color: var(--text-3); }
+.selectivity-atlas-keyboard-help summary { cursor: pointer; width: fit-content; }
+.selectivity-atlas-keyboard-help p { max-width: 620px; margin-top: 5px; line-height: 1.5; }
+.selectivity-atlas-stage-footer > button { flex-shrink: 0; }
 
 .selectivity-cluster-profile {
   display: grid;
