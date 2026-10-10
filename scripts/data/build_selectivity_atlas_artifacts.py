@@ -842,7 +842,9 @@ def build_parser() -> argparse.ArgumentParser:
         "--reference-manifest", type=Path, default=DEFAULT_REFERENCE_MANIFEST
     )
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--append-baseline-atlas", type=Path, help="Stage new audited models while copying this pinned baseline atlas unchanged.")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--append-baseline-atlas", type=Path, help="Stage new audited models while copying this pinned baseline atlas unchanged.")
+    mode.add_argument("--standardize-from-baseline", type=Path, help="Refit the exact full model roster from verified FP32 predictions into a fresh staging directory.")
     parser.add_argument("--baseline-artifact-root", type=Path, default=REPO_ROOT / "artifacts/reference")
     parser.add_argument("--audit-path", type=Path, default=REPO_ROOT.parent / "cortex-core/cortex/comparison/brain_map_audit.py")
     parser.add_argument("--image-root", type=Path, default=REPO_ROOT / "public/images")
@@ -954,10 +956,82 @@ def append_selectivity_atlas_assets(
         raise
 
 
+def standardize_selectivity_atlas_assets(
+    *, raw_root: Path, artifact_root: Path, baseline_root: Path, audit_path: Path,
+    output_dir: Path, image_root: Path = REPO_ROOT / "public/images", config: AtlasConfig = AtlasConfig(),
+) -> dict[str, Any]:
+    """Refit every known model without altering the method or unrelated artifacts."""
+    try:
+        from .spatial_standardization import PARENT_ATLAS_MANIFEST_SHA256, checked_document, validate_spatial_standardization
+    except ImportError:  # pragma: no cover - direct script execution
+        from spatial_standardization import PARENT_ATLAS_MANIFEST_SHA256, checked_document, validate_spatial_standardization
+    if output_dir.exists():
+        raise SelectivityAtlasValidationError("Standardization output must be a new staging directory.")
+    if config != AtlasConfig():
+        raise SelectivityAtlasValidationError("Standardization must retain the reviewed selectivity method exactly.")
+    reference, contract, matrices = validate_spatial_standardization(
+        artifact_root=artifact_root, raw_root=raw_root, baseline_root=baseline_root,
+        audit_path=audit_path, image_root=image_root,
+    )
+    parent_root = baseline_root / "public/data/voxel_selectivity_atlas"
+    parent = checked_document(parent_root / "manifest.json", PARENT_ATLAS_MANIFEST_SHA256)
+    if parent["method"] != method_metadata(config):
+        raise SelectivityAtlasValidationError("The reviewed parent selectivity method is incompatible.")
+    output_dir.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix=f".{output_dir.name}-standardize-", dir=output_dir.parent))
+    records = {}
+    try:
+        shutil.copytree(parent_root, staging, dirs_exist_ok=True)
+        for model in sorted(matrices):
+            sources = load_model_sources(model=model, raw_dir=raw_root / model, reference_manifest=reference)
+            responses, roi_names, roi_indices, image_ids = combine_model_sources(sources)
+            # The clustering input must be exactly the same raw Subject-1
+            # prefix as the independent anatomical export, just reordered.
+            expected = np.concatenate([matrices[model][roi] for roi in ROI_ORDER], axis=1)
+            if not np.array_equal(responses.astype(np.float32), expected):
+                raise SelectivityAtlasValidationError(f"{model}: atlas source differs from audited raw S1 responses.")
+            # Start from exact audited float32 prediction bits, not the tiny
+            # decimal-roundtrip differences in a float64 CSV parser. Analysis
+            # precision and the fixed clustering method are otherwise unchanged.
+            fit = fit_selectivity_atlas(expected.astype(np.float64), config=config)
+            points_path = staging / model / "points.csv"
+            summary_path = staging / model / "summary.json"
+            write_points_csv(points_path, roi_names=roi_names, roi_indices=roi_indices, fit=fit)
+            write_json(summary_path, build_summary(
+                model=model, image_ids=image_ids, roi_names=roi_names, fit=fit,
+                source_files=[{"roi": roi, "fileName": sources[roi].path.name, "sha256": sources[roi].sha256} for roi in ROI_ORDER],
+                config=config,
+            ))
+            records[model] = {
+                "pointsUrl": f"{model}/points.csv", "summaryUrl": f"{model}/summary.json",
+                "pointsSha256": sha256_file(points_path), "summarySha256": sha256_file(summary_path),
+                "pointsBytes": points_path.stat().st_size, "summaryBytes": summary_path.stat().st_size,
+                "pointCount": len(fit.labels),
+            }
+            print(f"Standardized {model}: {len(fit.labels)} voxels, silhouette={fit.silhouette:.4f}", flush=True)
+        manifest = {**parent, "supportedModels": sorted(matrices), "referenceVersion": contract["reference_version"], "models": records}
+        write_json(staging / "manifest.json", manifest)
+        if output_dir.exists():
+            raise SelectivityAtlasValidationError("Standardization output appeared during generation; nothing was replaced.")
+        os.rename(staging, output_dir)
+        return manifest
+    except BaseException:
+        shutil.rmtree(staging, ignore_errors=True)
+        raise
+
+
 def main() -> None:
     args = build_parser().parse_args()
     try:
-        if args.append_baseline_atlas:
+        if args.standardize_from_baseline:
+            if args.models:
+                raise SelectivityAtlasValidationError("A standardization must cover all models, not a subset.")
+            manifest = standardize_selectivity_atlas_assets(
+                raw_root=args.raw_dir, artifact_root=args.reference_manifest.parent,
+                baseline_root=args.standardize_from_baseline, audit_path=args.audit_path,
+                output_dir=args.output_dir, image_root=args.image_root,
+            )
+        elif args.append_baseline_atlas:
             if args.models:
                 raise SelectivityAtlasValidationError("An append must cover the exact expanded reference roster, not a separate model subset.")
             manifest = append_selectivity_atlas_assets(
@@ -975,7 +1049,7 @@ def main() -> None:
     except SelectivityAtlasValidationError as error:
         raise SystemExit(f"Selectivity atlas build failed: {error}") from error
     print(
-        f"{'Staged' if args.append_baseline_atlas else 'Installed'} {len(manifest['supportedModels'])} model atlas artifacts at "
+        f"{'Staged' if args.append_baseline_atlas or args.standardize_from_baseline else 'Installed'} {len(manifest['supportedModels'])} model atlas artifacts at "
         f"{args.output_dir.resolve()}",
         flush=True,
     )

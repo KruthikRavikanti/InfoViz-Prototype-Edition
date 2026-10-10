@@ -1,0 +1,21 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 71,
+    "1": 114
+  },
+  "clustering_method": "hierarchical",
+  "dendrogram_png": "public/data/voxel_clusters_hierarchical_corr/murtylab_alexnet_nsd_1000_ppa_20261010193633129Z_dendrogram.png",
+  "distance_metric": "correlation",
+  "distance_to_cluster_representative": "medoid_correlation_distance",
+  "linkage_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_alexnet_nsd_1000_ppa_20261010193633129Z_linkage.csv",
+  "linkage_method": "average",
+  "model": "alexnet",
+  "n_images": 185,
+  "n_voxels": 753,
+  "normalization": "voxel_zscore",
+  "result_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_alexnet_nsd_1000_ppa_20261010193633129Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.46982116395187024,
+  "source_file": "murtylab_alexnet_nsd_1000_ppa_20261010193633129Z.csv"
+}

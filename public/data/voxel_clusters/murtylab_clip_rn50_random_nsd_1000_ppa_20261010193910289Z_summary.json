@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 137,
+    "1": 48
+  },
+  "explained_variance_ratio_first10": [
+    0.5634325637376387,
+    0.2748097825375264,
+    0.12128923931492855,
+    0.029216714806935107,
+    0.003574201814516631,
+    0.0030835898592437576,
+    0.001179760191478084,
+    0.0010043783652404386,
+    0.0007146033943866474,
+    0.0004690779796618214
+  ],
+  "model": "clip_rn50_random",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_clip_rn50_random_nsd_1000_ppa_20261010193910289Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.3997825187315229,
+  "source_file": "murtylab_clip_rn50_random_nsd_1000_ppa_20261010193910289Z.csv"
+}

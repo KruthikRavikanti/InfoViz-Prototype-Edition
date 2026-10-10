@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 92,
+    "1": 93
+  },
+  "explained_variance_ratio_first10": [
+    0.7197809460760728,
+    0.11099909739069772,
+    0.03986339537229349,
+    0.02335291267628997,
+    0.011214409759602003,
+    0.009125310445625263,
+    0.007572808938753919,
+    0.005674513625555295,
+    0.005429047362324499,
+    0.004625353536116259
+  ],
+  "model": "google_vit",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_google_vit_nsd_1000_eba_20261010194143036Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.4122233606576699,
+  "source_file": "murtylab_google_vit_nsd_1000_eba_20261010194143036Z.csv"
+}

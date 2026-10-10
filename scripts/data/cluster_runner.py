@@ -244,14 +244,19 @@ def save_dendrogram_png(
 # Voxel clustering modes
 # ---------------------------------------------------------------------------
 
-def cluster_single_voxel_csv(csv_path: Path, out_dir: Path, pca_dim: int = 50, random_state: int = 42) -> Dict:
+def cluster_single_voxel_csv(csv_path: Path, out_dir: Path, pca_dim: int = 50, random_state: int = 42, *, canonical_float32: bool = False) -> Dict:
     """Original voxel method: impute, z-score voxels, PCA, then KMeans/euclidean."""
     df = pd.read_csv(csv_path)
     id_col = detect_id_column(df)
     image_ids, voxel_df = prepare_voxel_matrix(df, id_col)
 
     # Z-score happens per voxel column across images.
-    X = SimpleImputer(strategy="mean").fit_transform(voxel_df.values)
+    values = voxel_df.values
+    if canonical_float32:
+        # Fresh FP32 releases analyze the exact saved prediction bits, not the
+        # slightly different float64 interpretation of decimal CSV strings.
+        values = values.astype(np.float32).astype(np.float64)
+    X = SimpleImputer(strategy="mean").fit_transform(values)
     Xz = StandardScaler().fit_transform(X)
 
     # KMeans is run in PCA space to reduce high-dimensional voxel noise.
@@ -313,13 +318,18 @@ def cluster_single_voxel_csv_hierarchical_corr(
     k_max: int = 5,
     random_state: int = 42,
     save_dendrogram: bool = True,
+    *,
+    canonical_float32: bool = False,
 ) -> Dict:
     """New voxel method: z-score voxels, then cluster pairwise correlation distances."""
     df = pd.read_csv(csv_path)
     id_col = detect_id_column(df)
     image_ids, voxel_df = prepare_voxel_matrix(df, id_col)
 
-    X = SimpleImputer(strategy="mean").fit_transform(voxel_df.values)
+    values = voxel_df.values
+    if canonical_float32:
+        values = values.astype(np.float32).astype(np.float64)
+    X = SimpleImputer(strategy="mean").fit_transform(values)
     Xz = StandardScaler().fit_transform(X)
 
     # `pdist(..., metric="correlation")` calculates 1 - corr(row_i, row_j).

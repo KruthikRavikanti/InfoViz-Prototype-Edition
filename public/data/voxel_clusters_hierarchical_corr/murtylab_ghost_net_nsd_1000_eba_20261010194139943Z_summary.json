@@ -1,0 +1,21 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 82,
+    "1": 103
+  },
+  "clustering_method": "hierarchical",
+  "dendrogram_png": "public/data/voxel_clusters_hierarchical_corr/murtylab_ghost_net_nsd_1000_eba_20261010194139943Z_dendrogram.png",
+  "distance_metric": "correlation",
+  "distance_to_cluster_representative": "medoid_correlation_distance",
+  "linkage_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_ghost_net_nsd_1000_eba_20261010194139943Z_linkage.csv",
+  "linkage_method": "average",
+  "model": "ghost_net",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "normalization": "voxel_zscore",
+  "result_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_ghost_net_nsd_1000_eba_20261010194139943Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.45846681440963205,
+  "source_file": "murtylab_ghost_net_nsd_1000_eba_20261010194139943Z.csv"
+}

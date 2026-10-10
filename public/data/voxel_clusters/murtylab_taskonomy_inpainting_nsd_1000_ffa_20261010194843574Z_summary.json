@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 109,
+    "1": 76
+  },
+  "explained_variance_ratio_first10": [
+    0.770829473968466,
+    0.06257709140178445,
+    0.04696884199344558,
+    0.028743403311410513,
+    0.015521615420175378,
+    0.013245728601669515,
+    0.008210163044318146,
+    0.0065594119741817355,
+    0.005488367400876394,
+    0.005033528488657927
+  ],
+  "model": "taskonomy_inpainting",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_taskonomy_inpainting_nsd_1000_ffa_20261010194843574Z_clusters.csv",
+  "roi": "ffa",
+  "silhouette": 0.43825333383197435,
+  "source_file": "murtylab_taskonomy_inpainting_nsd_1000_ffa_20261010194843574Z.csv"
+}

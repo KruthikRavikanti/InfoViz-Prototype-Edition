@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 87,
+    "1": 98
+  },
+  "explained_variance_ratio_first10": [
+    0.912597272460263,
+    0.04708719661649131,
+    0.016378658232349286,
+    0.007535094718179861,
+    0.005232630460711731,
+    0.0036513591862601916,
+    0.002735558326518451,
+    0.001225664764473656,
+    0.0007088827266771489,
+    0.00043178135275343633
+  ],
+  "model": "ese_vovnet",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_ese_vovnet_nsd_1000_ppa_20261010194124327Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.5195751646573696,
+  "source_file": "murtylab_ese_vovnet_nsd_1000_ppa_20261010194124327Z.csv"
+}

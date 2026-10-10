@@ -3,7 +3,7 @@
   "clusters": [
     {
       "label": 0,
-      "meanSilhouette": 0.13570765397773413,
+      "meanSilhouette": 0.13570765397773424,
       "preferredImages": [
         {
           "imageId": "image_119.png",
@@ -57,7 +57,7 @@
     },
     {
       "label": 1,
-      "meanSilhouette": 0.2125284506622398,
+      "meanSilhouette": 0.21252845066223988,
       "preferredImages": [
         {
           "imageId": "image_047.png",
@@ -111,7 +111,7 @@
     },
     {
       "label": 2,
-      "meanSilhouette": 0.18546372642686842,
+      "meanSilhouette": 0.18546372642686876,
       "preferredImages": [
         {
           "imageId": "image_133.png",
@@ -165,7 +165,7 @@
     },
     {
       "label": 3,
-      "meanSilhouette": 0.15544064797708693,
+      "meanSilhouette": 0.155440647977087,
       "preferredImages": [
         {
           "imageId": "image_035.png",
@@ -219,7 +219,7 @@
     },
     {
       "label": 4,
-      "meanSilhouette": 0.18531562589791425,
+      "meanSilhouette": 0.1853156258979147,
       "preferredImages": [
         {
           "imageId": "image_119.png",
@@ -273,7 +273,7 @@
     },
     {
       "label": 5,
-      "meanSilhouette": 0.24794810449141708,
+      "meanSilhouette": 0.24794810449141716,
       "preferredImages": [
         {
           "imageId": "image_119.png",
@@ -327,7 +327,7 @@
     },
     {
       "label": 6,
-      "meanSilhouette": 0.30949041612226974,
+      "meanSilhouette": 0.30949041612227,
       "preferredImages": [
         {
           "imageId": "image_062.png",
@@ -381,7 +381,7 @@
     },
     {
       "label": 7,
-      "meanSilhouette": 0.26267066184593646,
+      "meanSilhouette": 0.2626706618459367,
       "preferredImages": [
         {
           "imageId": "image_047.png",
@@ -435,7 +435,7 @@
     },
     {
       "label": 8,
-      "meanSilhouette": 0.18040388217884437,
+      "meanSilhouette": 0.18040388217884484,
       "preferredImages": [
         {
           "imageId": "image_050.png",
@@ -489,7 +489,7 @@
     },
     {
       "label": 9,
-      "meanSilhouette": 0.19524235370928025,
+      "meanSilhouette": 0.19524235370927973,
       "preferredImages": [
         {
           "imageId": "image_034.png",
@@ -543,7 +543,7 @@
     },
     {
       "label": 10,
-      "meanSilhouette": 0.1462944671300086,
+      "meanSilhouette": 0.1462944671300085,
       "preferredImages": [
         {
           "imageId": "image_047.png",
@@ -597,7 +597,7 @@
     },
     {
       "label": 11,
-      "meanSilhouette": 0.2465987065916346,
+      "meanSilhouette": 0.24659870659163438,
       "preferredImages": [
         {
           "imageId": "image_119.png",
@@ -705,7 +705,7 @@
     },
     {
       "label": 13,
-      "meanSilhouette": 0.06735406633547726,
+      "meanSilhouette": 0.0673540663354771,
       "preferredImages": [
         {
           "imageId": "image_119.png",
@@ -776,26 +776,26 @@
     "pcaComponents": 35
   },
   "model": "cross_vit",
-  "pcaExplainedVarianceRatioSum": 0.99378933295313,
+  "pcaExplainedVarianceRatioSum": 0.9937893329531299,
   "responseKind": "model_predictions",
   "responseSpace": "nsd_1000_subject1_floc_t7_v1",
   "schemaVersion": 1,
-  "silhouette": 0.20960077714354514,
+  "silhouette": 0.20960077714354522,
   "sourceFiles": [
     {
-      "fileName": "murtylab_cross_vit_nsd_1000_ffa_20260410224222356Z.csv",
+      "fileName": "murtylab_cross_vit_nsd_1000_ffa_20261010193948297Z.csv",
       "roi": "ffa",
-      "sha256": "4df3f009c99955fbc7727963781310707e7d8adea104117aee09a93a328ace26"
+      "sha256": "94647eb0183f3c78684e5144c87990f55c24d9c99505fd9adbf8c424e22808fb"
     },
     {
-      "fileName": "murtylab_cross_vit_nsd_1000_eba_20260410224249694Z.csv",
+      "fileName": "murtylab_cross_vit_nsd_1000_eba_20261010193948297Z.csv",
       "roi": "eba",
-      "sha256": "a3a62c1c0476e671e536f3bfa7d49b9422851a82ca9d87cc6e2a45fbc0d08973"
+      "sha256": "450e990e8781bcf44e78851c2d55a686a79c90a2598b278758446d526c6008dc"
     },
     {
-      "fileName": "murtylab_cross_vit_nsd_1000_ppa_20260410224319595Z.csv",
+      "fileName": "murtylab_cross_vit_nsd_1000_ppa_20261010193948297Z.csv",
       "roi": "ppa",
-      "sha256": "166a480570964bc3c740acee4de1e6e187251cb18492ef5fd189a1c9837a716a"
+      "sha256": "8042574e276d6aab0a6c911c15d6c8d96dfe05b898bb8c46a207b8bb8a78c92f"
     }
   ],
   "splitHalfStability": {

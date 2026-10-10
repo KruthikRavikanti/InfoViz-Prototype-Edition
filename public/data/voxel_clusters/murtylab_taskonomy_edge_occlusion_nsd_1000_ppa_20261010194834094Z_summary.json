@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 142,
+    "1": 43
+  },
+  "explained_variance_ratio_first10": [
+    0.8620570469237296,
+    0.053526217784789415,
+    0.020950816685904036,
+    0.01607179179292403,
+    0.010070885599360577,
+    0.007202603591300074,
+    0.004098018112900615,
+    0.00362814672829847,
+    0.0022857330060987897,
+    0.00183578805845122
+  ],
+  "model": "taskonomy_edge_occlusion",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_taskonomy_edge_occlusion_nsd_1000_ppa_20261010194834094Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.5236893020400497,
+  "source_file": "murtylab_taskonomy_edge_occlusion_nsd_1000_ppa_20261010194834094Z.csv"
+}

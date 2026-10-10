@@ -57,7 +57,7 @@
     },
     {
       "label": 1,
-      "meanSilhouette": 0.09877545393221591,
+      "meanSilhouette": 0.09877545393221597,
       "preferredImages": [
         {
           "imageId": "image_020.png",
@@ -111,7 +111,7 @@
     },
     {
       "label": 2,
-      "meanSilhouette": 0.12832162289075924,
+      "meanSilhouette": 0.12832162289075955,
       "preferredImages": [
         {
           "imageId": "image_136.png",
@@ -165,7 +165,7 @@
     },
     {
       "label": 3,
-      "meanSilhouette": 0.15859664059330997,
+      "meanSilhouette": 0.15859664059331013,
       "preferredImages": [
         {
           "imageId": "image_115.png",
@@ -273,7 +273,7 @@
     },
     {
       "label": 5,
-      "meanSilhouette": 0.17840917617680752,
+      "meanSilhouette": 0.17840917617680743,
       "preferredImages": [
         {
           "imageId": "image_020.png",
@@ -327,7 +327,7 @@
     },
     {
       "label": 6,
-      "meanSilhouette": 0.17517256591019928,
+      "meanSilhouette": 0.17517256591019914,
       "preferredImages": [
         {
           "imageId": "image_114.png",
@@ -381,7 +381,7 @@
     },
     {
       "label": 7,
-      "meanSilhouette": 0.17474486929434674,
+      "meanSilhouette": 0.17474486929434668,
       "preferredImages": [
         {
           "imageId": "image_125.png",
@@ -435,7 +435,7 @@
     },
     {
       "label": 8,
-      "meanSilhouette": 0.198387587811452,
+      "meanSilhouette": 0.19838758781145213,
       "preferredImages": [
         {
           "imageId": "image_138.png",
@@ -489,7 +489,7 @@
     },
     {
       "label": 9,
-      "meanSilhouette": 0.14677280894688194,
+      "meanSilhouette": 0.14677280894688222,
       "preferredImages": [
         {
           "imageId": "image_003.png",
@@ -543,7 +543,7 @@
     },
     {
       "label": 10,
-      "meanSilhouette": 0.14191865646398732,
+      "meanSilhouette": 0.1419186564639873,
       "preferredImages": [
         {
           "imageId": "image_020.png",
@@ -651,7 +651,7 @@
     },
     {
       "label": 12,
-      "meanSilhouette": 0.08177793672057211,
+      "meanSilhouette": 0.08177793672057192,
       "preferredImages": [
         {
           "imageId": "image_024.png",
@@ -705,7 +705,7 @@
     },
     {
       "label": 13,
-      "meanSilhouette": 0.18738239586273753,
+      "meanSilhouette": 0.1873823958627376,
       "preferredImages": [
         {
           "imageId": "image_024.png",
@@ -776,26 +776,26 @@
     "pcaComponents": 35
   },
   "model": "dinov2_large",
-  "pcaExplainedVarianceRatioSum": 0.99189127013342,
+  "pcaExplainedVarianceRatioSum": 0.9918912701334202,
   "responseKind": "model_predictions",
   "responseSpace": "nsd_1000_subject1_floc_t7_v1",
   "schemaVersion": 1,
   "silhouette": 0.2659105553523456,
   "sourceFiles": [
     {
-      "fileName": "murtylab_dinov2_large_nsd_1000_ffa_20260410225534603Z.csv",
+      "fileName": "murtylab_dinov2_large_nsd_1000_ffa_20261010194024766Z.csv",
       "roi": "ffa",
-      "sha256": "283c5af5ef929b71c0c7c61d094397c3fbbaafc37361b58aa8b93bac2cbbbc29"
+      "sha256": "2282eae28b00783648646e947636680c4f3f34c79d199f03af442ea44a9c16f2"
     },
     {
-      "fileName": "murtylab_dinov2_large_nsd_1000_eba_20260410225612374Z.csv",
+      "fileName": "murtylab_dinov2_large_nsd_1000_eba_20261010194024766Z.csv",
       "roi": "eba",
-      "sha256": "e2f621c0a5853a7bb1af5c27cde7015f52298d6e4eb920589a9c3d680496d99b"
+      "sha256": "3d8a68ad2555a18d106d39bb148ea16fda545f93b4f8a996e119e81dc0048041"
     },
     {
-      "fileName": "murtylab_dinov2_large_nsd_1000_ppa_20260410225648367Z.csv",
+      "fileName": "murtylab_dinov2_large_nsd_1000_ppa_20261010194024766Z.csv",
       "roi": "ppa",
-      "sha256": "5931dd3b75c451d67ef6e8daf358bb894ced2ee8e3d9dd29ebf14dea9ed81753"
+      "sha256": "47d75f76617232d74253e2b9bebacabf9f4329fee55b9d51a3ba671c07fde97d"
     }
   ],
   "splitHalfStability": {

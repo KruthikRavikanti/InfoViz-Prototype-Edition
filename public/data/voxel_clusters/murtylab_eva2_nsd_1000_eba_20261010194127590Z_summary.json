@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 84,
+    "1": 101
+  },
+  "explained_variance_ratio_first10": [
+    0.6424261309795389,
+    0.17230460434479372,
+    0.07556798447604512,
+    0.03405981610895938,
+    0.017611891151321668,
+    0.010774920811548877,
+    0.00801904366313468,
+    0.006931470533767953,
+    0.006481124359936919,
+    0.003905845873655089
+  ],
+  "model": "eva2",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_eva2_nsd_1000_eba_20261010194127590Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.394141612695805,
+  "source_file": "murtylab_eva2_nsd_1000_eba_20261010194127590Z.csv"
+}

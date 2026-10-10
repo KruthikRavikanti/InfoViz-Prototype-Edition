@@ -2,14 +2,17 @@
 """Check real HTTP upload sessions against the published reference predictions.
 
 Uploads are copies of three public canonical images, never a user's images.
-Stochastic models are checked for identity/shape/finiteness, not equality to a
-different stochastic draw. Session tokens stay in a local ignored QA report.
+Stochastic models retain structural/ranking checks without requiring equality
+to a different stochastic draw. Tokens stay in a local ignored QA report.
 """
 from __future__ import annotations
 
 import argparse
+from functools import lru_cache
+import hashlib
 import json
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 
@@ -19,11 +22,18 @@ import requests
 from scipy.spatial.distance import pdist, squareform
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+# Resolve from this module, not REPO_ROOT: fixtures may replace the data root.
+CORE_ROOT = Path(__file__).resolve().parents[3] / "cortex-core"
 ROIS = ("ffa", "ppa", "eba")
 COUNTS = {"ffa": 156, "ppa": 170, "eba": 518}
 IMAGE_IDS = ("image_001.png", "image_042.png", "image_185.png")
 REFERENCE_IDS = tuple(f"image_{i:03d}.png" for i in range(1, 186))
 GOLDEN_TOLERANCE = 5e-4
+JOINT_METADATA = {
+    "schema_version": 1, "method": "hierarchical_correlation",
+    "distance_metric": "correlation", "linkage_method": "average",
+    "normalization": "reference_zscore",
+}
 
 
 class LiveCoverageVerificationError(ValueError):
@@ -51,16 +61,130 @@ def rdm_absolute_tolerance(voxel_count: int) -> float:
 
 
 def select_qa_models(reference: dict, models: list[str] | None, all_new: bool,
-                     baseline_models: list[str] | None = None) -> list[str]:
-    if bool(models) == all_new or (baseline_models and not all_new):
-        raise ValueError("Choose --models or --all-new; --baseline-models requires --all-new")
-    selected = models if models else reference.get("coverage_extension", {}).get("added_models", [])
+                     baseline_models: list[str] | None = None, *,
+                     all_supported: bool = False) -> list[str]:
+    if sum((bool(models), all_new, all_supported)) != 1 or (baseline_models and not all_new):
+        raise ValueError("Choose --models, --all-new, or --all-supported; --baseline-models requires --all-new")
+    selected = (reference["supported_models"] if all_supported else
+                models if models else reference.get("coverage_extension", {}).get("added_models", []))
     if not selected:
         raise ValueError("Published reference has no added models to verify")
     selected = list(dict.fromkeys([*selected, *(baseline_models or [])]))
     if not set(selected).issubset(reference["supported_models"]):
         raise ValueError("Requested QA models are not all in the published reference roster")
     return selected
+
+
+def prediction_policies(reference: dict) -> dict:
+    """Read the release's actual noise policy, never infer it from model names."""
+    standardization = reference.get("prediction_standardization")
+    if standardization is not None:
+        if "coverage_extension" in reference:
+            raise ValueError("Published reference has ambiguous release lineage")
+        policies = standardization.get("model_prediction_policies", {})
+        if (standardization.get("policy") != "full_roster_fp32_regeneration_v1"
+                or standardization.get("regenerated_models") != reference["supported_models"]
+                or set(policies) != set(reference["supported_models"])):
+            raise ValueError("Published standardization has incomplete prediction policies")
+        return policies
+    return reference.get("coverage_extension", {}).get("model_prediction_policies", {})
+
+
+@lru_cache(maxsize=1)
+def joint_hierarchy_schema():
+    """Import Core's structural tree validator without loading inference models."""
+    sys.path.insert(0, str(CORE_ROOT))
+    from cortex.comparison.schemas import JointHierarchy
+    return JointHierarchy
+
+
+def validate_joint_hierarchy(joint: dict, stimulus_ids: list[str], *, context: str) -> None:
+    # Require transmitted metadata explicitly: Pydantic defaults must not turn
+    # omitted method/normalization fields into apparently valid HTTP evidence.
+    if (not isinstance(joint, dict) or type(joint.get("schema_version")) is not int
+            or any(joint.get(key) != expected for key, expected in JOINT_METADATA.items())):
+        raise ValueError(f"{context}: joint hierarchy has missing or incompatible method metadata")
+    try:
+        joint_hierarchy_schema().model_validate(joint)
+    except ValueError as exc:
+        raise ValueError(f"{context}: invalid joint hierarchy tree/cluster contract") from exc
+    if (joint["reference_count"] != len(REFERENCE_IDS)
+            or joint["uploaded_count"] != len(stimulus_ids)
+            or [m["id"] for m in joint["members"] if m["kind"] == "reference"] != list(REFERENCE_IDS)
+            or [m["id"] for m in joint["members"] if m["kind"] == "uploaded"] != stimulus_ids):
+        raise ValueError(f"{context}: joint hierarchy changed reference/upload identity or order")
+
+
+def load_reference_means(entry: dict, *, context: str) -> np.ndarray:
+    """Read the saved ranking means, not recomputed raw-CSV voxel averages."""
+    root = REPO_ROOT / "artifacts/reference"
+    relative = Path(entry["path"])
+    path = root / relative
+    if (relative.is_absolute() or not path.resolve().is_relative_to(root.resolve()) or path.is_symlink()):
+        raise ValueError(f"{context}: unsafe private reference artifact path")
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    if digest.hexdigest() != entry["sha256"]:
+        raise ValueError(f"{context}: private reference artifact checksum changed")
+    with np.load(path, allow_pickle=False) as saved:
+        if saved["image_ids"].tolist() != list(REFERENCE_IDS):
+            raise ValueError(f"{context}: private reference image identity/order changed")
+        means = saved["reference_means"].copy()
+    if (means.dtype != np.dtype("float64") or means.shape != (len(REFERENCE_IDS),)
+            or not np.isfinite(means).all()):
+        raise ValueError(f"{context}: malformed saved reference ranking means")
+    return means
+
+
+def validate_ranking_statistics(reference_means: np.ndarray, stimuli: list[dict], *, context: str) -> None:
+    """Independently check live statistics, including draws from noisy models.
+
+    Only the returned live mean is ranked against the saved reference means.
+    No regenerated query rank or equality to a different noisy draw is assumed.
+    """
+    values = np.asarray(reference_means, dtype=np.float64)
+    if values.ndim != 1 or not values.size or not np.isfinite(values).all() or not stimuli:
+        raise ValueError(f"{context}: ranking inputs must be finite and nonempty")
+    means = []
+    for stimulus in stimuli:
+        mean = stimulus.get("mean")
+        if isinstance(mean, bool) or not isinstance(mean, (int, float)) or not np.isfinite(mean):
+            raise ValueError(f"{context}: live ranking mean is missing or non-finite")
+        means.append(float(mean))
+    # Descending combined ordering, references first on equal means, then
+    # original image/upload order. Do not import the production ranking helper.
+    items = [(float(value), 0, index) for index, value in enumerate(values)]
+    items.extend((value, 1, index) for index, value in enumerate(means))
+    items.sort(key=lambda item: (-item[0], item[1], item[2]))
+    session_ranks = {item[2]: rank for rank, item in enumerate(items, 1) if item[1] == 1}
+    session_count = len(items)
+    extreme_count = min(10, len(values))
+    for index, (stimulus, mean) in enumerate(zip(stimuli, means)):
+        greater = int(np.count_nonzero(values > mean))
+        equal = int(np.count_nonzero(values == mean))
+        less = int(np.count_nonzero(values < mean))
+        reference_rank = float(greater + 1) if equal == 0 else float(greater + (equal + 1) / 2)
+        percentile = 100.0 * (less + equal / 2.0) / len(values)
+        for key, expected in (("reference_rank", reference_rank), ("reference_percentile", percentile)):
+            actual = stimulus.get(key)
+            if (isinstance(actual, bool) or not isinstance(actual, (int, float)) or not np.isfinite(actual)
+                    or not np.isclose(actual, expected, rtol=0, atol=1e-12)):
+                raise ValueError(f"{context}: incorrect live {key} for upload {index}")
+        rank = session_ranks[index]
+        for key, expected in (("session_rank", rank), ("session_count", session_count)):
+            if type(stimulus.get(key)) is not int or stimulus[key] != expected:
+                raise ValueError(f"{context}: incorrect live {key} for upload {index}")
+        for key, expected in (("enters_top", rank <= extreme_count),
+                              ("enters_bottom", rank > session_count - extreme_count)):
+            if type(stimulus.get(key)) is not bool or stimulus[key] is not expected:
+                raise ValueError(f"{context}: incorrect live {key} for upload {index}")
+        closest = sorted(range(len(values)), key=lambda i: (abs(float(values[i]) - mean), i))[:5]
+        neighbors = stimulus.get("closest_by_mean")
+        if (not isinstance(neighbors, list)
+                or [neighbor.get("image_name") for neighbor in neighbors] != [REFERENCE_IDS[i] for i in closest]):
+            raise ValueError(f"{context}: incorrect closest-by-mean reference ordering for upload {index}")
 
 
 def verify_live(models: list[str], core_url: str, upload_root: Path) -> dict:
@@ -72,7 +196,7 @@ def verify_live(models: list[str], core_url: str, upload_root: Path) -> dict:
     try:
         reference = json.loads((REPO_ROOT / "artifacts/reference/manifest.json").read_text())
         version = report["reference_version"] = reference["reference_version"]
-        policies = reference.get("coverage_extension", {}).get("model_prediction_policies", {})
+        policies = prediction_policies(reference)
         if reference.get("dataset") != "nsd_1000" or reference.get("reference_count") != len(REFERENCE_IDS):
             raise ValueError("Published reference is not the canonical NSD-1000/Murty185 bundle")
         if not models or not set(models).issubset(reference["supported_models"]):
@@ -137,14 +261,12 @@ def verify_live(models: list[str], core_url: str, upload_root: Path) -> dict:
             for roi in ROIS:
                 result = session["roi_results"][roi]
                 joint = result["joint_hierarchy"]
-                if (joint["reference_count"] != len(REFERENCE_IDS)
-                        or joint["uploaded_count"] != len(IMAGE_IDS)
-                        or len(joint["members"]) != len(REFERENCE_IDS) + len(IMAGE_IDS)
-                        or [m["id"] for m in joint["members"] if m["kind"] == "reference"] != list(REFERENCE_IDS)
-                        or [m["id"] for m in joint["members"] if m["kind"] == "uploaded"] != stimulus_ids
-                        or [s["stimulus_id"] for s in result["stimuli"]] != stimulus_ids):
-                    raise ValueError(f"{model}/{roi}: joint hierarchy or ROI results changed reference/upload identity or order")
+                validate_joint_hierarchy(joint, stimulus_ids, context=f"{model}/{roi}")
+                if [s["stimulus_id"] for s in result["stimuli"]] != stimulus_ids:
+                    raise ValueError(f"{model}/{roi}: ROI results changed upload identity or order")
                 entry = reference["artifacts"][model][roi]
+                reference_means = load_reference_means(entry, context=f"{model}/{roi}")
+                validate_ranking_statistics(reference_means, result["stimuli"], context=f"{model}/{roi}")
                 frame = pd.read_csv(REPO_ROOT / "data/image_by_model" / entry["source_file"], index_col=0)
                 if result["voxel_count"] != frame.shape[1]:
                     raise ValueError(f"{model}/{roi}: wrong full pooled readout width")
@@ -189,9 +311,10 @@ def verify_live(models: list[str], core_url: str, upload_root: Path) -> dict:
                             "rois": list(ROIS), "brain_map_available": True,
                             "stochastic": stochastic, "maximum_subject1_voxel_drift": None if stochastic else max_drift,
                             "maximum_full_pooled_rdm_drift": None if stochastic else max_rdm_drift,
-                            "rdm_absolute_tolerances": rdm_tolerances})
+                            "rdm_absolute_tolerances": rdm_tolerances,
+                            "ranking_statistics_checked": True, "joint_tree_contract_checked": True})
             attempt["status"] = "passed"
-            print(f"  passed: 3 ROIs, joint hierarchy, previews, Subject 1; stochastic={stochastic}; drift={max_drift:.3g}", flush=True)
+            print(f"  passed: 3 ROIs, full joint tree, rankings, previews, Subject 1; stochastic={stochastic}; drift={max_drift:.3g}", flush=True)
         report["status"] = "passed"
         return report
     except Exception as exc:
@@ -212,17 +335,21 @@ def main() -> None:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--models", nargs="+")
     group.add_argument("--all-new", action="store_true", help="Sequentially verify every added model in the published release")
+    group.add_argument("--all-supported", action="store_true", help="Sequentially verify the complete published runnable model roster")
     parser.add_argument("--baseline-models", nargs="+", help="Also check these original models when using --all-new")
     parser.add_argument("--core-url", default="http://127.0.0.1:5558")
     parser.add_argument("--upload-root", type=Path, default=REPO_ROOT.parent / ".runtime/gradio")
     parser.add_argument("--report-path", type=Path, required=True)
     args = parser.parse_args()
-    allowed = REPO_ROOT / "artifacts/coverage-expansion"
-    if not args.report_path.resolve().is_relative_to(allowed.resolve()) or args.report_path.exists():
-        parser.error("QA report must be a new file inside artifacts/coverage-expansion")
+    allowed = (REPO_ROOT / "artifacts/coverage-expansion", REPO_ROOT / "artifacts/precision-standardization")
+    target = args.report_path.resolve()
+    if (not any(target.is_relative_to(root.resolve()) and target != root.resolve() for root in allowed)
+            or args.report_path.exists()):
+        parser.error("QA report must be a new file inside an approved ignored release-audit directory")
     try:
         reference = json.loads((REPO_ROOT / "artifacts/reference/manifest.json").read_text())
-        models = select_qa_models(reference, args.models, args.all_new, args.baseline_models)
+        models = select_qa_models(reference, args.models, args.all_new, args.baseline_models,
+                                 all_supported=args.all_supported)
         report = verify_live(models, args.core_url.rstrip("/"), args.upload_root.resolve())
     except LiveCoverageVerificationError as exc:
         report = exc.report

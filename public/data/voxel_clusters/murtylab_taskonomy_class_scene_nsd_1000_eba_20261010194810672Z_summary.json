@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 101,
+    "1": 84
+  },
+  "explained_variance_ratio_first10": [
+    0.7235627917637427,
+    0.18579661254828858,
+    0.043519080743016636,
+    0.01637601645245262,
+    0.01011081639892691,
+    0.007100452996758603,
+    0.0037906968201233435,
+    0.0033024647872172707,
+    0.0021526763410912833,
+    0.001719192211008656
+  ],
+  "model": "taskonomy_class_scene",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_taskonomy_class_scene_nsd_1000_eba_20261010194810672Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.3566756580696996,
+  "source_file": "murtylab_taskonomy_class_scene_nsd_1000_eba_20261010194810672Z.csv"
+}

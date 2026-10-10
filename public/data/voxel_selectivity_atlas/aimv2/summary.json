@@ -3,7 +3,7 @@
   "clusters": [
     {
       "label": 0,
-      "meanSilhouette": 0.2099882486818635,
+      "meanSilhouette": 0.20998824868186358,
       "preferredImages": [
         {
           "imageId": "image_027.png",
@@ -111,7 +111,7 @@
     },
     {
       "label": 2,
-      "meanSilhouette": 0.19307435624277247,
+      "meanSilhouette": 0.1930743562427725,
       "preferredImages": [
         {
           "imageId": "image_030.png",
@@ -165,7 +165,7 @@
     },
     {
       "label": 3,
-      "meanSilhouette": 0.19511206388351005,
+      "meanSilhouette": 0.1951120638835103,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -219,7 +219,7 @@
     },
     {
       "label": 4,
-      "meanSilhouette": 0.3178639149785486,
+      "meanSilhouette": 0.3178639149785482,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -273,7 +273,7 @@
     },
     {
       "label": 5,
-      "meanSilhouette": 0.13866761103522046,
+      "meanSilhouette": 0.13866761103522035,
       "preferredImages": [
         {
           "imageId": "image_027.png",
@@ -327,7 +327,7 @@
     },
     {
       "label": 6,
-      "meanSilhouette": 0.08601681029742113,
+      "meanSilhouette": 0.08601681029742092,
       "preferredImages": [
         {
           "imageId": "image_107.png",
@@ -381,7 +381,7 @@
     },
     {
       "label": 7,
-      "meanSilhouette": 0.21592766290455032,
+      "meanSilhouette": 0.21592766290455037,
       "preferredImages": [
         {
           "imageId": "image_103.png",
@@ -435,7 +435,7 @@
     },
     {
       "label": 8,
-      "meanSilhouette": 0.170038586197111,
+      "meanSilhouette": 0.17003858619711065,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -543,7 +543,7 @@
     },
     {
       "label": 10,
-      "meanSilhouette": 0.03756400749689378,
+      "meanSilhouette": 0.037564007496894106,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -597,7 +597,7 @@
     },
     {
       "label": 11,
-      "meanSilhouette": 0.19415815385149546,
+      "meanSilhouette": 0.19415815385149554,
       "preferredImages": [
         {
           "imageId": "image_107.png",
@@ -651,7 +651,7 @@
     },
     {
       "label": 12,
-      "meanSilhouette": 0.12747584599977588,
+      "meanSilhouette": 0.12747584599977566,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -705,7 +705,7 @@
     },
     {
       "label": 13,
-      "meanSilhouette": 0.028278562642134443,
+      "meanSilhouette": 0.028278562642134242,
       "preferredImages": [
         {
           "imageId": "image_103.png",
@@ -776,26 +776,26 @@
     "pcaComponents": 35
   },
   "model": "aimv2",
-  "pcaExplainedVarianceRatioSum": 0.9930144406798822,
+  "pcaExplainedVarianceRatioSum": 0.9930144406798826,
   "responseKind": "model_predictions",
   "responseSpace": "nsd_1000_subject1_floc_t7_v1",
   "schemaVersion": 1,
   "silhouette": 0.26863729592014984,
   "sourceFiles": [
     {
-      "fileName": "murtylab_aimv2_nsd_1000_ffa_20260408181105090Z.csv",
+      "fileName": "murtylab_aimv2_nsd_1000_ffa_20261010193603405Z.csv",
       "roi": "ffa",
-      "sha256": "0fb8bf115c162c027a5f908b4fee3a68ed4a8619856af4d055ce68cb8472a1fe"
+      "sha256": "a5276d8c6eb36eb411184667bbc5d828d37b3d3a154d01eb05af1fde87a04fe3"
     },
     {
-      "fileName": "murtylab_aimv2_nsd_1000_eba_20260408181142880Z.csv",
+      "fileName": "murtylab_aimv2_nsd_1000_eba_20261010193603405Z.csv",
       "roi": "eba",
-      "sha256": "c4486eff1085791b8a6005d88d2db9832eec4e7df259ae9a01fbf06c2813587a"
+      "sha256": "7dd3bbd2326edd277c4d121a7144ca7f55fae42042600652e8c8660783814f12"
     },
     {
-      "fileName": "murtylab_aimv2_nsd_1000_ppa_20260408181215407Z.csv",
+      "fileName": "murtylab_aimv2_nsd_1000_ppa_20261010193603405Z.csv",
       "roi": "ppa",
-      "sha256": "4430b26d1fb5b0bbd4c07a9630582058ce972c6343db4ea54120acf988d7df48"
+      "sha256": "5df9d0ea781d1c86d245cbc616fb2eb3b08d5fae40c63d530c129f221956a926"
     }
   ],
   "splitHalfStability": {

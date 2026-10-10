@@ -1,0 +1,21 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 69,
+    "1": 116
+  },
+  "clustering_method": "hierarchical",
+  "dendrogram_png": "public/data/voxel_clusters_hierarchical_corr/murtylab_clip_vit_b32_nsd_1000_ppa_20261010193916373Z_dendrogram.png",
+  "distance_metric": "correlation",
+  "distance_to_cluster_representative": "medoid_correlation_distance",
+  "linkage_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_clip_vit_b32_nsd_1000_ppa_20261010193916373Z_linkage.csv",
+  "linkage_method": "average",
+  "model": "clip_vit_b32",
+  "n_images": 185,
+  "n_voxels": 753,
+  "normalization": "voxel_zscore",
+  "result_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_clip_vit_b32_nsd_1000_ppa_20261010193916373Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.5630747093892533,
+  "source_file": "murtylab_clip_vit_b32_nsd_1000_ppa_20261010193916373Z.csv"
+}

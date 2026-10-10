@@ -3,6 +3,7 @@
   "$id": "https://murtylab.example/schemas/cortex-reference-manifest-v1.json",
   "title": "Cortex NSD-1000 reference artifact manifest",
   "type": "object",
+  "allOf": [{"not": {"required": ["coverage_extension", "prediction_standardization"]}}],
   "required": [
     "schema_version",
     "reference_version",
@@ -112,6 +113,23 @@
         }
       },
       "additionalProperties": true
+    },
+    "prediction_standardization": {
+      "type": "object",
+      "required": ["policy", "analysis_input_policy", "parent_reference_version", "parent_manifest_sha256", "parent_snapshot_sha256", "parent_library_versions", "regenerated_models", "inference_provenance_sha256", "prediction_policies", "model_prediction_policies"],
+      "properties": {
+        "policy": {"const": "full_roster_fp32_regeneration_v1"},
+        "analysis_input_policy": {"const": "canonical_float32_promoted_float64_v1"},
+        "parent_reference_version": {"$ref": "#/$defs/sha256"},
+        "parent_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "parent_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+        "parent_library_versions": {"type": "object", "additionalProperties": {"type": "string"}},
+        "regenerated_models": {"type": "array", "minItems": 26, "uniqueItems": true, "items": {"type": "string"}},
+        "inference_provenance_sha256": {"type": "object", "minProperties": 26, "additionalProperties": {"$ref": "#/$defs/sha256"}},
+        "prediction_policies": {"$ref": "#/properties/coverage_extension/properties/prediction_policies"},
+        "model_prediction_policies": {"$ref": "#/properties/coverage_extension/properties/model_prediction_policies"}
+      },
+      "additionalProperties": false
     },
     "voxel_counts": {
       "type": "object",

@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 113,
+    "1": 72
+  },
+  "explained_variance_ratio_first10": [
+    0.836458608823603,
+    0.05416603221525474,
+    0.017006361969433944,
+    0.012324648349107837,
+    0.007952612880760998,
+    0.006744274626663409,
+    0.005210049568448802,
+    0.00427360331809958,
+    0.003966793268786784,
+    0.0034320808975634074
+  ],
+  "model": "cross_vit",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_cross_vit_nsd_1000_ffa_20261010193948297Z_clusters.csv",
+  "roi": "ffa",
+  "silhouette": 0.4836969635752307,
+  "source_file": "murtylab_cross_vit_nsd_1000_ffa_20261010193948297Z.csv"
+}

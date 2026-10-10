@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 83,
+    "1": 102
+  },
+  "explained_variance_ratio_first10": [
+    0.6879345028365075,
+    0.1365895757314005,
+    0.08365324463399813,
+    0.03418371803918011,
+    0.014588789887322175,
+    0.008663884876701401,
+    0.005955248611821319,
+    0.005059044107392123,
+    0.0045918888963333735,
+    0.002793246726808816
+  ],
+  "model": "efficient_net",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_efficient_net_nsd_1000_eba_20261010194119160Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.4047616806036039,
+  "source_file": "murtylab_efficient_net_nsd_1000_eba_20261010194119160Z.csv"
+}

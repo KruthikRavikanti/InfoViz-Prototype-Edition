@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 86,
+    "1": 99
+  },
+  "explained_variance_ratio_first10": [
+    0.7840666671342914,
+    0.1255712318833202,
+    0.035674601430289624,
+    0.023299222306050648,
+    0.009566540337425702,
+    0.00786105120692769,
+    0.004928772517577236,
+    0.002580561720951181,
+    0.002385846641380735,
+    0.001502646176450955
+  ],
+  "model": "inceptionv4",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_inceptionv4_nsd_1000_eba_20261010194351629Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.4420514616766574,
+  "source_file": "murtylab_inceptionv4_nsd_1000_eba_20261010194351629Z.csv"
+}

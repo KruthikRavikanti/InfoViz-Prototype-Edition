@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 83,
+    "1": 102
+  },
+  "explained_variance_ratio_first10": [
+    0.91810757438703,
+    0.05675866003210059,
+    0.010567732411571216,
+    0.006166095140261179,
+    0.0036561578487006286,
+    0.0016291747039388741,
+    0.0011672214680223624,
+    0.0009298800675180457,
+    0.0005768435028515535,
+    0.00027920769146823153
+  ],
+  "model": "resnet50_places365",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_resnet50_places365_nsd_1000_ppa_20261010194521117Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.5330691142978241,
+  "source_file": "murtylab_resnet50_places365_nsd_1000_ppa_20261010194521117Z.csv"
+}

@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 104,
+    "1": 81
+  },
+  "explained_variance_ratio_first10": [
+    0.8757904906906584,
+    0.05731202222997597,
+    0.0070721248273601265,
+    0.006000987292740734,
+    0.004388772464845548,
+    0.003587435527653885,
+    0.0029566299800041582,
+    0.0028141029715929864,
+    0.002258952383511617,
+    0.002003709414911582
+  ],
+  "model": "convnext",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_convnext_nsd_1000_ppa_20261010193930172Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.49005287174330436,
+  "source_file": "murtylab_convnext_nsd_1000_ppa_20261010193930172Z.csv"
+}

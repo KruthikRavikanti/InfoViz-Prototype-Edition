@@ -1,5 +1,5 @@
 {
-  "checksum": "a862bba8496384d80de1b1990152b2b683e4325a52b0880d85783072172246d0",
+  "checksum": "3345e5fb332f4046c0b3a76a35f24a027dd0b6de0f62bb5e97eecda62c06b67d",
   "clustering": {
     "hierarchical_out_of_sample_policy": "nearest_medoid_assignment",
     "plot_projection": {
@@ -12,10 +12,110 @@
     }
   },
   "dataset": "nsd_1000",
-  "generated_at": "2026-10-10T18:35:43.539502Z",
+  "generated_at": "2026-10-10T20:35:47.618472Z",
   "image_count": 185,
   "model_prediction_policies": {
+    "adversarial_inceptionv3": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "aimv2": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "alexnet": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "alexnet_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "beit": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "bit": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "blip2": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
     "briaai": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "clip_rn101": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "clip_rn101_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "clip_rn50": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "clip_rn50_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "clip_vit_b32": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "clip_vit_b32_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "convnext": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "cornet_rt": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "cornet_s": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "cornet_z": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "cross_vit": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "densenet121": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "densenet161": {
       "deterministic_per_stimulus": true,
       "noise_modes": [],
       "response_policy": "evaluation_mode"
@@ -25,12 +125,42 @@
       "noise_modes": [],
       "response_policy": "evaluation_mode"
     },
+    "densenet169": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "densenet201": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
     "dinov2": {
       "deterministic_per_stimulus": true,
       "noise_modes": [],
       "response_policy": "evaluation_mode"
     },
+    "dinov2_large": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
     "dinov2_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "dreamsim_vitb16": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "dreamsim_vitb32": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "efficient_net": {
       "deterministic_per_stimulus": true,
       "noise_modes": [],
       "response_policy": "evaluation_mode"
@@ -530,7 +660,7 @@
     }
   },
   "reference_count": 185,
-  "reference_version": "a862bba8496384d80de1b1990152b2b683e4325a52b0880d85783072172246d0",
+  "reference_version": "3345e5fb332f4046c0b3a76a35f24a027dd0b6de0f62bb5e97eecda62c06b67d",
   "rois": [
     "ffa",
     "ppa",

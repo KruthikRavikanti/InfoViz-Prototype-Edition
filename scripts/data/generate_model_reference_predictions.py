@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage genuine NSD-1000 predictions for missing Cortex-Compass models.
+"""Stage genuine full-FP32 NSD-1000 predictions for Cortex-Compass models.
 
 Nothing in the live reference bundle is replaced. Each completed model is an
 atomically published directory of three raw CSVs and a provenance record; only
@@ -118,14 +118,35 @@ def model_inventory(core_root: Path, checkpoint_root: Path, scores_path: Path, r
     return result
 
 
-def select_models(inventory: dict[str, dict], models: list[str] | None, all_missing: bool) -> list[str]:
-    if bool(models) == all_missing:
-        raise GenerationValidationError("Choose exactly one of --models or --all-missing.")
-    selected = sorted(set(models)) if models else [m for m, entry in inventory.items() if not entry["existing_reference"]]
+def select_models(inventory: dict[str, dict], models: list[str] | None, all_missing: bool, all_scored: bool = False) -> list[str]:
+    if sum((bool(models), all_missing, all_scored)) != 1:
+        raise GenerationValidationError("Choose exactly one of --models, --all-missing or --all-scored.")
+    if models:
+        selected = sorted(set(models))
+    elif all_scored:
+        selected = sorted(inventory)
+    else:
+        selected = [m for m, entry in inventory.items() if not entry["existing_reference"]]
     unknown = set(selected) - set(inventory)
     if unknown:
         raise GenerationValidationError("Models are not on the scored roster: " + ", ".join(sorted(unknown)))
     return selected
+
+
+def validated_output_root(path: Path) -> Path:
+    """Allow only isolated staging children, never live data or staging roots."""
+    resolved = path.resolve()
+    allowed_roots = [(REPO_ROOT / "artifacts" / name).resolve()
+                     for name in ("coverage-expansion", "precision-standardization")]
+    if not any(resolved.is_relative_to(root) and resolved != root for root in allowed_roots):
+        raise GenerationValidationError("Output must be a subdirectory of artifacts/coverage-expansion or artifacts/precision-standardization; live data are never overwritten.")
+    return resolved
+
+
+def failure_output_root(output_root: Path) -> Path:
+    # Canonical raw roots contain completed model folders only. Forensics are
+    # kept outside that atomic directory inventory and never treated as data.
+    return output_root.parent / "failures" / output_root.name
 
 
 def image_provenance(image_root: Path) -> list[dict]:
@@ -541,7 +562,7 @@ def generate_model(model: str, *, inventory_entry: dict, core_root: Path, image_
         })
         partial.update({"status": "incomplete", "error_type": type(exc).__name__, "message": str(exc)})
         (temp_root / "provenance.json").write_text(json.dumps(partial, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-        failure_root = output_root / "failures"
+        failure_root = failure_output_root(output_root)
         failure_root.mkdir(parents=True, exist_ok=True)
         temp_root.rename(failure_root / f"{model}.{temp_root.name.rsplit('-', 1)[-1]}.partial")
         raise
@@ -566,7 +587,7 @@ def core_commit(core_root: Path) -> str | None:
 
 
 def write_failure(output_root: Path, model: str, error: Exception) -> None:
-    failures = output_root / "failures"
+    failures = failure_output_root(output_root)
     failures.mkdir(parents=True, exist_ok=True)
     record = {"model": model, "status": "failed", "error_type": type(error).__name__, "message": str(error),
               "recorded_at": datetime.now(timezone.utc).isoformat(), "substitution": False}
@@ -581,6 +602,7 @@ def main() -> int:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--models", nargs="+")
     group.add_argument("--all-missing", action="store_true")
+    group.add_argument("--all-scored", action="store_true", help="Regenerate the complete scored roster, excluding ceiling and unscored registry extras.")
     parser.add_argument("--core-root", type=Path, default=REPO_ROOT.parent / "cortex-core")
     parser.add_argument("--checkpoint-root", type=Path, default=Path("/research/cortex-paper/cortex_best_checkpoints"))
     parser.add_argument("--backbone-root", type=Path, default=REPO_ROOT / "artifacts/coverage-expansion/backbone-cache")
@@ -603,7 +625,7 @@ def main() -> int:
         parser.error("--device must be cpu or cuda[:index].")
     core_root = args.core_root.resolve()
     inventory = model_inventory(core_root, args.checkpoint_root.resolve(), args.scores_path.resolve(), args.reference_manifest.resolve())
-    models = select_models(inventory, args.models, args.all_missing)
+    models = select_models(inventory, args.models, args.all_missing, args.all_scored)
     images = image_provenance(args.image_root.resolve())
     if args.prepare_cache or args.prepare_cache_only:
         if args.preflight:
@@ -616,10 +638,7 @@ def main() -> int:
     if args.preflight:
         print(json.dumps({"selected_count": len(models), "image_count": len(images), "image_set_sha256": canonical_json_sha256(images), "models": {m: inventory[m] for m in models}}, sort_keys=True, indent=2))
         return 0 if all(e["readable"] for m in models for e in inventory[m]["rois"].values()) else 1
-    output_root = args.output_dir.resolve()
-    staging_root = (REPO_ROOT / "artifacts/coverage-expansion").resolve()
-    if not output_root.is_relative_to(staging_root) or output_root == staging_root:
-        raise GenerationValidationError("Output must be a subdirectory of artifacts/coverage-expansion; live data are never overwritten.")
+    output_root = validated_output_root(args.output_dir)
     offline = not args.allow_network
     if offline:
         os.environ["HF_HUB_OFFLINE"] = "1"

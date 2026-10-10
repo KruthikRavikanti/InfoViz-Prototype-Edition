@@ -3,81 +3,81 @@
   "clusters": [
     {
       "label": 0,
-      "meanSilhouette": 0.17608759726535922,
+      "meanSilhouette": 0.13574191279511252,
       "preferredImages": [
         {
           "imageId": "image_027.png",
-          "meanZ": 2.3769970700128975
+          "meanZ": 2.3460811120497884
         },
         {
           "imageId": "image_012.png",
-          "meanZ": 1.9199353916645747
+          "meanZ": 1.9034495674634735
         },
         {
           "imageId": "image_044.png",
-          "meanZ": 1.795072675266974
+          "meanZ": 1.7604838270570142
         },
         {
           "imageId": "image_097.png",
-          "meanZ": 1.6841971331559937
+          "meanZ": 1.69460555840305
         },
         {
           "imageId": "image_035.png",
-          "meanZ": 1.6750140072456958
+          "meanZ": 1.67426402771708
         }
       ],
       "roiCounts": {
-        "eba": 22,
-        "ffa": 6,
+        "eba": 21,
+        "ffa": 8,
         "ppa": 0
       },
-      "size": 28,
+      "size": 29,
       "suppressedImages": [
         {
           "imageId": "image_143.png",
-          "meanZ": -2.2594412040473193
+          "meanZ": -2.179640865894235
         },
         {
           "imageId": "image_145.png",
-          "meanZ": -2.2016102324057414
+          "meanZ": -2.1218698127214624
         },
         {
           "imageId": "image_148.png",
-          "meanZ": -2.1486746075152525
+          "meanZ": -2.099028753028528
         },
         {
           "imageId": "image_127.png",
-          "meanZ": -2.1213286047939564
+          "meanZ": -2.0826623838592058
         },
         {
           "imageId": "image_080.png",
-          "meanZ": -2.024756595950099
+          "meanZ": -1.9961830525071673
         }
       ]
     },
     {
       "label": 1,
-      "meanSilhouette": 0.32377180485471924,
+      "meanSilhouette": 0.32380140345191255,
       "preferredImages": [
         {
           "imageId": "image_180.png",
-          "meanZ": 2.1151504568870623
+          "meanZ": 2.1150494154010437
         },
         {
           "imageId": "image_105.png",
-          "meanZ": 2.0584799967410166
+          "meanZ": 2.0610530063114303
         },
         {
           "imageId": "image_027.png",
-          "meanZ": 2.0416888922799994
+          "meanZ": 2.038162715280054
         },
         {
           "imageId": "image_119.png",
-          "meanZ": 1.9114086556131218
+          "meanZ": 1.9097177032276347
         },
         {
           "imageId": "image_055.png",
-          "meanZ": 1.7522230797026621
+          "meanZ": 1.756295644393563
         }
       ],
       "roiCounts": {
@@ -89,157 +89,157 @@
       "suppressedImages": [
         {
           "imageId": "image_092.png",
-          "meanZ": -2.1142844643749545
+          "meanZ": -2.1150255008549563
         },
         {
           "imageId": "image_102.png",
-          "meanZ": -2.0705882344316513
+          "meanZ": -2.071409466208586
         },
         {
           "imageId": "image_082.png",
-          "meanZ": -1.8961961338600817
+          "meanZ": -1.8958163754756352
         },
         {
           "imageId": "image_147.png",
-          "meanZ": -1.842701137841364
+          "meanZ": -1.8426460897794283
         },
         {
           "imageId": "image_182.png",
-          "meanZ": -1.7980115381206645
+          "meanZ": -1.7957332232982708
         }
       ]
     },
     {
       "label": 2,
-      "meanSilhouette": 0.2742819914803293,
+      "meanSilhouette": 0.2684059826222862,
       "preferredImages": [
         {
           "imageId": "image_027.png",
-          "meanZ": 2.6366234956019947
+          "meanZ": 2.63428388263196
         },
         {
           "imageId": "image_012.png",
-          "meanZ": 2.1481970431647572
+          "meanZ": 2.1495006170544038
         },
         {
           "imageId": "image_044.png",
-          "meanZ": 1.9921364118281006
+          "meanZ": 1.9912342407794514
         },
         {
           "imageId": "image_009.png",
-          "meanZ": 1.7631721981184607
+          "meanZ": 1.7648689017570645
         },
         {
           "imageId": "image_035.png",
-          "meanZ": 1.6369212051088695
+          "meanZ": 1.640038959615354
         }
       ],
       "roiCounts": {
-        "eba": 61,
+        "eba": 62,
         "ffa": 4,
         "ppa": 0
       },
-      "size": 65,
+      "size": 66,
       "suppressedImages": [
         {
           "imageId": "image_145.png",
-          "meanZ": -2.8151607797352587
+          "meanZ": -2.8150517559425263
         },
         {
           "imageId": "image_143.png",
-          "meanZ": -2.7914580422010484
+          "meanZ": -2.7909972055668333
         },
         {
           "imageId": "image_148.png",
-          "meanZ": -2.630409057222067
+          "meanZ": -2.6276787203721907
         },
         {
           "imageId": "image_090.png",
-          "meanZ": -2.3430665817864065
+          "meanZ": -2.33921426073895
         },
         {
           "imageId": "image_080.png",
-          "meanZ": -2.241646234277254
+          "meanZ": -2.244531037765048
         }
       ]
     },
     {
       "label": 3,
-      "meanSilhouette": 0.24544405061687494,
+      "meanSilhouette": 0.26394248118875824,
       "preferredImages": [
         {
           "imageId": "image_027.png",
-          "meanZ": 2.687993155665911
+          "meanZ": 2.6888890266831655
         },
         {
           "imageId": "image_012.png",
-          "meanZ": 2.1190912908222663
+          "meanZ": 2.1243435240536943
         },
         {
           "imageId": "image_044.png",
-          "meanZ": 2.0693183384849783
+          "meanZ": 2.0791491458439872
         },
         {
           "imageId": "image_035.png",
-          "meanZ": 1.9951492548888654
+          "meanZ": 1.9958636562697496
         },
         {
           "imageId": "image_009.png",
-          "meanZ": 1.7312946838756682
+          "meanZ": 1.7507438073559904
         }
       ],
       "roiCounts": {
         "eba": 29,
-        "ffa": 6,
+        "ffa": 5,
         "ppa": 0
       },
-      "size": 35,
+      "size": 34,
       "suppressedImages": [
         {
           "imageId": "image_148.png",
-          "meanZ": -2.602290261537053
+          "meanZ": -2.6191123227015334
         },
         {
           "imageId": "image_145.png",
-          "meanZ": -2.504764486849851
+          "meanZ": -2.5283350005558365
         },
         {
           "imageId": "image_080.png",
-          "meanZ": -2.392179651301129
+          "meanZ": -2.406117072765145
         },
         {
           "imageId": "image_143.png",
-          "meanZ": -2.3662065883293
+          "meanZ": -2.393973632077839
         },
         {
           "imageId": "image_089.png",
-          "meanZ": -2.1843826523403487
+          "meanZ": -2.196919031767361
         }
       ]
     },
     {
       "label": 4,
-      "meanSilhouette": 0.10472733209867886,
+      "meanSilhouette": 0.104685207767073,
       "preferredImages": [
         {
           "imageId": "image_076.png",
-          "meanZ": 1.4219376731801023
+          "meanZ": 1.4221673196335773
         },
         {
           "imageId": "image_053.png",
-          "meanZ": 1.3821276697835014
+          "meanZ": 1.3821649672909562
         },
         {
           "imageId": "image_048.png",
-          "meanZ": 1.3603486604203758
+          "meanZ": 1.3601178441597142
         },
         {
           "imageId": "image_017.png",
-          "meanZ": 1.31771761703947
+          "meanZ": 1.3177100068230945
         },
         {
           "imageId": "image_144.png",
-          "meanZ": 1.2283183251446204
+          "meanZ": 1.227552511996336
         }
       ],
       "roiCounts": {
@@ -251,49 +251,49 @@
       "suppressedImages": [
         {
           "imageId": "image_170.png",
-          "meanZ": -2.4069848667212574
+          "meanZ": -2.406517877010221
         },
         {
           "imageId": "image_163.png",
-          "meanZ": -2.261846818721421
+          "meanZ": -2.262355017239315
         },
         {
           "imageId": "image_091.png",
-          "meanZ": -2.0629549815611847
+          "meanZ": -2.062842080805513
         },
         {
           "imageId": "image_007.png",
-          "meanZ": -1.9758038903733868
+          "meanZ": -1.9757198084993202
         },
         {
           "imageId": "image_097.png",
-          "meanZ": -1.9339451252719129
+          "meanZ": -1.9345142555211612
         }
       ]
     },
     {
       "label": 5,
-      "meanSilhouette": 0.1886574526013172,
+      "meanSilhouette": 0.18802703495696169,
       "preferredImages": [
         {
           "imageId": "image_105.png",
-          "meanZ": 2.0708369706743586
+          "meanZ": 2.0722097085175926
         },
         {
           "imageId": "image_180.png",
-          "meanZ": 1.9888969258450382
+          "meanZ": 1.9879801482607637
         },
         {
           "imageId": "image_032.png",
-          "meanZ": 1.7980142217598611
+          "meanZ": 1.7991406136292034
         },
         {
           "imageId": "image_119.png",
-          "meanZ": 1.787190255978483
+          "meanZ": 1.786595128584366
         },
         {
-          "imageId": "image_049.png",
-          "meanZ": 1.5019700108962397
+          "imageId": "image_031.png",
+          "meanZ": 1.5025769700898741
         }
       ],
       "roiCounts": {
@@ -305,49 +305,49 @@
       "suppressedImages": [
         {
           "imageId": "image_070.png",
-          "meanZ": -2.236028262735752
+          "meanZ": -2.2388854386735986
         },
         {
           "imageId": "image_113.png",
-          "meanZ": -2.1428958164123766
+          "meanZ": -2.142807885022076
         },
         {
           "imageId": "image_089.png",
-          "meanZ": -2.0847374112363335
+          "meanZ": -2.08668628222507
         },
         {
           "imageId": "image_126.png",
-          "meanZ": -1.9692935852937812
+          "meanZ": -1.9720958255163896
         },
         {
           "imageId": "image_005.png",
-          "meanZ": -1.8136046360195273
+          "meanZ": -1.8139748660164963
         }
       ]
     },
     {
       "label": 6,
-      "meanSilhouette": 0.2928370822990857,
+      "meanSilhouette": 0.29328223002991827,
       "preferredImages": [
         {
           "imageId": "image_027.png",
-          "meanZ": 2.171703909624345
+          "meanZ": 2.170967418668507
         },
         {
           "imageId": "image_097.png",
-          "meanZ": 1.8354230139283105
+          "meanZ": 1.8340033242381673
         },
         {
           "imageId": "image_012.png",
-          "meanZ": 1.8109520236341197
+          "meanZ": 1.811435275309703
         },
         {
           "imageId": "image_045.png",
-          "meanZ": 1.7019459783113686
+          "meanZ": 1.7017107078960725
         },
         {
           "imageId": "image_040.png",
-          "meanZ": 1.6916662100145354
+          "meanZ": 1.6926100801234079
         }
       ],
       "roiCounts": {
@@ -359,49 +359,49 @@
       "suppressedImages": [
         {
           "imageId": "image_143.png",
-          "meanZ": -2.5050495422950383
+          "meanZ": -2.5060725353033275
         },
         {
           "imageId": "image_145.png",
-          "meanZ": -2.3658429709722664
+          "meanZ": -2.3676319293678
         },
         {
           "imageId": "image_127.png",
-          "meanZ": -2.1820453875994885
+          "meanZ": -2.1819322365605442
         },
         {
           "imageId": "image_090.png",
-          "meanZ": -2.1666976387580448
+          "meanZ": -2.165880262174787
         },
         {
           "imageId": "image_148.png",
-          "meanZ": -2.0950488800909577
+          "meanZ": -2.092340181475807
         }
       ]
     },
     {
       "label": 7,
-      "meanSilhouette": 0.2947245187716571,
+      "meanSilhouette": 0.29502491605989256,
       "preferredImages": [
         {
           "imageId": "image_027.png",
-          "meanZ": 2.4200963677098506
+          "meanZ": 2.417572647986165
         },
         {
           "imageId": "image_012.png",
-          "meanZ": 2.0773972018056175
+          "meanZ": 2.0785256719432543
         },
         {
           "imageId": "image_005.png",
-          "meanZ": 1.8909373301348584
+          "meanZ": 1.886097457324961
         },
         {
           "imageId": "image_044.png",
-          "meanZ": 1.864983202767402
+          "meanZ": 1.864304269817243
         },
         {
           "imageId": "image_146.png",
-          "meanZ": 1.8043949934627945
+          "meanZ": 1.8046382463422483
         }
       ],
       "roiCounts": {
@@ -413,103 +413,103 @@
       "suppressedImages": [
         {
           "imageId": "image_145.png",
-          "meanZ": -2.9337967183517133
+          "meanZ": -2.9362346297163273
         },
         {
           "imageId": "image_148.png",
-          "meanZ": -2.726989181888712
+          "meanZ": -2.724307360099699
         },
         {
           "imageId": "image_143.png",
-          "meanZ": -2.6211168390028834
+          "meanZ": -2.6233269071486394
         },
         {
           "imageId": "image_090.png",
-          "meanZ": -2.2638427733999875
+          "meanZ": -2.2623467584934374
         },
         {
           "imageId": "image_080.png",
-          "meanZ": -2.127299698039907
+          "meanZ": -2.127491346163243
         }
       ]
     },
     {
       "label": 8,
-      "meanSilhouette": 0.21974683917659782,
+      "meanSilhouette": 0.22687356994455027,
       "preferredImages": [
         {
           "imageId": "image_112.png",
-          "meanZ": 1.5008906538165738
+          "meanZ": 1.5318750544302955
         },
         {
           "imageId": "image_025.png",
-          "meanZ": 1.3441444966538751
+          "meanZ": 1.3671332958621263
         },
         {
           "imageId": "image_067.png",
-          "meanZ": 1.3220124026102762
+          "meanZ": 1.335442023950306
         },
         {
           "imageId": "image_101.png",
-          "meanZ": 1.3140967046236085
+          "meanZ": 1.327863366342534
         },
         {
           "imageId": "image_171.png",
-          "meanZ": 1.3031186046353707
+          "meanZ": 1.3191287994946073
         }
       ],
       "roiCounts": {
         "eba": 2,
-        "ffa": 13,
+        "ffa": 12,
         "ppa": 27
       },
-      "size": 42,
+      "size": 41,
       "suppressedImages": [
         {
           "imageId": "image_005.png",
-          "meanZ": -2.440863481778333
+          "meanZ": -2.4842519763764597
         },
         {
           "imageId": "image_153.png",
-          "meanZ": -2.3228838297337098
+          "meanZ": -2.3378941005076834
         },
         {
           "imageId": "image_113.png",
-          "meanZ": -2.259317373893834
+          "meanZ": -2.2820852026984912
         },
         {
           "imageId": "image_070.png",
-          "meanZ": -2.154562741706217
+          "meanZ": -2.1754482492017697
         },
         {
           "imageId": "image_159.png",
-          "meanZ": -2.055795843762349
+          "meanZ": -2.0621734241964496
         }
       ]
     },
     {
       "label": 9,
-      "meanSilhouette": 0.2216460197484371,
+      "meanSilhouette": 0.22286509358026088,
       "preferredImages": [
         {
           "imageId": "image_027.png",
-          "meanZ": 2.3395108851567823
+          "meanZ": 2.3380670031858237
         },
         {
           "imageId": "image_005.png",
-          "meanZ": 2.3061693734987654
+          "meanZ": 2.3013138200646304
         },
         {
           "imageId": "image_012.png",
-          "meanZ": 1.950594575927745
+          "meanZ": 1.951491029284014
         },
         {
           "imageId": "image_044.png",
-          "meanZ": 1.7650377414851728
+          "meanZ": 1.7649929767190962
         },
         {
           "imageId": "image_040.png",
-          "meanZ": 1.6579297293909077
+          "meanZ": 1.6595502900371197
         }
       ],
       "roiCounts": {
@@ -521,49 +521,49 @@
       "suppressedImages": [
         {
           "imageId": "image_145.png",
-          "meanZ": -2.78446540959251
+          "meanZ": -2.787181768259097
         },
         {
           "imageId": "image_143.png",
-          "meanZ": -2.7729986282319987
+          "meanZ": -2.7746642617358592
         },
         {
           "imageId": "image_090.png",
-          "meanZ": -2.4277676299892987
+          "meanZ": -2.4267395111847705
         },
         {
           "imageId": "image_148.png",
-          "meanZ": -2.425476710492889
+          "meanZ": -2.42244173413862
         },
         {
           "imageId": "image_107.png",
-          "meanZ": -2.2199105642261827
+          "meanZ": -2.21743812277827
         }
       ]
     },
     {
       "label": 10,
-      "meanSilhouette": 0.4079215734642056,
+      "meanSilhouette": 0.4075461970266968,
       "preferredImages": [
         {
           "imageId": "image_119.png",
-          "meanZ": 2.263130481370452
+          "meanZ": 2.2629015943462965
         },
         {
           "imageId": "image_105.png",
-          "meanZ": 2.1101116696264515
+          "meanZ": 2.1105224130021427
         },
         {
           "imageId": "image_104.png",
-          "meanZ": 2.073413348268601
+          "meanZ": 2.0729828038987783
         },
         {
           "imageId": "image_048.png",
-          "meanZ": 2.0605092224912163
+          "meanZ": 2.0602220830845464
         },
         {
           "imageId": "image_180.png",
-          "meanZ": 2.0560097956874106
+          "meanZ": 2.055189366569286
         }
       ],
       "roiCounts": {
@@ -575,49 +575,49 @@
       "suppressedImages": [
         {
           "imageId": "image_005.png",
-          "meanZ": -2.1287329709003204
+          "meanZ": -2.1288048907332726
         },
         {
           "imageId": "image_070.png",
-          "meanZ": -2.087260640643494
+          "meanZ": -2.0882999818885337
         },
         {
           "imageId": "image_113.png",
-          "meanZ": -2.043268007202217
+          "meanZ": -2.04179659167797
         },
         {
           "imageId": "image_170.png",
-          "meanZ": -1.9451877891562124
+          "meanZ": -1.9449592529341966
         },
         {
           "imageId": "image_091.png",
-          "meanZ": -1.9196540410739982
+          "meanZ": -1.9197927115513311
         }
       ]
     },
     {
       "label": 11,
-      "meanSilhouette": 0.4162134710645585,
+      "meanSilhouette": 0.4162752370844318,
       "preferredImages": [
         {
           "imageId": "image_005.png",
-          "meanZ": 2.343400790122918
+          "meanZ": 2.338772895622873
         },
         {
           "imageId": "image_027.png",
-          "meanZ": 1.978337171944601
+          "meanZ": 1.9778242451560846
         },
         {
           "imageId": "image_040.png",
-          "meanZ": 1.8972089772409297
+          "meanZ": 1.8989286908538667
         },
         {
           "imageId": "image_097.png",
-          "meanZ": 1.7553728399511015
+          "meanZ": 1.7538653048638628
         },
         {
           "imageId": "image_012.png",
-          "meanZ": 1.6767698635115735
+          "meanZ": 1.6773749844635415
         }
       ],
       "roiCounts": {
@@ -629,49 +629,49 @@
       "suppressedImages": [
         {
           "imageId": "image_143.png",
-          "meanZ": -2.4984025783308077
+          "meanZ": -2.4994973180715236
         },
         {
           "imageId": "image_145.png",
-          "meanZ": -2.3797117889933626
+          "meanZ": -2.382456725602661
         },
         {
           "imageId": "image_107.png",
-          "meanZ": -2.357712027836525
+          "meanZ": -2.355049214459911
         },
         {
           "imageId": "image_090.png",
-          "meanZ": -2.2423522290689135
+          "meanZ": -2.2416850609271033
         },
         {
           "imageId": "image_127.png",
-          "meanZ": -2.0001342369535573
+          "meanZ": -1.999958116413278
         }
       ]
     },
     {
       "label": 12,
-      "meanSilhouette": 0.22111963382657315,
+      "meanSilhouette": 0.21969778670969747,
       "preferredImages": [
         {
           "imageId": "image_156.png",
-          "meanZ": 1.5036269234515713
+          "meanZ": 1.5039282328634413
         },
         {
           "imageId": "image_122.png",
-          "meanZ": 1.4717811011211748
+          "meanZ": 1.4711893368131364
         },
         {
           "imageId": "image_081.png",
-          "meanZ": 1.4607743547114798
+          "meanZ": 1.4612510970674464
         },
         {
           "imageId": "image_078.png",
-          "meanZ": 1.4369165269246993
+          "meanZ": 1.4370558416200998
         },
         {
           "imageId": "image_171.png",
-          "meanZ": 1.409330106446891
+          "meanZ": 1.41011124320157
         }
       ],
       "roiCounts": {
@@ -683,49 +683,49 @@
       "suppressedImages": [
         {
           "imageId": "image_105.png",
-          "meanZ": -1.7869890666598223
+          "meanZ": -1.786822498736726
         },
         {
           "imageId": "image_180.png",
-          "meanZ": -1.600291517416935
+          "meanZ": -1.6000182674036274
         },
         {
           "imageId": "image_065.png",
-          "meanZ": -1.5997506979480465
+          "meanZ": -1.5994977249553533
         },
         {
           "imageId": "image_048.png",
-          "meanZ": -1.5868184043643239
+          "meanZ": -1.5869051632893558
         },
         {
           "imageId": "image_119.png",
-          "meanZ": -1.5752979310707136
+          "meanZ": -1.5749747383133545
         }
       ]
     },
     {
       "label": 13,
-      "meanSilhouette": 0.15454819675564324,
+      "meanSilhouette": 0.15204431004317928,
       "preferredImages": [
         {
           "imageId": "image_027.png",
-          "meanZ": 2.8785810350328056
+          "meanZ": 2.875606711860619
         },
         {
           "imageId": "image_044.png",
-          "meanZ": 2.1742808380511804
+          "meanZ": 2.1719599234059257
         },
         {
           "imageId": "image_012.png",
-          "meanZ": 2.0676046896686437
+          "meanZ": 2.0686536669740683
         },
         {
           "imageId": "image_035.png",
-          "meanZ": 1.7988218361402353
+          "meanZ": 1.7992005072620054
         },
         {
-          "imageId": "image_131.png",
-          "meanZ": 1.6422764741966644
+          "imageId": "image_009.png",
+          "meanZ": 1.6430261704210791
         }
       ],
       "roiCounts": {
@@ -737,23 +737,23 @@
       "suppressedImages": [
         {
           "imageId": "image_148.png",
-          "meanZ": -2.594923358501865
+          "meanZ": -2.592791637569053
         },
         {
           "imageId": "image_145.png",
-          "meanZ": -2.490850496054312
+          "meanZ": -2.4899852632122683
         },
         {
           "imageId": "image_143.png",
-          "meanZ": -2.312901099157568
+          "meanZ": -2.314277053081833
         },
         {
           "imageId": "image_182.png",
-          "meanZ": -2.153755821843367
+          "meanZ": -2.1512422656365944
         },
         {
           "imageId": "image_080.png",
-          "meanZ": -2.063512201202747
+          "meanZ": -2.0629203218499867
         }
       ]
     }
@@ -776,42 +776,42 @@
     "pcaComponents": 35
   },
   "model": "clip_rn101_random",
-  "pcaExplainedVarianceRatioSum": 0.9997292166770232,
+  "pcaExplainedVarianceRatioSum": 0.9997292836420953,
   "responseKind": "model_predictions",
   "responseSpace": "nsd_1000_subject1_floc_t7_v1",
   "schemaVersion": 1,
-  "silhouette": 0.29116854502543793,
+  "silhouette": 0.290344801683531,
   "sourceFiles": [
     {
-      "fileName": "murtylab_clip_rn101_random_nsd_1000_ffa_20260408183509474Z.csv",
+      "fileName": "murtylab_clip_rn101_random_nsd_1000_ffa_20261010193856882Z.csv",
       "roi": "ffa",
-      "sha256": "8265cce4a5dc74728ae6e9c6afbbabe95623fb4d6a4e2b6ad9ce928b70e95212"
+      "sha256": "ed091a24cf3e3a55b1376d702d32ac99e3858d44f123acf99c553b21fb4f5525"
     },
     {
-      "fileName": "murtylab_clip_rn101_random_nsd_1000_eba_20260408183536743Z.csv",
+      "fileName": "murtylab_clip_rn101_random_nsd_1000_eba_20261010193856882Z.csv",
       "roi": "eba",
-      "sha256": "a22a68e51343ad1accb46376ce0bcc3166ee659ffd884827782e727c27f6dfbc"
+      "sha256": "2f3ee815f7e33b16ecd1e4b4096899166bea98837625910fccffd18fcdd71043"
     },
     {
-      "fileName": "murtylab_clip_rn101_random_nsd_1000_ppa_20260408183610273Z.csv",
+      "fileName": "murtylab_clip_rn101_random_nsd_1000_ppa_20261010193856882Z.csv",
       "roi": "ppa",
-      "sha256": "99a5d72f3b10fa1b9d287151884a278a7ee59dbb1ac81dcf4056a8211b8a3018"
+      "sha256": "0c2c01677a9dc84c02c94df778cf2d2452ed7255e18be275a7336f4ac6848ac8"
     }
   ],
   "splitHalfStability": {
     "adjustedRandIndices": [
-      0.7013984542653482,
-      0.5467419739559042,
-      0.597438324534585,
-      0.7854909177637478,
-      0.7671993530573417,
+      0.6489252583047227,
+      0.5350120421871882,
+      0.5856578251867101,
+      0.7733920450309709,
+      0.913889528893306,
       0.6003123673155337
     ],
     "allPassThreshold": false,
     "iterations": 6,
-    "meanAdjustedRandIndex": 0.6664302318154102,
+    "meanAdjustedRandIndex": 0.6761981778197385,
     "meanPassesThreshold": false,
-    "minAdjustedRandIndex": 0.5467419739559042,
+    "minAdjustedRandIndex": 0.5350120421871882,
     "randomSeed": 42,
     "threshold": 0.7
   },

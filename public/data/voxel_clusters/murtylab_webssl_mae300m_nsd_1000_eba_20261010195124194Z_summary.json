@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 71,
+    "1": 114
+  },
+  "explained_variance_ratio_first10": [
+    0.6921090178751431,
+    0.11613838338659199,
+    0.06344034309800331,
+    0.02896633891366991,
+    0.012040717543999598,
+    0.010996403606232278,
+    0.00905503017735155,
+    0.007603711001038373,
+    0.006657978182752942,
+    0.006299124530015508
+  ],
+  "model": "webssl_mae300m",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_webssl_mae300m_nsd_1000_eba_20261010195124194Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.37909683697808727,
+  "source_file": "murtylab_webssl_mae300m_nsd_1000_eba_20261010195124194Z.csv"
+}

@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 116,
+    "1": 69
+  },
+  "explained_variance_ratio_first10": [
+    0.7603078395542459,
+    0.10987018068414453,
+    0.04797829878418932,
+    0.02088425896799768,
+    0.010862685227049274,
+    0.009707261335327035,
+    0.00816208479989572,
+    0.00682791435414068,
+    0.004172925345999557,
+    0.0027269637733673426
+  ],
+  "model": "dreamsim_vitb32",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_dreamsim_vitb32_nsd_1000_eba_20261010194113557Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.436578510594509,
+  "source_file": "murtylab_dreamsim_vitb32_nsd_1000_eba_20261010194113557Z.csv"
+}

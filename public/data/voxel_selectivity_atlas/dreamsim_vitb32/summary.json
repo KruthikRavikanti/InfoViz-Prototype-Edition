@@ -57,7 +57,7 @@
     },
     {
       "label": 1,
-      "meanSilhouette": 0.2577551300343941,
+      "meanSilhouette": 0.25775513003439404,
       "preferredImages": [
         {
           "imageId": "image_048.png",
@@ -165,7 +165,7 @@
     },
     {
       "label": 3,
-      "meanSilhouette": 0.07178356058978619,
+      "meanSilhouette": 0.07178356058978612,
       "preferredImages": [
         {
           "imageId": "image_105.png",
@@ -273,7 +273,7 @@
     },
     {
       "label": 5,
-      "meanSilhouette": 0.14820928210500736,
+      "meanSilhouette": 0.14820928210500728,
       "preferredImages": [
         {
           "imageId": "image_105.png",
@@ -327,7 +327,7 @@
     },
     {
       "label": 6,
-      "meanSilhouette": 0.08929366936853751,
+      "meanSilhouette": 0.0892936693685376,
       "preferredImages": [
         {
           "imageId": "image_048.png",
@@ -381,7 +381,7 @@
     },
     {
       "label": 7,
-      "meanSilhouette": 0.1275928942286304,
+      "meanSilhouette": 0.12759289422863032,
       "preferredImages": [
         {
           "imageId": "image_105.png",
@@ -435,7 +435,7 @@
     },
     {
       "label": 8,
-      "meanSilhouette": 0.18582104838668898,
+      "meanSilhouette": 0.18582104838668884,
       "preferredImages": [
         {
           "imageId": "image_105.png",
@@ -543,7 +543,7 @@
     },
     {
       "label": 10,
-      "meanSilhouette": 0.2741392146562274,
+      "meanSilhouette": 0.2741392146562276,
       "preferredImages": [
         {
           "imageId": "image_115.png",
@@ -597,7 +597,7 @@
     },
     {
       "label": 11,
-      "meanSilhouette": 0.17296438828865618,
+      "meanSilhouette": 0.17296438828865582,
       "preferredImages": [
         {
           "imageId": "image_107.png",
@@ -651,7 +651,7 @@
     },
     {
       "label": 12,
-      "meanSilhouette": 0.20011579376741875,
+      "meanSilhouette": 0.20011579376741884,
       "preferredImages": [
         {
           "imageId": "image_107.png",
@@ -705,7 +705,7 @@
     },
     {
       "label": 13,
-      "meanSilhouette": 0.19156893912643552,
+      "meanSilhouette": 0.19156893912643547,
       "preferredImages": [
         {
           "imageId": "image_004.png",
@@ -776,26 +776,26 @@
     "pcaComponents": 35
   },
   "model": "dreamsim_vitb32",
-  "pcaExplainedVarianceRatioSum": 0.994137371611856,
+  "pcaExplainedVarianceRatioSum": 0.9941373716118556,
   "responseKind": "model_predictions",
   "responseSpace": "nsd_1000_subject1_floc_t7_v1",
   "schemaVersion": 1,
-  "silhouette": 0.29433160005604475,
+  "silhouette": 0.2943316000560447,
   "sourceFiles": [
     {
-      "fileName": "murtylab_dreamsim_vitb32_nsd_1000_ffa_20260410230137468Z.csv",
+      "fileName": "murtylab_dreamsim_vitb32_nsd_1000_ffa_20261010194113557Z.csv",
       "roi": "ffa",
-      "sha256": "f736f173f2c34e034237ea02448553fc8c5dc73c6fc1139ee8cddef3dd6acb38"
+      "sha256": "0c488a193f9f1854803f42f863c220a1803bc41a6b2bfadf55dfa91450ce6420"
     },
     {
-      "fileName": "murtylab_dreamsim_vitb32_nsd_1000_eba_20260410230200283Z.csv",
+      "fileName": "murtylab_dreamsim_vitb32_nsd_1000_eba_20261010194113557Z.csv",
       "roi": "eba",
-      "sha256": "f207706f67f13f849885ddeefbe62dd3828c664c398d3398c0cc5a26dc57fee5"
+      "sha256": "67395b8e8281cef462880b1c2e1ab6b9479b9145ec5eb3a89c7f32830d52763e"
     },
     {
-      "fileName": "murtylab_dreamsim_vitb32_nsd_1000_ppa_20260410230221436Z.csv",
+      "fileName": "murtylab_dreamsim_vitb32_nsd_1000_ppa_20261010194113557Z.csv",
       "roi": "ppa",
-      "sha256": "98704663e82d5267e11d94e2d15d8c85bd164a0e1dbc02133d432a421ff94951"
+      "sha256": "2dd77cc5c5250caa7c4ef8e74030dedca82986a9afb8805575302abd0102b84b"
     }
   ],
   "splitHalfStability": {

@@ -1,0 +1,22 @@
+{
+  "best_k": 3,
+  "cluster_sizes": {
+    "0": 60,
+    "1": 64,
+    "2": 61
+  },
+  "clustering_method": "hierarchical",
+  "dendrogram_png": "public/data/voxel_clusters_hierarchical_corr/murtylab_toponets_rn18_tau_0.5_nsd_1000_eba_20261010194940681Z_dendrogram.png",
+  "distance_metric": "correlation",
+  "distance_to_cluster_representative": "medoid_correlation_distance",
+  "linkage_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_toponets_rn18_tau_0.5_nsd_1000_eba_20261010194940681Z_linkage.csv",
+  "linkage_method": "average",
+  "model": "toponets_rn18_tau_0.5",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "normalization": "voxel_zscore",
+  "result_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_toponets_rn18_tau_0.5_nsd_1000_eba_20261010194940681Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.46591355644207233,
+  "source_file": "murtylab_toponets_rn18_tau_0.5_nsd_1000_eba_20261010194940681Z.csv"
+}

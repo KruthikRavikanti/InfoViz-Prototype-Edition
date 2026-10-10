@@ -3,7 +3,7 @@
   "clusters": [
     {
       "label": 0,
-      "meanSilhouette": 0.08007297402658903,
+      "meanSilhouette": 0.08007297402658906,
       "preferredImages": [
         {
           "imageId": "image_118.png",
@@ -57,7 +57,7 @@
     },
     {
       "label": 1,
-      "meanSilhouette": 0.3322205394092158,
+      "meanSilhouette": 0.3322205394092161,
       "preferredImages": [
         {
           "imageId": "image_004.png",
@@ -111,7 +111,7 @@
     },
     {
       "label": 2,
-      "meanSilhouette": 0.16092753025490533,
+      "meanSilhouette": 0.1609275302549055,
       "preferredImages": [
         {
           "imageId": "image_052.png",
@@ -165,7 +165,7 @@
     },
     {
       "label": 3,
-      "meanSilhouette": 0.2516063508110487,
+      "meanSilhouette": 0.25160635081104876,
       "preferredImages": [
         {
           "imageId": "image_099.png",
@@ -273,7 +273,7 @@
     },
     {
       "label": 5,
-      "meanSilhouette": 0.012779569905898215,
+      "meanSilhouette": 0.012779569905898276,
       "preferredImages": [
         {
           "imageId": "image_157.png",
@@ -327,7 +327,7 @@
     },
     {
       "label": 6,
-      "meanSilhouette": 0.07540813107626067,
+      "meanSilhouette": 0.07540813107626065,
       "preferredImages": [
         {
           "imageId": "image_052.png",
@@ -381,7 +381,7 @@
     },
     {
       "label": 7,
-      "meanSilhouette": -0.009193790660577121,
+      "meanSilhouette": -0.009193790660577033,
       "preferredImages": [
         {
           "imageId": "image_157.png",
@@ -489,7 +489,7 @@
     },
     {
       "label": 9,
-      "meanSilhouette": -0.009809802093716713,
+      "meanSilhouette": -0.009809802093716794,
       "preferredImages": [
         {
           "imageId": "image_063.png",
@@ -543,7 +543,7 @@
     },
     {
       "label": 10,
-      "meanSilhouette": 0.03719595652448901,
+      "meanSilhouette": 0.03719595652448895,
       "preferredImages": [
         {
           "imageId": "image_050.png",
@@ -597,7 +597,7 @@
     },
     {
       "label": 11,
-      "meanSilhouette": 0.21485644291069914,
+      "meanSilhouette": 0.21485644291069955,
       "preferredImages": [
         {
           "imageId": "image_082.png",
@@ -651,7 +651,7 @@
     },
     {
       "label": 12,
-      "meanSilhouette": 0.17497358608353458,
+      "meanSilhouette": 0.17497358608353503,
       "preferredImages": [
         {
           "imageId": "image_100.png",
@@ -705,7 +705,7 @@
     },
     {
       "label": 13,
-      "meanSilhouette": 0.19589414423332877,
+      "meanSilhouette": 0.19589414423332888,
       "preferredImages": [
         {
           "imageId": "image_157.png",
@@ -776,26 +776,26 @@
     "pcaComponents": 35
   },
   "model": "clip_vit_b32_random",
-  "pcaExplainedVarianceRatioSum": 0.9866456987720736,
+  "pcaExplainedVarianceRatioSum": 0.9866456987720744,
   "responseKind": "model_predictions",
   "responseSpace": "nsd_1000_subject1_floc_t7_v1",
   "schemaVersion": 1,
-  "silhouette": 0.15235294254560822,
+  "silhouette": 0.1523529425456083,
   "sourceFiles": [
     {
-      "fileName": "murtylab_clip_vit_b32_random_nsd_1000_ffa_20260408185920614Z.csv",
+      "fileName": "murtylab_clip_vit_b32_random_nsd_1000_ffa_20261010193923703Z.csv",
       "roi": "ffa",
-      "sha256": "f53387ff4fa2057e05ed18e87af1bd1a9447574f69775ec5953da2e11417f578"
+      "sha256": "bb4221e88bafc9244800ed97597fc1c71a58d85fd398acef1bb4a4f30b6080a5"
     },
     {
-      "fileName": "murtylab_clip_vit_b32_random_nsd_1000_eba_20260408185950352Z.csv",
+      "fileName": "murtylab_clip_vit_b32_random_nsd_1000_eba_20261010193923703Z.csv",
       "roi": "eba",
-      "sha256": "e7e955837dabb863c13ec36b719d28e344fc0928bb2b836debcb76ef14cbc696"
+      "sha256": "0b55687447ff0c6e1ec45ca525f691ba3cffe684c0cafc3bb733878ef4da9916"
     },
     {
-      "fileName": "murtylab_clip_vit_b32_random_nsd_1000_ppa_20260408190014009Z.csv",
+      "fileName": "murtylab_clip_vit_b32_random_nsd_1000_ppa_20261010193923703Z.csv",
       "roi": "ppa",
-      "sha256": "699976611cd60483b01ea783411125fca3c9cf0d6218ac992b6fdf3cd191313d"
+      "sha256": "45121e09dcd0cf215b2e33edcb3f13e7fbe4ad05a90e9dffac5e81951c8cd51a"
     }
   ],
   "splitHalfStability": {

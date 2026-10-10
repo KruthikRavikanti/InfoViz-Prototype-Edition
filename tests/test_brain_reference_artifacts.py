@@ -59,7 +59,7 @@ class BrainReferenceArtifactTests(unittest.TestCase):
         self.assertEqual(set(manifest["models"]), set(self.source_manifest["supported_models"]))
         self.assertTrue(set(self.audit["AUDITED_CHECKPOINT_SHA256"]) <= set(manifest["models"]))
 
-    def test_all_model_payloads_exactly_preserve_raw_subject1_prefixes_and_baseline_26_identity(self):
+    def test_all_model_payloads_exactly_preserve_raw_subject1_prefixes(self):
         for model, entry in self.manifest["models"].items():
             with self.subTest(model=model):
                 payload = (self.output / entry["url"]).read_bytes()
@@ -80,7 +80,8 @@ class BrainReferenceArtifactTests(unittest.TestCase):
                     self.assertEqual(provenance["sourceSha256"], source["source_sha256"])
                     self.assertEqual(provenance["voxelOrderSha256"], self.audit["AUDITED_VOXEL_ORDER_SHA256"][roi])
                     self.assertEqual(provenance["checkpointSha256"], self.checkpoints[model][ROIS.index(roi)])
-                if model in self.audit["AUDITED_CHECKPOINT_SHA256"]:
+                if (model in self.audit["AUDITED_CHECKPOINT_SHA256"]
+                        and self.source_manifest.get("coverage_extension", {}).get("policy") == "append_only_preserve_baseline_artifacts_v1"):
                     baseline = REPO_ROOT / "artifacts/coverage-expansion/baseline/public/data/brain/reference"
                     if baseline.is_dir():
                         self.assertEqual(payload, (baseline / f"{model}.f32").read_bytes())

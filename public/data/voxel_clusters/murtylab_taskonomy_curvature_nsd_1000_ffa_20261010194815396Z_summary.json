@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 103,
+    "1": 82
+  },
+  "explained_variance_ratio_first10": [
+    0.8110049168194425,
+    0.08625528921491223,
+    0.03877624129094523,
+    0.017425761272430056,
+    0.011487393266562352,
+    0.006693247969333638,
+    0.0039002923584061672,
+    0.0035030203379855314,
+    0.0029055480714028064,
+    0.0025203309217137456
+  ],
+  "model": "taskonomy_curvature",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_taskonomy_curvature_nsd_1000_ffa_20261010194815396Z_clusters.csv",
+  "roi": "ffa",
+  "silhouette": 0.44038224296933576,
+  "source_file": "murtylab_taskonomy_curvature_nsd_1000_ffa_20261010194815396Z.csv"
+}

@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 48,
+    "1": 137
+  },
+  "explained_variance_ratio_first10": [
+    0.7913021955189145,
+    0.042180956968060866,
+    0.0368306368728928,
+    0.021854227410134774,
+    0.015651326114878673,
+    0.01048731007817015,
+    0.008636907607981041,
+    0.00777723597183423,
+    0.0059309428569395035,
+    0.0047331247393541725
+  ],
+  "model": "kosmos2",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_kosmos2_nsd_1000_ffa_20261010194358451Z_clusters.csv",
+  "roi": "ffa",
+  "silhouette": 0.46554106058517614,
+  "source_file": "murtylab_kosmos2_nsd_1000_ffa_20261010194358451Z.csv"
+}

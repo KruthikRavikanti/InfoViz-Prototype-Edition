@@ -15,6 +15,8 @@ from scripts.data.generate_model_reference_predictions import (
     select_models, sha256_file, validate_predictions, verify_completed_triad, write_prediction_csv,
     validate_parallel_execution,
     NUMERIC_POLICY, verify_precision_provenance,
+    validated_output_root,
+    failure_output_root,
 )
 
 
@@ -49,6 +51,7 @@ class ReferencePredictionGenerationTests(unittest.TestCase):
             inventory = model_inventory(root, root, scores, manifest)
             self.assertEqual(set(inventory), {"existing", "missing"})
             self.assertEqual(select_models(inventory, None, True), ["missing"])
+            self.assertEqual(select_models(inventory, None, False, True), ["existing", "missing"])
             self.assertTrue(all(e["readable"] for e in inventory["missing"]["rois"].values()))
             self.assertFalse(inventory["existing"]["rois"]["ffa"]["readable"])
 
@@ -57,6 +60,32 @@ class ReferencePredictionGenerationTests(unittest.TestCase):
         for models, all_missing in ((None, False), (["model"], True), (["ceiling"], False)):
             with self.subTest(models=models, all_missing=all_missing), self.assertRaises(GenerationValidationError):
                 select_models(inventory, models, all_missing)
+
+    def test_all_scored_selection_is_independent_of_the_current_reference_roster(self):
+        inventory = {"previously_added": {"existing_reference": True},
+                     "original": {"existing_reference": True}}
+        self.assertEqual(select_models(inventory, None, False, True), ["original", "previously_added"])
+        for models, missing in ((["original"], False), (None, True)):
+            with self.assertRaises(GenerationValidationError):
+                select_models(inventory, models, missing, True)
+
+    def test_staging_outputs_allow_isolated_standardization_but_reject_live_or_broad_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with patch("scripts.data.generate_model_reference_predictions.REPO_ROOT", root):
+                for name in ("coverage-expansion", "precision-standardization"):
+                    staged = root / "artifacts" / name / "raw-fp32"
+                    self.assertEqual(validated_output_root(staged), staged.resolve())
+                    with self.assertRaises(GenerationValidationError):
+                        validated_output_root(staged.parent)
+                for unsafe in (root, root / "artifacts", root / "data/image_by_model", root / "public/data"):
+                    with self.assertRaises(GenerationValidationError):
+                        validated_output_root(unsafe)
+
+    def test_failure_forensics_are_outside_the_canonical_model_inventory(self):
+        raw = Path("/fixture/artifacts/precision-standardization/raw-fp32")
+        self.assertEqual(failure_output_root(raw), raw.parent / "failures/raw-fp32")
+        self.assertFalse(failure_output_root(raw).is_relative_to(raw))
 
     def test_invalid_shapes_types_and_nonfinite_predictions_are_rejected(self):
         for matrix in (np.zeros((185, 715), dtype=np.float32), np.zeros((185, 716), dtype=np.float64), np.full((185, 716), np.nan, dtype=np.float32)):

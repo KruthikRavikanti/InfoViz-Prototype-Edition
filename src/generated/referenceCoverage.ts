@@ -1,10 +1,10 @@
 /**
  * Reviewed release identities, never inferred from an unverified response.
  * Update only after the complete staged reference/spatial bundle is audited.
- * Baseline child predictions and atlas fits remain immutable when appended.
+ * Historical releases remain recoverable; full-roster refreshes require fresh proofs.
  */
 export const REFERENCE_COVERAGE = Object.freeze({
-  referenceVersion: 'a862bba8496384d80de1b1990152b2b683e4325a52b0880d85783072172246d0',
+  referenceVersion: '3345e5fb332f4046c0b3a76a35f24a027dd0b6de0f62bb5e97eecda62c06b67d',
   models: Object.freeze([
     'adversarial_inceptionv3', 'aimv2', 'alexnet',
     'alexnet_random', 'beit', 'bit',
@@ -49,7 +49,7 @@ export const REFERENCE_COVERAGE = Object.freeze({
     'vone_rn50', 'webssl_dino300m', 'webssl_mae300m',
     'wideresnet101', 'wideresnet50', 'xception',
   ]),
-  brainManifestSha256: 'ebe0a4da8cd42eea2abd94060724af6efca48520efacdcf5e48f783792617c81',
-  atlasManifestSha256: 'ba589e7108173009c33bc1489a04423aac69b2d2e3ed2a6ad9c4ace1a2100418',
+  brainManifestSha256: 'a61486b019eb71027a4894116d4a9082b302fab74b5a567f12a7eefcec0bef97',
+  atlasManifestSha256: '93b76741ce1dc6cff60c5ba2e9454ef7e85f67d31ce0fe23e39d626a958d82f9',
   stochasticModels: Object.freeze(['vone_alexnet', 'vone_cornet_s']),
 });

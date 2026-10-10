@@ -326,7 +326,7 @@ def load_and_validate_source(
     *,
     expected_ids: Sequence[str],
     expected_voxel_count: int,
-    expected_means: np.ndarray,
+    expected_means: np.ndarray | None,
     mean_atol: float = MEAN_ABSOLUTE_TOLERANCE,
     mean_rtol: float = MEAN_RELATIVE_TOLERANCE,
 ) -> ValidatedSource:
@@ -383,7 +383,7 @@ def load_and_validate_source(
 
     voxels = np.column_stack(numeric_columns).astype(np.float64, copy=False)
     means = voxels.mean(axis=1, dtype=np.float64)
-    if not np.allclose(means, expected_means, atol=mean_atol, rtol=mean_rtol):
+    if expected_means is not None and not np.allclose(means, expected_means, atol=mean_atol, rtol=mean_rtol):
         differences = np.abs(means - expected_means)
         worst = int(np.argmax(differences))
         raise ReferenceValidationError(
@@ -1100,7 +1100,7 @@ def public_manifest_from_full(manifest: Mapping[str, Any]) -> dict[str, Any]:
             "dreamsim": {"available": False},
         },
     }
-    extension = manifest.get("coverage_extension")
+    extension = manifest.get("prediction_standardization", manifest.get("coverage_extension"))
     if isinstance(extension, Mapping) and "model_prediction_policies" in extension:
         # Only compact scientific interpretation metadata; inference paths/hashes stay private.
         public["model_prediction_policies"] = extension["model_prediction_policies"]

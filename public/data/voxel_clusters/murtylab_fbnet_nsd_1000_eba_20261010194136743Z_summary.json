@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 108,
+    "1": 77
+  },
+  "explained_variance_ratio_first10": [
+    0.7391729218970674,
+    0.11230332000589043,
+    0.06684868729017608,
+    0.02540959410634889,
+    0.016378731297683937,
+    0.009680551742624124,
+    0.008133249931145108,
+    0.006915511801741863,
+    0.004706470037732262,
+    0.00323439505998199
+  ],
+  "model": "fbnet",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_fbnet_nsd_1000_eba_20261010194136743Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.43572067596657005,
+  "source_file": "murtylab_fbnet_nsd_1000_eba_20261010194136743Z.csv"
+}

@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 69,
+    "1": 116
+  },
+  "explained_variance_ratio_first10": [
+    0.7225282972127262,
+    0.11228863823055843,
+    0.04673821151626014,
+    0.021718408446315847,
+    0.014972092027708632,
+    0.011943337629128822,
+    0.00934593778248798,
+    0.008720796969633715,
+    0.006913427077890877,
+    0.005650677981737235
+  ],
+  "model": "beit",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_beit_nsd_1000_eba_20261010193640437Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.44156507591064176,
+  "source_file": "murtylab_beit_nsd_1000_eba_20261010193640437Z.csv"
+}

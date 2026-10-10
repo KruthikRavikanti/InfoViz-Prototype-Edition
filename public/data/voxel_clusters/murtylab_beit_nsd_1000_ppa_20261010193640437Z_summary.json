@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 119,
+    "1": 66
+  },
+  "explained_variance_ratio_first10": [
+    0.8973733552594131,
+    0.06265318706102517,
+    0.01398397506802145,
+    0.00402793727313793,
+    0.0026211325288680422,
+    0.002286838614924546,
+    0.0015754094488985057,
+    0.0011674061896972008,
+    0.0008135348596712964,
+    0.0007642301810475348
+  ],
+  "model": "beit",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_beit_nsd_1000_ppa_20261010193640437Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.5321047424265928,
+  "source_file": "murtylab_beit_nsd_1000_ppa_20261010193640437Z.csv"
+}

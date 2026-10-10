@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 73,
+    "1": 112
+  },
+  "explained_variance_ratio_first10": [
+    0.7209619320844484,
+    0.11267856745906285,
+    0.06759674033076307,
+    0.021627518485193755,
+    0.013490916561910144,
+    0.010407532025539342,
+    0.009470094689178962,
+    0.007528587406083705,
+    0.005316397012233898,
+    0.004492760495446102
+  ],
+  "model": "blip2",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_blip2_nsd_1000_eba_20261010193656145Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.4227113270048358,
+  "source_file": "murtylab_blip2_nsd_1000_eba_20261010193656145Z.csv"
+}

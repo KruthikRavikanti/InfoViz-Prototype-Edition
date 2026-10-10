@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 81,
+    "1": 104
+  },
+  "explained_variance_ratio_first10": [
+    0.8025624911742056,
+    0.12020768890140265,
+    0.04501962078771002,
+    0.017809435884977735,
+    0.006047293527125495,
+    0.003696832087564038,
+    0.0024642384046011825,
+    0.001201637613596701,
+    0.00031157617730537366,
+    0.00026992285287688513
+  ],
+  "model": "cornet_s",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_cornet_s_nsd_1000_eba_20261010193938643Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.4748055385354046,
+  "source_file": "murtylab_cornet_s_nsd_1000_eba_20261010193938643Z.csv"
+}

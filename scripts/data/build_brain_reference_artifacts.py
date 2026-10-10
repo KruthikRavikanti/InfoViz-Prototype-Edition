@@ -430,17 +430,79 @@ def append_reference_brain_assets(
     return index
 
 
+def validate_spatial_standardization(
+    *, artifact_root: Path, raw_root: Path, baseline_root: Path, audit_path: Path,
+    image_root: Path = REPO_ROOT / "public/images",
+) -> tuple[dict, dict, dict[str, dict[str, np.ndarray]]]:
+    try:
+        from .spatial_standardization import validate_spatial_standardization as validate
+    except ImportError:  # pragma: no cover - direct script execution
+        from spatial_standardization import validate_spatial_standardization as validate
+    return validate(artifact_root=artifact_root, raw_root=raw_root, baseline_root=baseline_root,
+                    audit_path=audit_path, image_root=image_root)
+
+
+def standardize_reference_brain_assets(
+    *, artifact_root: Path, raw_root: Path, baseline_root: Path, audit_path: Path,
+    output_root: Path, image_root: Path = REPO_ROOT / "public/images",
+) -> dict:
+    """Freshly export all 126 audited matrices into a new, unpromoted directory."""
+    try:
+        from .spatial_standardization import PARENT_BRAIN_MANIFEST_SHA256, checked_document, validate_spatial_standardization
+    except ImportError:  # pragma: no cover - direct script execution
+        from spatial_standardization import PARENT_BRAIN_MANIFEST_SHA256, checked_document, validate_spatial_standardization
+    if output_root.exists():
+        raise BrainReferenceValidationError("Standardization output must be a new staging directory.")
+    reference, contract, matrices = validate_spatial_standardization(
+        artifact_root=artifact_root, raw_root=raw_root, baseline_root=baseline_root,
+        audit_path=audit_path, image_root=image_root,
+    )
+    parent_root = baseline_root / "public/data/brain/reference"
+    parent = checked_document(parent_root / "manifest.json", PARENT_BRAIN_MANIFEST_SHA256)
+    entries = {}
+    # Preserve unrelated parent files, but every known model payload below is
+    # freshly derived from the newly validated raw matrix, never copied as data.
+    shutil.copytree(parent_root, output_root)
+    try:
+        for model in sorted(matrices):
+            payload = np.ascontiguousarray(np.concatenate([matrices[model][roi] for roi in ROIS], axis=1), dtype="<f4").tobytes(order="C")
+            (output_root / f"{model}.f32").write_bytes(payload)
+            entries[model] = {
+                "url": f"{model}.f32", "bytes": len(payload), "sha256": sha256(payload),
+                "provenance": {roi: {
+                    "artifactSha256": reference["artifacts"][model][roi]["sha256"],
+                    "sourceSha256": reference["artifacts"][model][roi]["source_sha256"],
+                    "voxelOrderSha256": contract["voxel_order_sha256"][roi],
+                    "checkpointSha256": contract["checkpoint_sha256_by_model"][model][ROIS.index(roi)],
+                } for roi in ROIS},
+            }
+        index = {**parent, "referenceVersion": reference["reference_version"], "models": entries}
+        (output_root / "manifest.json").write_text(json.dumps(index, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
+        (output_root / "spatial-audit.json").write_text(json.dumps(contract, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
+    except BaseException:
+        shutil.rmtree(output_root)
+        raise
+    return index
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--artifact-root", type=Path, default=REPO_ROOT / "artifacts/reference")
     parser.add_argument("--raw-root", type=Path, default=REPO_ROOT / "data/image_by_model")
     parser.add_argument("--audit-path", type=Path, default=REPO_ROOT.parent / "cortex-core/cortex/comparison/brain_map_audit.py")
     parser.add_argument("--output-root", type=Path, default=REPO_ROOT / "public/data/brain/reference")
-    parser.add_argument("--append-baseline-brain", type=Path, help="Explicitly stage an audited extension of this pinned baseline brain bundle.")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--append-baseline-brain", type=Path, help="Explicitly stage an audited extension of this pinned baseline brain bundle.")
+    mode.add_argument("--standardize-from-baseline", type=Path, help="Freshly stage every model using full-roster FP32 proofs and this reviewed rollback snapshot.")
     parser.add_argument("--baseline-artifact-root", type=Path, default=REPO_ROOT / "artifacts/reference")
     parser.add_argument("--image-root", type=Path, default=REPO_ROOT / "public/images")
     args = parser.parse_args()
-    if args.append_baseline_brain:
+    if args.standardize_from_baseline:
+        manifest = standardize_reference_brain_assets(
+            artifact_root=args.artifact_root, raw_root=args.raw_root, audit_path=args.audit_path,
+            baseline_root=args.standardize_from_baseline, output_root=args.output_root, image_root=args.image_root,
+        )
+    elif args.append_baseline_brain:
         manifest = append_reference_brain_assets(
             artifact_root=args.artifact_root, raw_root=args.raw_root, audit_path=args.audit_path,
             baseline_artifact_root=args.baseline_artifact_root, baseline_brain_root=args.append_baseline_brain,

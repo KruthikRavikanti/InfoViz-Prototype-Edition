@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 96,
+    "1": 89
+  },
+  "explained_variance_ratio_first10": [
+    0.8203353900166602,
+    0.1022796823190167,
+    0.028319413766424426,
+    0.011428862666321385,
+    0.009112590038714528,
+    0.005260206284921482,
+    0.0043176069236191125,
+    0.003551915125927012,
+    0.0024020354324970055,
+    0.0019994982578748688
+  ],
+  "model": "taskonomy_autoencoding",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_taskonomy_autoencoding_nsd_1000_ppa_20261010194801094Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.4214606578107126,
+  "source_file": "murtylab_taskonomy_autoencoding_nsd_1000_ppa_20261010194801094Z.csv"
+}

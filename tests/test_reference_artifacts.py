@@ -191,17 +191,25 @@ class ReferenceArtifactRepositoryTests(unittest.TestCase):
         cls.raw_dir = REPO_ROOT / "data" / "image_by_model"
         cls.combined_path = REPO_ROOT / "public" / "data" / "combined_image_means.csv"
         cls.public_manifest = json.loads((REPO_ROOT / "public/data/reference_manifest.json").read_text(encoding="utf-8"))
+        cls.private_manifest = json.loads((REPO_ROOT / "artifacts/reference/manifest.json").read_text(encoding="utf-8"))
         cls.models = cls.public_manifest["supported_models"]
         cls.candidates = discover_source_candidates(cls.raw_dir, expected_models=cls.models)
         cls.combined = load_combined_means(cls.combined_path, cls.models)
 
-        candidate = cls.candidates[("clip_rn50", "ffa")][0]
+        cls.clip_entry = cls.private_manifest["artifacts"]["clip_rn50"]["ffa"]
+        candidate = next(candidate for candidate in cls.candidates[("clip_rn50", "ffa")]
+                         if candidate.path.name == cls.clip_entry["source_file"])
         cls.clip_source = load_and_validate_source(
             candidate,
             expected_ids=canonical_image_ids(),
             expected_voxel_count=716,
             expected_means=cls.combined["clip_rn50_ffa"].to_numpy(dtype=np.float64),
         )
+        if "prediction_standardization" in cls.private_manifest:
+            from scripts.data.refresh_reference_coverage import ANALYSIS_INPUT_POLICY, canonicalize_source
+            if cls.private_manifest["prediction_standardization"].get("analysis_input_policy") != ANALYSIS_INPUT_POLICY:
+                raise AssertionError("Published full-refresh analysis input policy is not canonical FP32")
+            cls.clip_source = canonicalize_source(cls.clip_source)
 
     def test_published_roster_has_complete_triads_and_retains_original_26(self) -> None:
         legacy_models = {
@@ -234,14 +242,14 @@ class ReferenceArtifactRepositoryTests(unittest.TestCase):
             / "public"
             / "data"
             / "voxel_clusters"
-            / "murtylab_clip_rn50_nsd_1000_ffa_20260408164117065Z_clusters.csv"
+            / f"{Path(self.clip_entry['source_file']).stem}_clusters.csv"
         )
         hierarchical = pd.read_csv(
             REPO_ROOT
             / "public"
             / "data"
             / "voxel_clusters_hierarchical_corr"
-            / "murtylab_clip_rn50_nsd_1000_ffa_20260408164117065Z_clusters.csv"
+            / f"{Path(self.clip_entry['source_file']).stem}_clusters.csv"
         )
         self.assertEqual(arrays["image_ids"].tolist(), kmeans["image_name"].tolist())
         np.testing.assert_array_equal(arrays["kmeans_labels"], kmeans["cluster_label"])

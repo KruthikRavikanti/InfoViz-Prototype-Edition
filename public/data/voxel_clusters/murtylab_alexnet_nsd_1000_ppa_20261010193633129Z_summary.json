@@ -1,0 +1,28 @@
+{
+  "best_k": 3,
+  "cluster_sizes": {
+    "0": 45,
+    "1": 54,
+    "2": 86
+  },
+  "explained_variance_ratio_first10": [
+    0.9110320869276818,
+    0.052930017327625756,
+    0.014648112068776439,
+    0.005490746157788086,
+    0.0032135054617916273,
+    0.0024826420077232944,
+    0.0011341079576346889,
+    0.0007911565756647236,
+    0.0007058215007218345,
+    0.0006508530421699981
+  ],
+  "model": "alexnet",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_alexnet_nsd_1000_ppa_20261010193633129Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.4599611481208577,
+  "source_file": "murtylab_alexnet_nsd_1000_ppa_20261010193633129Z.csv"
+}

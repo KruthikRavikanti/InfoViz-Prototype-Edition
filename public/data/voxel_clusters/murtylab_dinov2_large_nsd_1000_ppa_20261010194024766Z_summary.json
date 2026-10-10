@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 128,
+    "1": 57
+  },
+  "explained_variance_ratio_first10": [
+    0.8759517574156641,
+    0.07260298142238598,
+    0.016071785744607305,
+    0.007756674532222928,
+    0.005763667196603297,
+    0.003909080990294227,
+    0.003042341976685787,
+    0.0023058807774963374,
+    0.00196853264416507,
+    0.0015676056124203322
+  ],
+  "model": "dinov2_large",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_dinov2_large_nsd_1000_ppa_20261010194024766Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.5382906065327259,
+  "source_file": "murtylab_dinov2_large_nsd_1000_ppa_20261010194024766Z.csv"
+}

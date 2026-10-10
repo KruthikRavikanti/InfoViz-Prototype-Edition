@@ -3,7 +3,7 @@
   "clusters": [
     {
       "label": 0,
-      "meanSilhouette": 0.14507176071685915,
+      "meanSilhouette": 0.1450717607168594,
       "preferredImages": [
         {
           "imageId": "image_024.png",
@@ -57,7 +57,7 @@
     },
     {
       "label": 1,
-      "meanSilhouette": 0.7449395446371913,
+      "meanSilhouette": 0.7449395446371914,
       "preferredImages": [
         {
           "imageId": "image_126.png",
@@ -111,7 +111,7 @@
     },
     {
       "label": 2,
-      "meanSilhouette": 0.1602931590362121,
+      "meanSilhouette": 0.16029315903621186,
       "preferredImages": [
         {
           "imageId": "image_011.png",
@@ -165,7 +165,7 @@
     },
     {
       "label": 3,
-      "meanSilhouette": 0.04120374557450796,
+      "meanSilhouette": 0.041203745574508115,
       "preferredImages": [
         {
           "imageId": "image_041.png",
@@ -219,7 +219,7 @@
     },
     {
       "label": 4,
-      "meanSilhouette": 0.18732689460092178,
+      "meanSilhouette": 0.1873268946009218,
       "preferredImages": [
         {
           "imageId": "image_011.png",
@@ -273,7 +273,7 @@
     },
     {
       "label": 5,
-      "meanSilhouette": 0.14297910865401695,
+      "meanSilhouette": 0.14297910865401664,
       "preferredImages": [
         {
           "imageId": "image_014.png",
@@ -327,7 +327,7 @@
     },
     {
       "label": 6,
-      "meanSilhouette": 0.19114352338930948,
+      "meanSilhouette": 0.19114352338930946,
       "preferredImages": [
         {
           "imageId": "image_024.png",
@@ -381,7 +381,7 @@
     },
     {
       "label": 7,
-      "meanSilhouette": 0.11709529024350558,
+      "meanSilhouette": 0.11709529024350576,
       "preferredImages": [
         {
           "imageId": "image_001.png",
@@ -435,7 +435,7 @@
     },
     {
       "label": 8,
-      "meanSilhouette": 0.29695837270387704,
+      "meanSilhouette": 0.2969583727038771,
       "preferredImages": [
         {
           "imageId": "image_044.png",
@@ -489,7 +489,7 @@
     },
     {
       "label": 9,
-      "meanSilhouette": 0.04583944238704242,
+      "meanSilhouette": 0.04583944238704239,
       "preferredImages": [
         {
           "imageId": "image_024.png",
@@ -543,7 +543,7 @@
     },
     {
       "label": 10,
-      "meanSilhouette": 0.03645935280499762,
+      "meanSilhouette": 0.0364593528049978,
       "preferredImages": [
         {
           "imageId": "image_001.png",
@@ -597,7 +597,7 @@
     },
     {
       "label": 11,
-      "meanSilhouette": 0.16668133186863623,
+      "meanSilhouette": 0.16668133186863607,
       "preferredImages": [
         {
           "imageId": "image_016.png",
@@ -651,7 +651,7 @@
     },
     {
       "label": 12,
-      "meanSilhouette": 0.08741504582203867,
+      "meanSilhouette": 0.08741504582203886,
       "preferredImages": [
         {
           "imageId": "image_024.png",
@@ -705,7 +705,7 @@
     },
     {
       "label": 13,
-      "meanSilhouette": 0.16398309212382495,
+      "meanSilhouette": 0.16398309212382503,
       "preferredImages": [
         {
           "imageId": "image_011.png",
@@ -776,26 +776,26 @@
     "pcaComponents": 35
   },
   "model": "beit",
-  "pcaExplainedVarianceRatioSum": 0.9874128490708091,
+  "pcaExplainedVarianceRatioSum": 0.9874128490708098,
   "responseKind": "model_predictions",
   "responseSpace": "nsd_1000_subject1_floc_t7_v1",
   "schemaVersion": 1,
-  "silhouette": 0.2807464319584813,
+  "silhouette": 0.28074643195848137,
   "sourceFiles": [
     {
-      "fileName": "murtylab_beit_nsd_1000_ffa_20260408181916663Z.csv",
+      "fileName": "murtylab_beit_nsd_1000_ffa_20261010193640437Z.csv",
       "roi": "ffa",
-      "sha256": "a75725dc0156490e01e997662215ff2a3e390fe58fce3784e466623a179036c4"
+      "sha256": "701183abf272fb043030009d292e171def007c36ecc7bab18b410d5cfbcea849"
     },
     {
-      "fileName": "murtylab_beit_nsd_1000_eba_20260408181943906Z.csv",
+      "fileName": "murtylab_beit_nsd_1000_eba_20261010193640437Z.csv",
       "roi": "eba",
-      "sha256": "bb6d5168b5b011fc4f7fc11b580c5aacc9e6f84286e14f646da337fdc48d37c7"
+      "sha256": "bf675b2de4f188c45218b85b95613a41dbc6c3c1669dfec9bd3993ba111b8994"
     },
     {
-      "fileName": "murtylab_beit_nsd_1000_ppa_20260408182011671Z.csv",
+      "fileName": "murtylab_beit_nsd_1000_ppa_20261010193640437Z.csv",
       "roi": "ppa",
-      "sha256": "9cb350f1c6dfe971f6c6346304f68f710ef7eb9a0791390fa0d2f8718c6fa8da"
+      "sha256": "4c66eb3240e8fe3df5fdd0359650066ef471612fe9b99511dce14f76d47cfec0"
     }
   ],
   "splitHalfStability": {

@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 104,
+    "1": 81
+  },
+  "explained_variance_ratio_first10": [
+    0.8488381652940896,
+    0.060180520725497684,
+    0.0256328226419803,
+    0.021297472553357753,
+    0.00987783450805152,
+    0.007506955792380819,
+    0.006407165714653822,
+    0.004046253338462468,
+    0.003493692499891927,
+    0.0028862191512786135
+  ],
+  "model": "taskonomy_denoising",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_taskonomy_denoising_nsd_1000_ffa_20261010194820056Z_clusters.csv",
+  "roi": "ffa",
+  "silhouette": 0.4563807755379708,
+  "source_file": "murtylab_taskonomy_denoising_nsd_1000_ffa_20261010194820056Z.csv"
+}

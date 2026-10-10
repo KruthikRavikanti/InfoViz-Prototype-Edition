@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 95,
+    "1": 90
+  },
+  "explained_variance_ratio_first10": [
+    0.7621755455825512,
+    0.1343255648705566,
+    0.05924583467067231,
+    0.02216499821486937,
+    0.008769309955689994,
+    0.0027102090745507053,
+    0.002007554699146275,
+    0.0018592000393605967,
+    0.001033771328461271,
+    0.0007824430447788787
+  ],
+  "model": "densenet161",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_densenet161_nsd_1000_eba_20261010193956102Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.4314500151902758,
+  "source_file": "murtylab_densenet161_nsd_1000_eba_20261010193956102Z.csv"
+}

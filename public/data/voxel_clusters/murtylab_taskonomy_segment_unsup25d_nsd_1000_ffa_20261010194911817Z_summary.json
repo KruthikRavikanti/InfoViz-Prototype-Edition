@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 94,
+    "1": 91
+  },
+  "explained_variance_ratio_first10": [
+    0.8239450342653375,
+    0.07828738023673713,
+    0.03259511096385111,
+    0.01664341731043554,
+    0.009825861645363396,
+    0.007970080558616813,
+    0.00603354769207822,
+    0.005135260447999085,
+    0.003583242002295148,
+    0.0030414361043213153
+  ],
+  "model": "taskonomy_segment_unsup25d",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_taskonomy_segment_unsup25d_nsd_1000_ffa_20261010194911817Z_clusters.csv",
+  "roi": "ffa",
+  "silhouette": 0.4298687608592834,
+  "source_file": "murtylab_taskonomy_segment_unsup25d_nsd_1000_ffa_20261010194911817Z.csv"
+}

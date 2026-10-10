@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 130,
+    "1": 55
+  },
+  "explained_variance_ratio_first10": [
+    0.6903499758065123,
+    0.050361219825361084,
+    0.032349679120914035,
+    0.026887883570881024,
+    0.01750694722567679,
+    0.012965362617035478,
+    0.009543968164417303,
+    0.00942968530320709,
+    0.008234442515925693,
+    0.00771541996644188
+  ],
+  "model": "tdann_simclr_alpha_2",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_tdann_simclr_alpha_2_nsd_1000_ffa_20261010194930836Z_clusters.csv",
+  "roi": "ffa",
+  "silhouette": 0.4180810239546519,
+  "source_file": "murtylab_tdann_simclr_alpha_2_nsd_1000_ffa_20261010194930836Z.csv"
+}

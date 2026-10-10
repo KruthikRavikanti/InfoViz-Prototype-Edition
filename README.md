@@ -91,28 +91,49 @@ both predicted-response clustering methods, Subject 1 brain maps, and voxel-sele
 artifacts. The `127`th scoreboard entry is the **noise ceiling**, not a runnable model;
 it remains score-only and is not selectable as prediction evidence in Compare mode.
 
-The original 26-model bundle is preserved: its source predictions, transforms, cluster
-files, and spatial child assets are copied unchanged. The additional 100 models use
-their registered Cortex Core backbones and existing trained NSD-1000 readouts, evaluated
-on the canonical `public/images/image_001.png` through `image_185.png` files. No model
-is substituted and no readout is retrained. The full pooled readouts contain 716 FFA,
+All 126 models use their registered Cortex Core backbones and existing trained
+NSD-1000 readouts, evaluated on the canonical `public/images/image_001.png` through
+`image_185.png` files. No model is substituted and no readout is retrained.
+The original 26-model bundle and the subsequent mixed-policy 126-model release
+are retained as recoverable historical snapshots, not silently overwritten.
+The active standardized release regenerates every model's predictions and refits
+its derived image clusters, Subject 1 brain responses, and selectivity atlas.
+Numerical values, near-tied image ranks, and cluster partitions can therefore
+change; the processing methods and parameters do not. Standardized reference
+means, image clustering, and voxel-selectivity analyses start from the exact
+float32 prediction values, promoted to float64 for their existing analyses.
+The brain map retains those same audited float32 Subject 1 values. This avoids
+a second, slightly different interpretation of decimal CSV values, especially
+for nearly constant random-control responses. The full pooled readouts contain 716 FFA,
 753 PPA, and 2,045 EBA columns, ordered by NSD subjects 1, 2, 5, and 7; anatomical
 views use only the audited Subject 1 prefixes.
 
-The 100 added models use an explicit full-FP32 policy: TF32 and autocasting are
+All 126 models use one explicit full-FP32 policy: TF32 and autocasting are
 disabled, with deterministic cuDNN and highest-precision float32 matrix multiplication.
 The same policy is used for reference generation and live upload inference, avoiding
-batch-dependent TF32 rounding differences. The original 26 models retain their saved
-data and legacy inference settings. Core serializes precision-sensitive inference
+batch-dependent TF32 rounding differences. This controls numerical arithmetic;
+it does not establish better biological predictive accuracy. Core serializes precision-sensitive inference
 and restores settings on exit so concurrent requests cannot mix these policies.
+The scoreboard retains its historical benchmark scores; those scores are not
+new evaluations under the standardized execution policy.
 
 VOne-AlexNet and VOne-CORnet-S retain their configured neuronal noise. Their saved
 reference predictions are seeded samples, not averages, and the UI warns that repeated
 predictions may vary. The registered VOne-RN50 checkpoint has no active neuronal noise
 and is not labeled stochastic. Random-backbone variants remain distinct models and
 use the initialization recorded in their inference provenance.
-The random VGG16/VGG19 constructors set their seed before allocating weights,
+The random AlexNet and VGG16/VGG19 constructors set their seed before allocating weights,
 so the first ROI loaded uses the same recorded initialization as subsequent ROIs.
+The original 26-model archives do not record backbone-state hashes, so changes
+in those archives cannot all be attributed solely to FP32 arithmetic. Nearly
+flat random-control responses can also reorder substantially despite small
+absolute changes. The release comparison records both response and rank changes.
+For AlexNetRandom specifically, the historical checkpoints contain readout
+weights only, and neither the cached encodings nor the backbone cache records
+the training encoder's initialization. The controlled seed-0 TF32 test does
+not explain the archived response differences. Its current reference/live
+consistency is verified, but its historical training-encoder pairing remains
+unverified; interpret this random control accordingly.
 
 Coverage changes have a new reference version. Reopen Cortex-Compass from the Lab
 to create a fresh comparison after updating the bundle; old-version session tokens
@@ -120,12 +141,41 @@ are not silently mixed with the expanded reference data.
 
 ### Maintaining coverage
 
-`scripts/data/generate_model_reference_predictions.py` generates missing triads in
+`scripts/data/generate_model_reference_predictions.py` generates prediction triads in
 an ignored staging directory and records image, backbone, readout, preprocessing,
 seed, numerical precision, helper-source hash, and noise-policy provenance. Run GPU inference with `CUDA_VISIBLE_DEVICES=0`
 in this shared local environment. Its default is offline; explicit `--allow-network`
 is needed for an uncached official checkpoint. The local backbone overlay uses
 readable shared weights without writing into the shared research directories.
+
+For a uniform-policy release, `--all-scored` regenerates all 126 models into a
+fresh `artifacts/precision-standardization/raw-fp32` directory. It does not reuse
+old provenance with a new helper hash. Freeze the inference sources before
+generation; every provenance record binds the observed numerical policy and
+actual source bytes. Changing those sources requires a new verified run.
+
+Full regeneration is a separate operation from append-only expansion:
+`refresh_reference_coverage.py` requires the exact reviewed 126-model parent
+snapshot, refits every model with the existing algorithms and parameters, and
+records `prediction_standardization` lineage. The brain and atlas builders use
+`--standardize-from-baseline` to export/refit all models from that new release.
+Its `analysis_input_policy` explicitly binds float32-to-float64 ingestion;
+the legacy builders' decimal-CSV ingestion remains unchanged.
+`verify_reference_refresh.py` checks the complete parent snapshot, all new raw
+sources and inference proofs, fitted transforms, plotted cluster identities,
+and the independent spatial audit. `compare_reference_releases.py` measures
+changes in raw responses, saved ranking means, image midranks, and image/voxel cluster partitions;
+it distinguishes changes to displayed means from changes to raw float32 voxel averages.
+adjusted Rand indices avoid mistaking cluster-label permutations for changes.
+
+Only after staged verification should identity pins be reviewed and
+`install_reference_refresh.py --servers-stopped` used. Its scoped transaction
+retains the entire prior release and all historical raw CSVs, adds the fresh
+sources without collisions, and restores the previous state on failure.
+`verify_live_coverage.py --all-supported` checks the real HTTP comparison flow
+for every published model; noisy VOne models retain explicit stochastic checks
+instead of false cross-draw equality assertions. The historical scoreboard,
+visual-feature, DreamSim, measured-fMRI, and anatomy assets remain unchanged.
 
 `extend_reference_coverage.py` requires an explicit complete target roster and
 fits only the added models. Use the spatial builders' `--append-baseline-brain`
@@ -153,7 +203,7 @@ for explicit staging paths. Cortex Core must use the prepared overlay via
 `CORTEX_BACKBONE_DIR`; its scoped cache helper isolates constructor-specific
 Torch Hub overrides so loading DreamSim cannot redirect later models' caches.
 
-### Moving the expanded release to another machine
+### Moving the standardized release to another machine
 
 Git contains the public 126-model views and their reviewed identity pins.
 The private Core bundle in `artifacts/reference` is intentionally ignored:
@@ -161,11 +211,15 @@ a fresh clone alone cannot create matching upload comparisons. Transfer that
 verified directory separately, use the matching Cortex Core precision/cache/audit
 changes and trained readout resources, and set `CORTEX_REFERENCE_ARTIFACT_DIR`
 to its absolute path. The installed release version is
-`a862bba8496384d80de1b1990152b2b683e4325a52b0880d85783072172246d0`;
+`3345e5fb332f4046c0b3a76a35f24a027dd0b6de0f62bb5e97eecda62c06b67d`;
 its private `manifest.json` SHA-256 is
-`9258d85bfb911db0a4dc959659d0e8b57e69957fc73f671416fdeea9a96c7475`.
+`74c282968b2d2d807f499e933f68d64668650ce8f2a783d4fb2931e0ab9b77f2`.
 Retain the immutable baseline and FP32 provenance under
-`artifacts/coverage-expansion` as release audit material. Do not run the legacy
+`artifacts/precision-standardization`, together with the earlier
+`artifacts/coverage-expansion` snapshots, as release audit material. The local
+`pre-install-3345e5fb332f4046c0b3a76a35f24a027dd0b6de0f62bb5e97eecda62c06b67d`
+backup retains the previous mixed-policy release, and all historical raw CSVs
+remain in place. Do not run the legacy
 26-model builder over the expanded inputs to try to reproduce this release.
 
 ## Tech Stack

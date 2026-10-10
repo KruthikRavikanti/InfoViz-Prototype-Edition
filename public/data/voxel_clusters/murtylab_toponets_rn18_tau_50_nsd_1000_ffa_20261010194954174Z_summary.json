@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 114,
+    "1": 71
+  },
+  "explained_variance_ratio_first10": [
+    0.8679234721830462,
+    0.05945582385787264,
+    0.02370283119806011,
+    0.010887109519346313,
+    0.009737376498351819,
+    0.006257822748714631,
+    0.005567264073613116,
+    0.003516914919857881,
+    0.00272191760858194,
+    0.0016874465288178213
+  ],
+  "model": "toponets_rn18_tau_50",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_toponets_rn18_tau_50_nsd_1000_ffa_20261010194954174Z_clusters.csv",
+  "roi": "ffa",
+  "silhouette": 0.552474323853588,
+  "source_file": "murtylab_toponets_rn18_tau_50_nsd_1000_ffa_20261010194954174Z.csv"
+}

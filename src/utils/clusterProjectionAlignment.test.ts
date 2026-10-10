@@ -6,6 +6,8 @@ import { inferClusterProjectionAlignment } from './clusterProjectionAlignment';
 import kmeansVisualCsv from '../../public/data/visual_clusters/visual_clusters.csv?raw';
 import hierarchicalVisualCsv from '../../public/data/visual_clusters_hierarchical_corr/visual_clusters.csv?raw';
 import referenceIdentity from '../../public/data/reference_manifest.json';
+import publishedKmeansSummary from '../../public/data/voxel_clusters/voxel_cluster_summary.json';
+import publishedHierarchicalSummary from '../../public/data/voxel_clusters_hierarchical_corr/voxel_cluster_summary.json';
 
 const kmeansVoxelCsvs = import.meta.glob<string>('../../public/data/voxel_clusters/*_clusters.csv', {
   query: '?raw', import: 'default', eager: true,
@@ -133,25 +135,30 @@ describe('hierarchical upload PCA axis alignment', () => {
 
   it('validates every complete published model/ROI reference geometry', () => {
     const expectedCount = referenceIdentity.supported_models.length * referenceIdentity.rois.length;
-    expect(Object.keys(kmeansVoxelCsvs)).toHaveLength(expectedCount);
-    expect(Object.keys(hierarchicalVoxelCsvs)).toHaveLength(expectedCount);
+    // Historical timestamped plots may be retained after a reference refresh.
+    // Validate the exact active summary selections, not the first glob match.
+    expect(publishedKmeansSummary).toHaveLength(expectedCount);
+    expect(publishedHierarchicalSummary).toHaveLength(expectedCount);
+    const kmeansEntries = new Map(publishedKmeansSummary.map((entry) => [`${entry.model}/${entry.roi}`, entry]));
+    const hierarchicalEntries = new Map(publishedHierarchicalSummary.map((entry) => [`${entry.model}/${entry.roi}`, entry]));
+    expect(kmeansEntries.size).toBe(expectedCount);
+    expect(hierarchicalEntries.size).toBe(expectedCount);
+    const assetPath = (path: string) => `../../public/${path.replace(/^public\//, '')}`;
     for (const model of referenceIdentity.supported_models) {
       for (const roi of referenceIdentity.rois) {
-        // Full basename boundaries distinguish AlexNet/CORnet-S from VOne
-        // variants; suffix matching would incorrectly count both families.
-        const identity = `murtylab_${model}_nsd_1000_${roi}_`;
-        const matches = (path: string) => path.split('/').pop()?.startsWith(identity);
-        expect(Object.keys(kmeansVoxelCsvs).filter(matches)).toHaveLength(1);
-        expect(Object.keys(hierarchicalVoxelCsvs).filter(matches)).toHaveLength(1);
-      }
-    }
-    for (const [hierarchicalPath, text] of Object.entries(hierarchicalVoxelCsvs)) {
-      const sourcePath = hierarchicalPath.replace('/voxel_clusters_hierarchical_corr/', '/voxel_clusters/');
-      const source = csvView(kmeansVoxelCsvs[sourcePath]);
-      const target = csvView(text);
-      expect(inferClusterProjectionAlignment(source, target), hierarchicalPath).not.toBeNull();
-      if (hierarchicalPath.includes('clip_rn50_nsd_1000_eba_')) {
-        expect(inferClusterProjectionAlignment(source, target)).toEqual({ xSign: 1, ySign: -1 });
+        const key = `${model}/${roi}`;
+        const kmeans = kmeansEntries.get(key);
+        const hierarchical = hierarchicalEntries.get(key);
+        expect(kmeans, key).toBeDefined();
+        expect(hierarchical, key).toBeDefined();
+        expect(kmeans!.source_file, key).toBe(hierarchical!.source_file);
+        const sourcePath = assetPath(kmeans!.result_csv);
+        const targetPath = assetPath(hierarchical!.result_csv);
+        expect(kmeansVoxelCsvs[sourcePath], sourcePath).toBeDefined();
+        expect(hierarchicalVoxelCsvs[targetPath], targetPath).toBeDefined();
+        const source = csvView(kmeansVoxelCsvs[sourcePath]);
+        const target = csvView(hierarchicalVoxelCsvs[targetPath]);
+        expect(inferClusterProjectionAlignment(source, target), key).not.toBeNull();
       }
     }
   });

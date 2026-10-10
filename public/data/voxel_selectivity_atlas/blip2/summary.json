@@ -3,7 +3,7 @@
   "clusters": [
     {
       "label": 0,
-      "meanSilhouette": 0.13323411747881622,
+      "meanSilhouette": 0.133234117478816,
       "preferredImages": [
         {
           "imageId": "image_047.png",
@@ -57,7 +57,7 @@
     },
     {
       "label": 1,
-      "meanSilhouette": 0.7103362344063365,
+      "meanSilhouette": 0.7103362344063368,
       "preferredImages": [
         {
           "imageId": "image_139.png",
@@ -111,7 +111,7 @@
     },
     {
       "label": 2,
-      "meanSilhouette": 0.17302333236699433,
+      "meanSilhouette": 0.17302333236699446,
       "preferredImages": [
         {
           "imageId": "image_010.png",
@@ -165,7 +165,7 @@
     },
     {
       "label": 3,
-      "meanSilhouette": 0.1685035449556353,
+      "meanSilhouette": 0.16850354495563558,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -219,7 +219,7 @@
     },
     {
       "label": 4,
-      "meanSilhouette": 0.1702866685149763,
+      "meanSilhouette": 0.17028666851497642,
       "preferredImages": [
         {
           "imageId": "image_005.png",
@@ -273,7 +273,7 @@
     },
     {
       "label": 5,
-      "meanSilhouette": 0.22136518848257422,
+      "meanSilhouette": 0.22136518848257428,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -327,7 +327,7 @@
     },
     {
       "label": 6,
-      "meanSilhouette": 0.27864726435057013,
+      "meanSilhouette": 0.27864726435057025,
       "preferredImages": [
         {
           "imageId": "image_027.png",
@@ -381,7 +381,7 @@
     },
     {
       "label": 7,
-      "meanSilhouette": 0.13249909815786795,
+      "meanSilhouette": 0.13249909815786778,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -435,7 +435,7 @@
     },
     {
       "label": 8,
-      "meanSilhouette": 0.16797073185964215,
+      "meanSilhouette": 0.16797073185964184,
       "preferredImages": [
         {
           "imageId": "image_113.png",
@@ -489,7 +489,7 @@
     },
     {
       "label": 9,
-      "meanSilhouette": 0.017343196307719508,
+      "meanSilhouette": 0.017343196307719088,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -543,7 +543,7 @@
     },
     {
       "label": 10,
-      "meanSilhouette": 0.05280477873253565,
+      "meanSilhouette": 0.05280477873253599,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -597,7 +597,7 @@
     },
     {
       "label": 11,
-      "meanSilhouette": 0.1838624070033176,
+      "meanSilhouette": 0.18386240700331757,
       "preferredImages": [
         {
           "imageId": "image_010.png",
@@ -651,7 +651,7 @@
     },
     {
       "label": 12,
-      "meanSilhouette": 0.17953037926253262,
+      "meanSilhouette": 0.17953037926253274,
       "preferredImages": [
         {
           "imageId": "image_116.png",
@@ -705,7 +705,7 @@
     },
     {
       "label": 13,
-      "meanSilhouette": 0.2056733406940613,
+      "meanSilhouette": 0.20567334069406154,
       "preferredImages": [
         {
           "imageId": "image_138.png",
@@ -776,26 +776,26 @@
     "pcaComponents": 35
   },
   "model": "blip2",
-  "pcaExplainedVarianceRatioSum": 0.9928268898054232,
+  "pcaExplainedVarianceRatioSum": 0.9928268898054238,
   "responseKind": "model_predictions",
   "responseSpace": "nsd_1000_subject1_floc_t7_v1",
   "schemaVersion": 1,
-  "silhouette": 0.2839735444333787,
+  "silhouette": 0.28397354443337874,
   "sourceFiles": [
     {
-      "fileName": "murtylab_blip2_nsd_1000_ffa_20260408182330045Z.csv",
+      "fileName": "murtylab_blip2_nsd_1000_ffa_20261010193656145Z.csv",
       "roi": "ffa",
-      "sha256": "af5a765b1a92960cced6632ceb16395764d4341dda06ca1524aa771e9201f665"
+      "sha256": "7bcd4213d207d8c03ca0912f36e13f4bda96a224dbcb24f1a1afd2da4b9e43e9"
     },
     {
-      "fileName": "murtylab_blip2_nsd_1000_eba_20260408182423525Z.csv",
+      "fileName": "murtylab_blip2_nsd_1000_eba_20261010193656145Z.csv",
       "roi": "eba",
-      "sha256": "3e8376e96c88fe0dca476e790b656ff72dba328fd3f3e81741d538a18c079e9e"
+      "sha256": "a72a905d7728b3d3721fccb1f8ad5d20a93b9443eaae53b37bcfadf3e26d73ef"
     },
     {
-      "fileName": "murtylab_blip2_nsd_1000_ppa_20260408182513632Z.csv",
+      "fileName": "murtylab_blip2_nsd_1000_ppa_20261010193656145Z.csv",
       "roi": "ppa",
-      "sha256": "7d794683e89b2dcd669156a030c75e50b55bcc425954397d438992822cfff910"
+      "sha256": "d18ed2dcdbe4da628b3be11b1bd8bf888fcbd9ee753be59d654b41df35752dcd"
     }
   ],
   "splitHalfStability": {
