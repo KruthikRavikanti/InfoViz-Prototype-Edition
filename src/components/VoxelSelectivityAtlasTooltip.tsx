@@ -1,8 +1,8 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import type { SelectivityAtlasHoverDatum } from '../types/selectivityAtlas';
+import type { SelectivityAtlasHoverDatum, SelectivityBrainHoverDatum } from '../types/selectivityAtlas';
 import { brainTooltipPosition } from '../utils/brainTooltipLayout';
 
-export function VoxelSelectivityAtlasTooltip({ hovered }: { hovered: SelectivityAtlasHoverDatum }) {
+export function VoxelSelectivityAtlasTooltip({ hovered }: { hovered: SelectivityAtlasHoverDatum | SelectivityBrainHoverDatum }) {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const latestHoverRef = useRef(hovered);
   const [position, setPosition] = useState({ left: 0, top: 0 });
@@ -51,6 +51,12 @@ export function VoxelSelectivityAtlasTooltip({ hovered }: { hovered: Selectivity
       <strong>{hovered.roi.toUpperCase()} voxel {hovered.roiVoxelIndex}</strong>
       <span>Cluster C{hovered.clusterLabel}</span>
       <span>PCA centroid distance {hovered.distanceToCentroid.toFixed(3)}</span>
+      {'hemisphere' in hovered && <>
+        <span>{hovered.hemisphere.toUpperCase()} · source voxel [z, y, x]: [{hovered.volumeCoordinateZyx.join(', ')}]</span>
+        <span>Supported surface vertex: {hovered.vertexIndex.toLocaleString()}</span>
+        {hovered.sourceCount > 1 && <span>Shared mapper vertex · this marker identifies one source voxel.</span>}
+      </>}
+      {'occluded' in hovered && hovered.occluded && <span>Hidden by cortex · rotate to inspect.</span>}
       {hovered.outsideView && <span>Outside current view · zoom out or reset.</span>}
     </div>
   );

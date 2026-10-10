@@ -1,4 +1,5 @@
 import type { CanonicalRoi } from './session';
+import type { BrainHemisphere } from './brainMap';
 
 export type SelectivityAtlasRoi = CanonicalRoi;
 
@@ -116,4 +117,15 @@ export type SelectivityAtlasHoverDatum = SelectivityAtlasPoint & {
   canvasY: number;
   /** Keyboard inspection can retain identity even when the voxel is outside the camera frustum. */
   outsideView?: boolean;
+};
+
+/** A categorical cluster marker at a mapper-supported cortical vertex, not UMAP coordinates. */
+export type SelectivityBrainHoverDatum = SelectivityAtlasHoverDatum & {
+  hemisphere: BrainHemisphere;
+  vertexIndex: number;
+  volumeCoordinateZyx: [number, number, number];
+  mappingWeight: number;
+  sourceCount: number;
+  /** A native voxel remains inspectable by keyboard when it is behind the cortex. */
+  occluded?: boolean;
 };

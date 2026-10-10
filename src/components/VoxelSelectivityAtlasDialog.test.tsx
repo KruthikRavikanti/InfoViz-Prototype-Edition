@@ -1,6 +1,8 @@
 import reviewedManifestText from '../../public/data/voxel_selectivity_atlas/manifest.json?raw';
 import reviewedPointsText from '../../public/data/voxel_selectivity_atlas/clip_rn50/points.csv?raw';
 import reviewedSummaryText from '../../public/data/voxel_selectivity_atlas/clip_rn50/summary.json?raw';
+import brainManifestJson from '../../public/data/brain/nsd-subj01/manifest.json';
+import brainProjectionJson from '../../public/data/brain/nsd-subj01/projection.json';
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -10,9 +12,14 @@ import {
   validateSelectivityAtlasSummary,
 } from '../services/selectivityAtlasAssets';
 import type { SelectivityAtlasAssets } from '../types/selectivityAtlas';
+import type { BrainMapAssets } from '../types/brainMap';
+import { validateBrainMapManifest, validateBrainProjection } from '../services/brainMapAssets';
 import { VoxelSelectivityAtlasDialog } from './VoxelSelectivityAtlasDialog';
 
-const dialogState = vi.hoisted(() => ({ open: false, assets: null as SelectivityAtlasAssets | null }));
+const dialogState = vi.hoisted(() => ({
+  open: false, assets: null as SelectivityAtlasAssets | null,
+  brainView: false, brainAssets: null as BrainMapAssets | null, brainError: '',
+}));
 
 vi.mock('../generated/referenceCoverage', async (importOriginal) => {
   const original = await importOriginal<typeof import('../generated/referenceCoverage')>();
@@ -24,6 +31,11 @@ vi.mock('react', async (importOriginal) => {
   return {
     ...original,
     useState(initialState: unknown) {
+      if (dialogState.brainView && initialState === 'similarity') return original.useState('brain');
+      if (typeof initialState === 'object' && initialState !== null && 'status' in initialState && initialState.status === 'idle') {
+        if (dialogState.brainAssets) return original.useState({ status: 'ready', assets: dialogState.brainAssets });
+        if (dialogState.brainError) return original.useState({ status: 'error', message: dialogState.brainError });
+      }
       if (dialogState.open && initialState === false) return original.useState(true);
       if (dialogState.assets && typeof initialState === 'object' && initialState !== null
         && 'status' in initialState && initialState.status === 'loading') {
@@ -42,6 +54,9 @@ vi.mock('react-dom', async (importOriginal) => ({
 afterEach(() => {
   dialogState.open = false;
   dialogState.assets = null;
+  dialogState.brainView = false;
+  dialogState.brainAssets = null;
+  dialogState.brainError = '';
   vi.unstubAllGlobals();
 });
 
@@ -50,6 +65,11 @@ function referenceAssets(): SelectivityAtlasAssets {
   const summary = validateSelectivityAtlasSummary(JSON.parse(reviewedSummaryText), manifest, 'clip_rn50');
   const points = parseSelectivityAtlasPoints(reviewedPointsText, manifest, summary);
   return { manifest, summary, points };
+}
+
+function brainAssets(): BrainMapAssets {
+  const manifest = validateBrainMapManifest(brainManifestJson, 'http://localhost/data/brain/nsd-subj01/manifest.json');
+  return { manifest, projection: validateBrainProjection(brainProjectionJson, manifest) };
 }
 
 describe('voxel selectivity dialog', () => {
@@ -98,8 +118,61 @@ describe('voxel selectivity dialog', () => {
     expect(markup).toContain('model predictions, not measured fMRI');
     expect(markup).toContain('Labels and colors are model-specific, not anatomical parcels');
     expect(markup).toContain('Select a voxel or cluster');
+    expect(markup).toContain('aria-label="Voxel view"');
+    expect(markup).toMatch(/aria-pressed="true"[^>]*>Similarity/);
+    expect(markup).toMatch(/aria-pressed="false"[^>]*>Brain/);
+    expect(markup).not.toContain('Cortical surface</label>');
     const methodStart = markup.indexOf('<details class="selectivity-atlas-method">');
     const methodEnd = markup.indexOf('</details>', methodStart);
     expect(markup.slice(methodStart, methodEnd)).toContain('not anatomical directions or response units');
+  });
+
+  it('maps the same categorical atlas to anatomy without replacing its profile controls', () => {
+    dialogState.open = true;
+    dialogState.assets = referenceAssets();
+    dialogState.brainView = true;
+    dialogState.brainAssets = brainAssets();
+    vi.stubGlobal('document', { body: {} });
+    const markup = renderToStaticMarkup(<VoxelSelectivityAtlasDialog model="clip_rn50" available />);
+    expect(markup).toMatch(/aria-pressed="true"[^>]*>Brain/);
+    expect(markup).toContain('Positions: Subject 1 cortex · colors: voxel clusters, not activation.');
+    expect(markup).toContain('841 / 844 voxels mapped');
+    expect(markup).toContain('3 EBA voxels unmapped · available in Similarity');
+    expect(markup).toContain('Cortical surface');
+    expect(markup).toContain('value="inflated"');
+    expect(markup).toContain('value="pial"');
+    expect(markup).toContain('cluster IDs are never averaged');
+    expect(markup).toContain('marker occupies a supported surface vertex');
+    expect(markup).toContain('trained on pooled NSD subjects');
+    expect(markup).toContain('185 Murty reference images · uploads not included');
+    expect(markup.match(/aria-label="Cluster C\d+, \d+ voxels"/g)).toHaveLength(14);
+    expect(markup.match(/type="checkbox"/g)).toHaveLength(3);
+    expect(markup).toContain('Select a voxel or cluster');
+  });
+
+  it('isolates unavailable cortical assets from the still-available similarity view', () => {
+    dialogState.open = true;
+    dialogState.assets = referenceAssets();
+    dialogState.brainView = true;
+    dialogState.brainError = 'Surface identity mismatch';
+    vi.stubGlobal('document', { body: {} });
+    const markup = renderToStaticMarkup(<VoxelSelectivityAtlasDialog model="clip_rn50" available />);
+    expect(markup).toContain('role="alert"');
+    expect(markup).toContain('Brain view unavailable');
+    expect(markup).toContain('Surface identity mismatch');
+    expect(markup).toContain('Cortical mapping unavailable');
+    expect(markup).not.toContain('Loading cortical mapping…');
+    expect(markup).toContain('Similarity view remains available.');
+    expect(markup).toContain('14 exploratory clusters');
+  });
+
+  it('shows a loading state without claiming anatomical coverage prematurely', () => {
+    dialogState.open = true;
+    dialogState.assets = referenceAssets();
+    dialogState.brainView = true;
+    vi.stubGlobal('document', { body: {} });
+    const markup = renderToStaticMarkup(<VoxelSelectivityAtlasDialog model="clip_rn50" available />);
+    expect(markup).toContain('Loading cortical mapping…');
+    expect(markup).not.toContain('841 / 844 voxels mapped');
   });
 });

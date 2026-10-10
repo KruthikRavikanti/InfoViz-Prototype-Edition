@@ -10,6 +10,9 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { loadSelectivityAtlasAssets } from '../services/selectivityAtlasAssets';
+import { loadBrainMapAssets } from '../services/brainMapAssets';
+import { buildSelectivityBrainAnchors, validateSelectivityBrainCompatibility } from '../utils/selectivityBrainProjection';
+import type { BrainMapAssets, BrainSurfaceKind } from '../types/brainMap';
 import { isStochasticReferenceModel, STOCHASTIC_REFERENCE_NOTE } from '../utils/predictionPolicy';
 import { VoxelSelectivityAtlasTooltip } from './VoxelSelectivityAtlasTooltip';
 import type {
@@ -18,6 +21,7 @@ import type {
   SelectivityAtlasHoverDatum,
   SelectivityAtlasRoi,
   SelectivityAtlasStimulus,
+  SelectivityBrainHoverDatum,
 } from '../types/selectivityAtlas';
 import {
   SELECTIVITY_CLUSTER_COLORS,
@@ -26,7 +30,13 @@ import {
 } from '../utils/selectivityAtlas';
 
 const VoxelSelectivityAtlasViewer = lazy(() => import('./VoxelSelectivityAtlasViewer'));
+const SelectivityBrainViewer = lazy(() => import('./SelectivityBrainViewer'));
 const ROI_ORDER: SelectivityAtlasRoi[] = ['ffa', 'eba', 'ppa'];
+type AtlasViewMode = 'similarity' | 'brain';
+type BrainAssetState =
+  | { status: 'idle' | 'loading' }
+  | { status: 'error'; message: string }
+  | { status: 'ready'; assets: BrainMapAssets };
 
 type AssetState =
   | { status: 'loading' }
@@ -41,7 +51,7 @@ type VoxelSelectivityAtlasDialogProps = {
 function keepFocusInsideDialog(event: KeyboardEvent<HTMLElement>) {
   if (event.key !== 'Tab') return;
   const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
-    'button:not([disabled]), input:not([disabled]), a[href], summary, [tabindex]:not([tabindex="-1"])',
+    'button:not([disabled]), input:not([disabled]), select:not([disabled]), a[href], summary, [tabindex]:not([tabindex="-1"])',
   )).filter((element) => element.getClientRects().length > 0);
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
@@ -116,7 +126,11 @@ function VoxelSelectivityAtlasModal({
     ppa: true,
   });
   const [selectedCluster, setSelectedCluster] = useState<number | null>(null);
-  const [hovered, setHovered] = useState<SelectivityAtlasHoverDatum | null>(null);
+  const [hovered, setHovered] = useState<SelectivityAtlasHoverDatum | SelectivityBrainHoverDatum | null>(null);
+  const [viewMode, setViewMode] = useState<AtlasViewMode>('similarity');
+  const [surface, setSurface] = useState<BrainSurfaceKind>('inflated');
+  const [brainState, setBrainState] = useState<BrainAssetState>({ status: 'idle' });
+  const brainAssetsRef = useRef<BrainMapAssets | null>(null);
   const [resetKey, setResetKey] = useState(0);
   const enabledRoiSet = useMemo(
     () => new Set(ROI_ORDER.filter((roi) => enabledRois[roi])),
@@ -144,6 +158,34 @@ function VoxelSelectivityAtlasModal({
   }, [model]);
 
   useEffect(() => {
+    if (viewMode !== 'brain' || assetState.status !== 'ready') return;
+    if (brainAssetsRef.current) {
+      setBrainState({ status: 'ready', assets: brainAssetsRef.current });
+      return;
+    }
+    let ignore = false;
+    const abortController = new AbortController();
+    setBrainState({ status: 'loading' });
+    loadBrainMapAssets(fetch, abortController.signal)
+      .then((assets) => {
+        validateSelectivityBrainCompatibility(assetState.assets, assets);
+        // Fail closed before rendering if any source lacks a distinct supported marker.
+        buildSelectivityBrainAnchors(assets, assetState.assets.points);
+        if (!ignore) {
+          brainAssetsRef.current = assets;
+          setBrainState({ status: 'ready', assets });
+        }
+      })
+      .catch((error: unknown) => {
+        if (!ignore) setBrainState({
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Cortical mapping could not be loaded.',
+        });
+      });
+    return () => { ignore = true; abortController.abort(); };
+  }, [viewMode, assetState]);
+
+  useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = previousOverflow; };
@@ -158,6 +200,14 @@ function VoxelSelectivityAtlasModal({
         0,
       )
     : 0;
+  const mappedCount = brainState.status === 'ready'
+    ? ROI_ORDER.reduce((sum, roi) => sum + (enabledRois[roi] ? brainState.assets.manifest.rois[roi].mappedResponseCount : 0), 0)
+    : 0;
+
+  function changeView(mode: AtlasViewMode) {
+    setHovered(null);
+    setViewMode(mode);
+  }
 
   return createPortal(
     <div
@@ -207,6 +257,15 @@ function VoxelSelectivityAtlasModal({
           <>
             <div className="selectivity-atlas-layout">
               <aside className="selectivity-atlas-controls" aria-label="Voxel selectivity controls">
+                {viewMode === 'brain' && (
+                  <label className="selectivity-brain-surface-control">
+                    Cortical surface
+                    <select value={surface} onChange={(event) => { setHovered(null); setSurface(event.target.value as BrainSurfaceKind); }}>
+                      <option value="inflated">Inflated</option>
+                      <option value="pial">Pial</option>
+                    </select>
+                  </label>
+                )}
                 <fieldset>
                   <legend>Brain regions</legend>
                   {ROI_ORDER.map((roi) => (
@@ -284,24 +343,64 @@ function VoxelSelectivityAtlasModal({
                     References: 110 places, 50 body parts, 25 faces. This imbalance and ROI differences can
                     shape clusters. Labels and colors are model-specific, not anatomical parcels.
                   </p>
+                  {viewMode === 'brain' && (
+                    <p>
+                      Brain markers use the same Subject 1 fLoc voxels (t &gt; 7) and reviewed cortical mapper
+                      as the response map. Each marker occupies a supported surface vertex; cluster IDs
+                      are never averaged. Three EBA voxels lack surface coverage and remain in Similarity.
+                      Inflated and pial surfaces retain the same vertex correspondence.
+                      The predictor was trained on pooled NSD subjects; this view locates its Subject 1 outputs.
+                    </p>
+                  )}
                 </details>
               </aside>
 
               <div className="selectivity-atlas-stage-column">
                 <div className="selectivity-atlas-stage-heading">
-                  <p>Dots: voxels · colors: clusters · positions: similarity, not anatomy.</p>
-                  <span>{visibleCount} / {assetState.assets.summary.voxelCount} voxels visible</span>
+                  <div className="selectivity-atlas-view-toggle" role="group" aria-label="Voxel view">
+                    <button type="button" aria-pressed={viewMode === 'similarity'} onClick={() => changeView('similarity')}>
+                      Similarity
+                    </button>
+                    <button type="button" aria-pressed={viewMode === 'brain'} onClick={() => changeView('brain')}>
+                      Brain
+                    </button>
+                  </div>
+                  <p>{viewMode === 'brain'
+                    ? 'Positions: Subject 1 cortex · colors: voxel clusters, not activation.'
+                    : 'Dots: voxels · colors: clusters · positions: similarity, not anatomy.'}</p>
+                  <span>{viewMode === 'brain'
+                    ? brainState.status === 'ready' ? `${mappedCount} / ${visibleCount} voxels mapped`
+                      : brainState.status === 'error' ? 'Cortical mapping unavailable' : 'Loading cortical mapping…'
+                    : `${visibleCount} / ${assetState.assets.summary.voxelCount} voxels visible`}</span>
+                  {viewMode === 'brain' && brainState.status === 'ready' && visibleCount > mappedCount && (
+                    <small className="selectivity-brain-mapping-note">{visibleCount - mappedCount} EBA voxels unmapped · available in Similarity</small>
+                  )}
                 </div>
                 <div className="selectivity-atlas-stage">
                   <Suspense fallback={<div className="selectivity-atlas-canvas-state">Preparing the 3D renderer…</div>}>
-                    <VoxelSelectivityAtlasViewer
+                    {viewMode === 'similarity' ? <VoxelSelectivityAtlasViewer
                       points={assetState.assets.points}
                       enabledRois={enabledRoiSet}
                       selectedCluster={selectedCluster}
                       resetKey={resetKey}
                       onHover={setHovered}
                       onSelectCluster={(cluster) => setSelectedCluster((current) => current === cluster ? null : cluster)}
-                    />
+                    /> : brainState.status === 'ready' ? <SelectivityBrainViewer
+                      assets={brainState.assets}
+                      points={assetState.assets.points}
+                      enabledRois={enabledRoiSet}
+                      surface={surface}
+                      selectedCluster={selectedCluster}
+                      resetKey={resetKey}
+                      onHover={setHovered}
+                      onSelectCluster={(cluster) => setSelectedCluster((current) => current === cluster ? null : cluster)}
+                    /> : brainState.status === 'error' ? (
+                      <div className="selectivity-atlas-canvas-state error" role="alert">
+                        <strong>Brain view unavailable</strong>
+                        <p>{brainState.message}</p>
+                        <span>Similarity view remains available.</span>
+                      </div>
+                    ) : <div className="selectivity-atlas-canvas-state" role="status">Loading cortical mapping…</div>}
                   </Suspense>
                   {visibleCount === 0 && (
                     <div className="selectivity-atlas-canvas-state" role="status">
