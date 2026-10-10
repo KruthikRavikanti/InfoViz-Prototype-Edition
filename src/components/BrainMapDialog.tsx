@@ -233,7 +233,7 @@ function BrainMapModal({
             <p className="eyebrow">Predicted responses · NSD Subject 1</p>
             <h2 id="brain-map-modal-title">3D Brain Map</h2>
             <p id="brain-map-modal-description">
-              {model} · FFA, PPA, and EBA predictions on subject-native cortex.
+              {model} · FFA · PPA · EBA
             </p>
             {isStochasticReferenceModel(model) ? <p>{STOCHASTIC_REFERENCE_NOTE}</p> : null}
           </div>
@@ -303,7 +303,7 @@ function BrainMapModal({
                 >→</button>
               </div>
               <span className="brain-map-image-count" role="status">
-                {imageSearch.trim() ? `${filteredImages.length} found` : `${images.length} images`}
+                {imageSearch.trim() ? `${filteredImages.length} found` : `${images.length} ${images.length === 1 ? 'image' : 'images'}`}
               </span>
             </div>
             {referenceError && (
@@ -354,7 +354,6 @@ function BrainMapModal({
                   </label>
                 );
               })}
-              <small>Inflated exposes sulcal cortex; pial preserves native folding.</small>
             </fieldset>
 
             <fieldset>
@@ -401,8 +400,7 @@ function BrainMapModal({
             <p className="brain-map-coverage">
               {mappedCount === null
                 ? 'Checking surface coverage…'
-                : `${mappedCount.toLocaleString()} of ${responseCount.toLocaleString()} voxel responses mapped. `}
-              Three EBA responses are unmapped and not plotted.
+                : `${mappedCount.toLocaleString()} / ${responseCount.toLocaleString()} responses mapped · 3 EBA unmapped`}
             </p>
               </div>
             </details>
@@ -420,7 +418,7 @@ function BrainMapModal({
                 <div className="brain-map-asset-state error" role="alert">
                   <strong>Brain map unavailable</strong>
                   <p>{assetState.message}</p>
-                  <p>No anatomical surface is shown when its metadata does not match the session response space.</p>
+                  <p>Anatomy and session response spaces must match.</p>
                 </div>
               )}
               {assetState.status === 'ready' && stimulusResult && !referenceIsLoading && (
@@ -439,7 +437,7 @@ function BrainMapModal({
               {assetState.status === 'ready' && (referenceIsLoading || !stimulusResult) && (
                 <div className={`brain-map-asset-state${referenceError ? ' error' : ''}`} role={referenceError ? 'alert' : 'status'}>
                   <strong>{referenceError ? 'Reference brain map unavailable' : 'Preparing shared response scale…'}</strong>
-                  <p>{referenceError ?? 'Preparing the verified Subject 1 voxel responses for all 185 reference images.'}</p>
+                  <p>{referenceError ?? 'Loading Subject 1 predictions for 185 reference images.'}</p>
                 </div>
               )}
               {hovered && stimulus && (
@@ -465,18 +463,18 @@ function BrainMapModal({
         </div>
 
         <footer className="brain-map-science-note">
-          <p>Model predictions, not measured BOLD signals for these images.</p>
+          <p>Model predictions, not measured BOLD.</p>
           <details className="brain-map-mapping-details">
             <summary>Mapping details</summary>
             <p>
-              Hover previews rank raw predicted responses for the displayed image’s dominant source voxel,
-              not the blended surface vertex. Only the active image collection is compared; searching
-              narrows the image picker, not this ranking. Hovering does not change the displayed brain image.
+              Hover ranks raw predictions at the dominant source voxel, not the blended surface vertex.
+              It compares the active image collection; search only filters the image picker.
             </p>
             <p>
               Subject 1 fLoc-defined FFA, PPA, and EBA output voxels at <em>t</em> &gt; 7 are projected onto
               the subject-native cortical surface using a line-nearest-neighbor mapper.
             </p>
+            <p>Inflated exposes sulcal cortex; pial preserves native folding.</p>
             <p>
               The NSD-1000 predictor was trained with pooled NSD subjects; this projection only locates
               its Subject 1 output columns. Color between source voxels is not anatomical activation.

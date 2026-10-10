@@ -143,6 +143,8 @@ describe('presentation cleanup preserves controls and scientific evidence', () =
     expect(markup).toContain('Choose a model &amp; region');
     expect(markup).toContain('Select a heatmap cell');
     expect(markup).not.toMatch(/Selection:?\s*None|Loaded images/i);
+    expect(markup).not.toContain('class="eyebrow"');
+    expect(markup).not.toContain('to explore image responses and clusters');
     expect(markup).not.toContain('Export JSON');
   });
 
@@ -165,6 +167,7 @@ describe('presentation cleanup preserves controls and scientific evidence', () =
     expect(source).toContain('Lowest response</dt><dd>1.000');
     expect(source).toContain('clip_rn50_ffa');
     expect(source).toContain('mean predicted voxel responses, not model alignment scores');
+    expect(markup).not.toContain('>Model &amp; region</p>');
   });
 
   it('separates response, clustering, and spatial tools without hiding shared export actions', () => {
@@ -194,6 +197,8 @@ describe('presentation cleanup preserves controls and scientific evidence', () =
     expect(markup).toContain('Alignment Δ (A−B): +0.200');
     expect(markup).toContain('Export JSON');
     expect(metrics).toContain('Images ranked</dt><dd>4');
+    expect(markup).toContain('aria-label="Selection A: clip_rn50, FFA"');
+    expect(markup).toContain('aria-label="Selection B: resnet50, FFA"');
     expect(metrics).toContain('Mean response Δ (A−B)</dt><dd>+0.000');
     expect(metrics).toContain('Rescaled rank correlation</dt><dd>50.0%');
     expect(metrics).toContain('(ρ + 1) / 2 × 100, not the percentage of matching images');

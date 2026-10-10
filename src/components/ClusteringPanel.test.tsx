@@ -217,10 +217,10 @@ describe('session clustering safeguards', () => {
     expect(markup).toContain('Visual-feature clusters');
     expect(markup).toContain('DreamSim similarity clusters');
     expect(markup).toContain('Measured fMRI clusters');
-    expect(markup).toContain('Each dot is an image; colors mark clusters. Hover to preview; click to enlarge.');
+    expect(markup).toContain('Dots are images; colors mark clusters. Hover to preview; click to enlarge.');
     expect(markup.match(/1 cluster · 2 images/g)).toHaveLength(1);
     expect(markup).toContain('<details class="cluster-details"><summary>Cluster details</summary>');
-    expect(markup).toContain('PCA projection. Axes are fixed to the reference images.');
+    expect(markup).toContain('PCA projection · fixed reference axes.');
     expect(markup).toContain('aria-label="PCA image-cluster projection"');
     expect(markup).toContain('Compare FFA · EBA · PPA');
     expect(markup).toContain('Voxel Selectivity Explorer');
@@ -249,6 +249,35 @@ describe('session clustering safeguards', () => {
     expect(markup).toContain('Voxel selectivity is not available for this model');
   });
 
+  it('retains full method metadata and metrics inside concise, collapsed cluster details', () => {
+    const view: ClusterView = {
+      ...populatedVoxelView,
+      summary: {
+        nImages: 2, bestK: 1, silhouette: .456, clusterSizes: { '2': 2 },
+        nVoxels: 716, nFeatures: 768, pcaDimUsed: 50,
+        clusteringMethod: 'hierarchical', distanceMetric: 'correlation (1 − r)',
+        normalization: 'reference z-score', distanceToClusterRepresentative: 'medoid correlation distance',
+      },
+    };
+    const markup = renderToStaticMarkup(
+      <ClusteringPanel
+        {...commonProps}
+        voxelRoiStates={{ ...populatedVoxelRoiStates, ffa: { view, status: 'idle' } }}
+        session={null}
+      />,
+    );
+    const details = markup.match(/<details class="cluster-details">([\s\S]*?)<\/details>/)?.[1];
+
+    expect(details).toContain('PCA projection · fixed reference axes.');
+    expect(details).toContain('Method: hierarchical · Distance: correlation (1 − r) · Normalization: reference z-score');
+    expect(details).toContain('Image distances use medoid distance.');
+    expect(details).toContain('<dt>Silhouette</dt><dd>0.456</dd>');
+    expect(details).toContain('<dt>Voxels</dt><dd>716</dd>');
+    expect(details).toContain('<dt>Features</dt><dd>768</dd>');
+    expect(details).toContain('<dt>PCA dimensions</dt><dd>50</dd>');
+    expect(markup).not.toContain('Images grouped by');
+  });
+
   it('renders linked comparison charts for FFA, EBA, and PPA inside the comparison view', () => {
     const markup = renderToStaticMarkup(
       <VoxelRoiComparison
@@ -266,9 +295,11 @@ describe('session clustering safeguards', () => {
     expect(markup).toContain('data-roi-cluster-chart="eba"');
     expect(markup).toContain('data-roi-cluster-chart="ppa"');
     expect(markup.match(/data-link-key="reference:reference-a\.png"/g)).toHaveLength(3);
-    expect(markup).toContain('Hover a point to trace the same image across FFA, EBA, and PPA.');
+    expect(markup).toContain('Hover an image to highlight it across FFA, EBA, and PPA.');
     expect(markup).toContain('Predicted-response clusters across ROIs');
     expect(markup).toContain('aria-label="FFA PCA image-cluster projection"');
+    expect(markup).not.toContain('Linked hover ready');
+    expect(markup).not.toContain('Images grouped by predicted response patterns');
   });
 
   it('keeps an out-of-range upload warning visible outside collapsible cluster details', () => {

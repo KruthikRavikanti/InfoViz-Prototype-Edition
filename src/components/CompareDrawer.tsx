@@ -73,7 +73,7 @@ function CellCard({
   onOpenImage: (i: EvidenceImage) => void;
 }) {
   return (
-    <article className="compare-cell-card">
+    <article className="compare-cell-card" aria-label={`Selection ${label}: ${cell.model}, ${cell.roi.toUpperCase()}`}>
       <div className="compare-card-heading">
         <span>{label}</span>
         <div>
@@ -91,8 +91,8 @@ function CellCard({
       </dl>
       {evidenceView ? (
         <>
-          <ImageGrid title={`Highest responses · ${label}`} images={evidenceView.topImages} onOpenImage={onOpenImage} compact />
-          <ImageGrid title={`Lowest responses · ${label}`} images={evidenceView.bottomImages} onOpenImage={onOpenImage} compact />
+          <ImageGrid title="Highest responses" images={evidenceView.topImages} onOpenImage={onOpenImage} compact />
+          <ImageGrid title="Lowest responses" images={evidenceView.bottomImages} onOpenImage={onOpenImage} compact />
         </>
       ) : (
         <p className="compare-empty">Image responses unavailable.</p>
@@ -139,7 +139,7 @@ function ClusterOverlapMatrix({ comparison }: { comparison: ClusterComparisonSum
           </Fragment>
         ))}
       </div>
-      <p className="compare-cluster-matrix-caption">Darker cells mean more images share that A/B cluster pairing.</p>
+      <p className="compare-cluster-matrix-caption">Darker cells contain more shared images.</p>
     </div>
   );
 }
@@ -171,7 +171,7 @@ function ClusterComparisonSection({
       <section className="compare-cluster-section">
         <div>
           <h3>Cluster agreement</h3>
-          <p>No cluster assignments were available for both selected cells.</p>
+          <p>Clusters unavailable for this pair.</p>
         </div>
       </section>
     );
@@ -181,7 +181,7 @@ function ClusterComparisonSection({
     <section className="compare-cluster-section">
       <div>
         <h3>Cluster agreement</h3>
-        <p>Compare predicted-response image clusters; cluster labels need not match.</p>
+        <p>Predicted-response image clusters.</p>
       </div>
 
       <div className="compare-cluster-grid">
@@ -198,7 +198,8 @@ function ClusterComparisonSection({
                 <div><dt title="Normalized mutual information between image cluster assignments">NMI</dt><dd>{fmt(comparison.normalizedMutualInformation)}</dd></div>
               </dl>
               <details className="compare-cluster-details">
-                <summary>Overlap matrix &amp; details</summary>
+                <summary>Overlap details</summary>
+                <p>Cluster numbers are local to A and B; compare image membership, not labels.</p>
                 <dl className="compare-cluster-metrics">
                   <div><dt>Pair agreement</dt><dd>{fmtRatio(comparison.pairAgreement)}</dd></div>
                   <div><dt>Co-cluster Jaccard</dt><dd>{fmtRatio(comparison.coClusterJaccard)}</dd></div>
@@ -322,7 +323,7 @@ export function CompareDrawer({
         <div className="compare-drawer-heading">
           <div>
             <h2>Compare selections</h2>
-            <p>Compare image responses, rankings, and clusters for A and B.</p>
+            <p>Predicted image responses for A and B.</p>
           </div>
           <button className="compare-close-button" type="button" onClick={() => onCompareModeChange(false)}>
             Close &thinsp; <kbd style={{ fontFamily: 'inherit', fontSize: '.72rem', opacity: .7 }}>Esc</kbd>
@@ -348,7 +349,7 @@ export function CompareDrawer({
                 <span>Alignment Δ (A−B): {fmtDiff(summary.aggregateScoreDifference)}</span>
               </div>
               <details className="compare-metric-details">
-                <summary>More response metrics</summary>
+                <summary>Response details</summary>
                 <dl className="compare-metrics">
                   <div><dt>Images ranked</dt><dd>{summary.rankSimilarity.sharedImageCount}</dd></div>
                   <div><dt>Mean response Δ (A−B)</dt><dd>{fmtDiff(summary.imageMeanDifference)}</dd></div>
@@ -379,7 +380,7 @@ export function CompareDrawer({
             </section>
           ) : (
             <p className="compare-empty">
-              Image responses are required for both selections to compare overlap.
+              Responses unavailable for one or both selections.
             </p>
           )}
         </div>

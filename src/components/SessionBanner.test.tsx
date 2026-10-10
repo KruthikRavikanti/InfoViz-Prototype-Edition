@@ -20,7 +20,9 @@ describe('comparison session context', () => {
     expect(markup).toContain('Comparison details');
     expect(markup).toContain('Mean predicted response by region');
     expect(markup).toContain('Predictions only; no measured fMRI for uploads.');
-    expect(markup).toContain('It does not change the original Cortex result.');
+    expect(markup).toContain('Your original Lab result is unchanged.');
+    expect(markup).toContain('Lab result:');
+    expect(markup).toContain('Upload comparison:');
     expect(markup).not.toContain('<h2>');
   });
 });

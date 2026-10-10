@@ -126,6 +126,17 @@ describe('Cortex-Compass masthead', () => {
     expect(text).not.toMatch(/Your Lab settings:.*alexnet.*NSD-1000/);
   });
 
+  it('does not repeat identical Lab settings beneath the active viewing context', () => {
+    const session = comparisonSession();
+    session.sourceRequest.model = 'clip_rn50';
+    session.sourceRequest.dataset = 'nsd_1000';
+    session.sourceRequest.roi = 'ffa';
+    const text = visibleText(renderHeader({ selectedCell: cell(), hasImageResponses: true, session }));
+
+    expect(text).toMatch(/Viewing:.*clip_rn50.*FFA.*NSD-1000/);
+    expect(text).not.toContain('Your Lab settings:');
+  });
+
   it('describes the loaded upload comparison before a heatmap cell is selected', () => {
     const text = visibleText(renderHeader({ session: comparisonSession() }));
 

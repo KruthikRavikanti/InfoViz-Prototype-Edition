@@ -240,10 +240,9 @@ export function DetailsPanel({
   if (!selectedCell) {
     return (
       <aside className="details-panel" aria-label="Details panel">
-        <p className="eyebrow">Explore</p>
         <h2>Choose a model &amp; region</h2>
         <div className="empty-state-card">
-          <p>Select a heatmap cell to explore image responses and clusters.</p>
+          <p>Select a heatmap cell.</p>
         </div>
       </aside>
     );
@@ -255,7 +254,6 @@ export function DetailsPanel({
 
       {/* Header */}
       <div className="evidence-panel-header">
-        <p className="eyebrow">Model &amp; region</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           <span className="model-tag" style={{ textTransform: 'uppercase', fontWeight: 700 }}>
             {selectedCell.roi}
@@ -326,7 +324,7 @@ export function DetailsPanel({
         ) : !evidenceView ? (
           <div className="evidence-empty-state">
             <h3>Image responses unavailable</h3>
-            <p>No per-image responses are available for this model and region.</p>
+            <p>This selection has alignment scores only.</p>
           </div>
         ) : (
           <>

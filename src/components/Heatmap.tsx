@@ -148,7 +148,6 @@ export function Heatmap({
     <section className="heatmap-area" aria-label="Heatmap area">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Overview</p>
           <h2>Model alignment</h2>
         </div>
         <span>{models.length} models</span>
@@ -169,7 +168,7 @@ export function Heatmap({
         {cells.length === 0 ? (
           <div className="heatmap-empty-state">
             <h3>No models match</h3>
-            <p>Clear the search or reset controls to restore the heatmap.</p>
+            <p>Clear the search or reset controls.</p>
           </div>
         ) : (
           <svg className="heatmap-svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img">

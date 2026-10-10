@@ -43,13 +43,13 @@ const ROI_COMPARISON_ORDER: CanonicalRoi[] = ['ffa', 'eba', 'ppa'];
 
 function jointClusteringNote(view: ClusterView | null, hasHierarchy: boolean): string | null {
   if (!hasHierarchy) {
-    return 'This upload session predates joint clustering. Choose Open Cortex-Compass in Virtual Cortex to rebuild it.';
+    return 'This upload session predates joint clustering. Reopen Cortex-Compass from Virtual Cortex to rebuild it.';
   }
   if (view && !view.jointHierarchy) {
-    return 'Joint clustering could not be matched to these reference images. Only the reference clusters are shown.';
+    return 'Joint clustering does not match these references. Only reference clusters are shown.';
   }
   if (view?.jointHierarchy && !view.uploadAxisAlignment) {
-    return 'The joint tree is available, but upload markers are hidden because the reference axes could not be verified.';
+    return 'The joint tree is available; upload markers are hidden because reference axes could not be verified.';
   }
   return null;
 }
@@ -511,7 +511,7 @@ function ClusterFilters({
         <input
           type="search"
           className="scatter-search-input"
-          placeholder="Search image filename..."
+          placeholder="Search filenames…"
           value={searchQuery}
           onChange={(event) => onSearchQueryChange(event.target.value)}
           aria-label={`Search image filenames in ${label}`}
@@ -626,14 +626,18 @@ function ClusterSection({
       }}>
         <summary>Cluster details</summary>
         <div className="cluster-details-content">
-          <p>{projectionLabel(view)} projection. Axes are fixed to the reference images.</p>
+          <p>{projectionLabel(view)} projection · fixed reference axes.</p>
           {view.jointHierarchy && (
-            <p>Joint clustering uses full response or feature vectors, not PCA coordinates. Reference normalization stays fixed; clusters and the tree are rebuilt with uploads.</p>
+            <p>Clustering uses full response or feature vectors, not PCA coordinates. Reference normalization stays fixed; clusters and tree are rebuilt with uploads.</p>
           )}
           <Metrics summary={view.summary} />
-          {view.summary?.clusteringMethod && <p>Method: {view.summary.clusteringMethod}.</p>}
-          {view.summary?.distanceMetric && <p>Distance: {view.summary.distanceMetric}.</p>}
-          {view.summary?.normalization && <p>Normalization: {view.summary.normalization}.</p>}
+          {(view.summary?.clusteringMethod || view.summary?.distanceMetric || view.summary?.normalization) && (
+            <p>{[
+              view.summary.clusteringMethod && `Method: ${view.summary.clusteringMethod}`,
+              view.summary.distanceMetric && `Distance: ${view.summary.distanceMetric}`,
+              view.summary.normalization && `Normalization: ${view.summary.normalization}`,
+            ].filter(Boolean).join(' · ')}</p>
+          )}
           {view.summary?.distanceToClusterRepresentative && (
             <p>Image distances use {representativeDistanceLabel(view).toLowerCase()}.</p>
           )}
@@ -744,7 +748,7 @@ function GroundTruthSection({
     return (
       <section className={`cluster-section ${variant === 'board' ? 'cluster-section--board' : ''}`}>
         <h3>Measured fMRI clusters</h3>
-        <p className="cluster-section-description">Images grouped by measured participant responses.</p>
+        <p className="cluster-section-description">Measured participant responses.</p>
         {sessionActive && (
           <p className="ground-truth-session-note" data-no-upload-overlay="true">
             Uploads are predictions only; this view uses measured fMRI.
@@ -762,7 +766,7 @@ function GroundTruthSection({
   return (
     <section className={`cluster-section ${variant === 'board' ? 'cluster-section--board' : ''}`}>
       <h3>Measured fMRI clusters</h3>
-      <p className="cluster-section-description">Images grouped by measured participant responses.</p>
+      <p className="cluster-section-description">Measured participant responses.</p>
       {sessionActive && (
         <p className="ground-truth-session-note" data-no-upload-overlay="true">
           Uploads are predictions only; this view uses measured fMRI.
@@ -871,15 +875,15 @@ function SessionVoxelAssignments({
         <span>
           {results.length === 1 && focusedStimulus
             ? `Uploaded: ${focusedStimulus.displayName}`
-            : `${results.length} uploaded ${method === 'hierarchical_correlation' ? 'images' : 'placements'}`}
+            : `${results.length} uploaded images`}
         </span>
         {focusedCluster !== null && <strong>Cluster {focusedCluster}</strong>}
       </summary>
       <div className="session-assignment-details">
         {method === 'hierarchical_correlation' && (
           <p>
-            Reference images and uploads are clustered together using full predicted-response vectors.
-            Medoids summarize the resulting clusters; they do not assign membership.
+            Joint hierarchical clustering uses full predicted-response vectors for references and uploads.
+            Medoids summarize clusters; they do not assign membership.
           </p>
         )}
         <div className="session-assignment-list">
@@ -903,7 +907,6 @@ function SessionVoxelAssignments({
                   </>
                 ) : member && jointHierarchy ? (
                   <>
-                    <span>Joint hierarchical clustering</span>
                     <span>Cluster {member.clusterId} · medoid correlation distance {member.distanceToMedoid.toFixed(3)}</span>
                     <small>Medoid: {jointClusterMedoidName(jointHierarchy, member.clusterId, session)}</small>
                   </>
@@ -963,13 +966,13 @@ export function VoxelRoiComparison({
       <div className="roi-cluster-comparison-heading">
         <div>
           <h3 id="roi-cluster-comparison-title">Predicted-response clusters across ROIs</h3>
-          <p>Hover a point to trace the same image across FFA, EBA, and PPA.</p>
+          <p>Hover an image to highlight it across FFA, EBA, and PPA.</p>
         </div>
-        <span className={`roi-cluster-linked-label ${linkedItem ? 'active' : ''}`}>
-          {linkedItem
-            ? `${linkedItem.kind === 'uploaded' ? 'Uploaded' : 'Linked'}: ${linkedItem.label}`
-            : 'Linked hover ready'}
-        </span>
+        {linkedItem && (
+          <span className="roi-cluster-linked-label active">
+            {`${linkedItem.kind === 'uploaded' ? 'Uploaded' : 'Linked'}: ${linkedItem.label}`}
+          </span>
+        )}
       </div>
 
       <ClusterFilters
@@ -1007,14 +1010,13 @@ export function VoxelRoiComparison({
               {state.status === 'loading' ? (
                 <section className="cluster-section cluster-section--board">
                   <div className="cluster-section-heading">
-                    <div><h3>{roi.toUpperCase()}</h3><p>Images grouped by predicted response patterns.</p></div>
+                    <div><h3>{roi.toUpperCase()}</h3></div>
                   </div>
                   <p className="cluster-empty-note">Loading…</p>
                 </section>
               ) : (
                 <ClusterSection
                   title={roi.toUpperCase()}
-                  description="Images grouped by predicted response patterns."
                   view={state.status === 'error' ? null : state.view}
                   emptyMessage={state.status === 'error' ? 'Response clusters could not be loaded.' : 'Response clusters are unavailable for this ROI.'}
                   imageCategories={imageCategories}
@@ -1114,23 +1116,23 @@ export function ClusteringPanel({
           />
         )}
       </div>
-      <p className="cluster-panel-intro">Each dot is an image; colors mark clusters. Hover to preview; click to enlarge.</p>
+      <p className="cluster-panel-intro">Dots are images; colors mark clusters. Hover to preview; click to enlarge.</p>
       {session && <p className="cluster-panel-upload-key">
         {clusteringMethod === 'hierarchical_correlation'
-          ? 'Reference images and uploads are clustered together when joint data are available. Glowing dots are uploads; display axes stay fixed.'
+          ? 'References and uploads cluster together when joint data are available. Glowing dots are uploads; display axes stay fixed.'
           : 'Glowing dots are uploads; reference axes stay fixed.'}
       </p>}
       <div className="cluster-board">
         {voxelState.status === 'loading' ? (
           <section className="cluster-section cluster-section--board">
             <h3>Predicted-response clusters</h3>
-            <p className="cluster-section-description">Images grouped by predicted voxel-response patterns.</p>
+            <p className="cluster-section-description">Predicted voxel-response patterns.</p>
             <p className="cluster-empty-note">Loading…</p>
           </section>
         ) : (
           <ClusterSection
             title="Predicted-response clusters"
-            description="Images grouped by predicted voxel-response patterns."
+            description="Predicted voxel-response patterns."
             view={voxelState.status === 'error' ? null : voxelState.view}
             emptyMessage={
               voxelState.status === 'error'
@@ -1157,7 +1159,7 @@ export function ClusteringPanel({
         )}
         <ClusterSection
           title="Visual-feature clusters"
-          description="Images grouped by color, texture, and other visual features."
+          description="Color, texture, and other visual features."
           view={displayVisualView}
           emptyMessage="Visual-feature clusters are unavailable."
           imageCategories={imageCategories}
@@ -1176,7 +1178,7 @@ export function ClusteringPanel({
         />
         <ClusterSection
           title="DreamSim similarity clusters"
-          description="Images grouped by DreamSim perceptual embeddings."
+          description="DreamSim perceptual embeddings."
           view={dreamsimView}
           emptyMessage="DreamSim clusters are unavailable."
           imageCategories={imageCategories}
@@ -1184,10 +1186,10 @@ export function ClusteringPanel({
           variant="board"
           footer={session ? (
             <details className="session-cluster-note" data-dreamsim-overlay="disabled">
-              <summary>Uploaded placement unavailable</summary>
+              <summary>Upload projection unavailable</summary>
               <p>
-                The archived reference bundle has 1,792 features, while the current Cortex embedding path produces 768.
-                No incompatible DreamSim projection is shown.
+                Reference embeddings have 1,792 features; the current embedding path produces 768.
+                These incompatible embeddings cannot share a projection.
               </p>
             </details>
           ) : null}
@@ -1221,7 +1223,7 @@ export function ClusteringPanel({
               <div>
                 <p className="eyebrow">Linked image comparison</p>
                 <h2 id="roi-comparison-modal-title">FFA · EBA · PPA</h2>
-                <p>Predicted-response clusters across ROIs, using the same model and method.</p>
+                <p>Same model and clustering method across all three ROIs.</p>
               </div>
               <button type="button" autoFocus onClick={closeRoiComparison}>Close</button>
             </header>

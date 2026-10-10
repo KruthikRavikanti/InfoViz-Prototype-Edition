@@ -15,6 +15,8 @@ function formatValue(value: number): string {
 export function SessionBanner({ session, focusedStimulusId, onFocusStimulus }: SessionBannerProps) {
   const focusedId = focusedStimulusId ?? session.stimuli[0]?.id;
   const uploadLabel = `${session.stimuli.length} upload${session.stimuli.length === 1 ? '' : 's'}`;
+  const sourceDataset = session.sourceRequest.dataset === 'nsd_1000' ? 'NSD-1000'
+    : session.sourceRequest.dataset === 'murty185' ? 'Murty-185' : session.sourceRequest.dataset;
 
   return (
     <section className="session-context" aria-label="Cortex-Compass comparison session">
@@ -49,10 +51,10 @@ export function SessionBanner({ session, focusedStimulusId, onFocusStimulus }: S
         <summary>Comparison details</summary>
         <div className="session-context-detail-body">
           <p className="session-context-copy">
-            The original result used <strong>{session.sourceRequest.model}</strong> with{' '}
-            <strong>{session.sourceRequest.dataset}</strong> / <strong>{session.sourceRequest.roi.toUpperCase()}</strong>.{' '}
-            This fixed-reference comparison uses <strong>{session.comparison.model}</strong> with NSD-1000 predictions
-            across FFA, PPA, and EBA. It does not change the original Cortex result.
+            Lab result: <strong>{session.sourceRequest.model}</strong> ·{' '}
+            <strong>{sourceDataset}</strong> · <strong>{session.sourceRequest.roi.toUpperCase()}</strong>.
+            {' '}Upload comparison: <strong>{session.comparison.model}</strong> · NSD-1000 · FFA, PPA, EBA.
+            {' '}Your original Lab result is unchanged.
           </p>
 
           <div className="session-roi-comparison" aria-label="Uploaded stimulus comparison across ROIs">

@@ -256,7 +256,7 @@ export function JointDendrogram({ view, session, onOpenImage, linkedItem = null,
           })}
         </svg>
       </div>
-      <figcaption>Each leaf is an image. Hover to preview; click to enlarge. Glowing leaves are uploads.</figcaption>
+      <figcaption>Leaves are images; glow marks uploads. Hover to preview; click to enlarge.</figcaption>
       {preview && previewImage && previewMember && createPortal(
         <div
           id={tooltipId}

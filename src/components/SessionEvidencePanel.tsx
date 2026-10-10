@@ -238,7 +238,7 @@ function ResponseDistribution({
             <p className="session-distribution-tooltip-meta">
               <span>
                 {activePoint.origin === 'uploaded'
-                  ? 'Uploaded stimulus'
+                  ? 'Uploaded'
                   : `Reference #${activePoint.image.referenceRank ?? activePoint.image.rank}`}
               </span>
               <span>Predicted response {activePoint.image.value.toFixed(3)}</span>
@@ -254,9 +254,9 @@ function ResponseDistribution({
       </div>
       <figcaption>
         {view.referenceImages.length} Murty references + {view.uploadedImages.length}{' '}
-        {view.uploadedImages.length === 1 ? 'upload' : 'uploads'} · predicted response (NSD-1000).
-        {' '}Hover or focus to preview · click to enlarge. Axis fixed to the reference range.
-        {hasOutsideMarker && ' Markers outside the reference range are pinned to the boundary.'}
+        {view.uploadedImages.length === 1 ? 'upload' : 'uploads'} · NSD-1000 predicted mean.
+        {' '}Hover / focus to preview · click to enlarge. Axis fixed to the reference range.
+        {hasOutsideMarker && ' Out-of-range uploads appear at the boundary.'}
       </figcaption>
     </figure>
   );
@@ -267,13 +267,13 @@ function formatRank(value: number): string {
 }
 
 function formatReferenceInsertionRank(value: number): string {
-  return value === 186 ? 'After all 185 references' : `#${formatRank(value)} relative to 185 references`;
+  return value === 186 ? 'Below all 185' : `#${formatRank(value)}`;
 }
 
 function NeighborPair({ view, onOpenImage }: Pick<SessionEvidencePanelProps, 'view' | 'onOpenImage'>) {
   const images = [view.predecessor, view.successor].filter((image): image is EvidenceImage => image !== null);
   if (images.length === 0) return null;
-  return <ImageGrid title="Closest lower / higher references" images={images} onOpenImage={onOpenImage} compact />;
+  return <ImageGrid title="Lower / higher response" images={images} onOpenImage={onOpenImage} compact />;
 }
 
 export function SessionEvidencePanel({ view, onOpenImage, onFocusStimulus }: SessionEvidencePanelProps) {
@@ -315,7 +315,10 @@ export function SessionEvidencePanel({ view, onOpenImage, onFocusStimulus }: Ses
           <dt title="Standard error across predicted voxel responses; not model uncertainty">Voxel SEM</dt>
           <dd>{focusedResult.sem === null ? '—' : focusedResult.sem.toFixed(3)}</dd>
         </div>
-        <div><dt>Reference rank</dt><dd>{formatReferenceInsertionRank(focusedResult.referenceRank)}</dd></div>
+        <div>
+          <dt title="Descending insertion rank among 185 reference predictions; ties receive their midpoint">Reference rank</dt>
+          <dd>{formatReferenceInsertionRank(focusedResult.referenceRank)}</dd>
+        </div>
         <div><dt>Reference percentile</dt><dd>{focusedResult.referencePercentile.toFixed(1)}th</dd></div>
         <div><dt title="Rank among reference images and uploads">Combined rank</dt><dd>#{focusedResult.sessionRank} / {focusedResult.sessionCount}</dd></div>
         <div><dt title="Membership in the combined top or bottom 10 reference images and uploads, independent of the display limit">Top / bottom 10</dt><dd>{inclusion}</dd></div>

@@ -15,8 +15,8 @@ type HeaderProps = {
 };
 
 function mappingLabel(dataset: string): string {
-  if (dataset === 'nsd_1000') return 'NSD-1000 mapping';
-  if (dataset === 'murty185') return 'Murty-185 mapping';
+  if (dataset === 'nsd_1000') return 'NSD-1000';
+  if (dataset === 'murty185') return 'Murty-185';
   return dataset;
 }
 
@@ -36,6 +36,10 @@ export function Header({
     && selectedCell.model === session.comparison.model
     && session.comparison.rois.some((roi) => roi === selectedCell.roi));
   const showUploadModelSeparately = session && (compareMode || (selectedCell && !viewingUploadModel));
+  const labSettingsMatchView = Boolean(session && selectedCell && hasImageResponses && !compareMode
+    && session.sourceRequest.model === selectedCell.model
+    && session.sourceRequest.dataset === 'nsd_1000'
+    && session.sourceRequest.roi.toLowerCase() === selectedCell.roi.toLowerCase());
   const displayedModels = compareMode
     ? compareCells.map((cell) => cell.model)
     : selectedCell && hasImageResponses ? [selectedCell.model] : session ? [session.comparison.model] : [];
@@ -84,7 +88,7 @@ export function Header({
                 </span>
               ) : <span>Select a model and region to explore predictions.</span>}
             </p>
-            {session && (
+            {session && !labSettingsMatchView && (
               <p className="lede header-lab-settings">
                 <strong>Your Lab settings:</strong> {session.sourceRequest.model} · {mappingLabel(session.sourceRequest.dataset)} · {session.sourceRequest.roi.toUpperCase()}
                 {showUploadModelSeparately && (

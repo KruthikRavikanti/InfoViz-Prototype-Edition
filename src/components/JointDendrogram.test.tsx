@@ -41,6 +41,7 @@ describe('joint session dendrogram', () => {
     expect(markup).toContain('data-link-key="uploaded:stimulus-a"');
     expect(markup).toContain('joint-dendrogram-upload-glow');
     expect(markup).toContain('Average-linkage correlation distance (1 − r)');
+    expect(markup).toContain('Leaves are images; glow marks uploads. Hover to preview; click to enlarge.');
     expect(markup).toContain('data-merge-distance="1.2"');
     expect(markup).not.toContain('nearest-medoid assignment');
     expect(markup).not.toContain('<img');

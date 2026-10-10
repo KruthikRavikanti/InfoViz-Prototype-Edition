@@ -92,13 +92,22 @@ describe('Subject 1 brain-map launcher', () => {
     expect(markup).toContain('Preparing shared predicted response scale');
     expect(markup).not.toContain('model units · fixed scale');
     expect(markup).toContain('aria-busy="true"');
-    expect(markup).toContain('Model predictions, not measured BOLD signals for these images.');
+    expect(markup).toContain('Model predictions, not measured BOLD.');
     expect(markup).toContain('<details class="brain-map-mapping-details">');
     expect(markup).toContain('<summary>Mapping details</summary>');
     expect(markup).toContain('line-nearest-neighbor mapper');
     expect(markup).toContain('pooled NSD subjects');
-    expect(markup).toContain('Three EBA responses are unmapped and not plotted.');
+    expect(markup).toContain('Three EBA responses lack mapper coverage and are omitted.');
     expect(markup).toContain('Color between source voxels is not anatomical activation.');
+    expect(markup).toContain('t</em> &gt; 7');
+    expect(markup).toContain('dominant source voxel, not the blended surface vertex');
+    expect(markup).toContain('active image collection; search only filters the image picker');
+    const mappingDetails = markup.slice(markup.indexOf('<details class="brain-map-mapping-details">'));
+    expect(mappingDetails).toContain('Inflated exposes sulcal cortex; pial preserves native folding.');
+    expect(markup.slice(0, markup.indexOf('<details class="brain-map-mapping-details">')))
+      .not.toContain('Inflated exposes sulcal cortex');
+    expect(markup.match(/type="radio"/g)).toHaveLength(2);
+    expect(markup.match(/type="checkbox"/g)).toHaveLength(3);
   });
 
   it('visibly distinguishes the image coloring the brain from voxel hover comparisons', () => {

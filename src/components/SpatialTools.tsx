@@ -30,30 +30,27 @@ export function SpatialTools({ model, session, focusedStimulusId, onFocusStimulu
 
   return (
     <div className="spatial-tools">
-      <p className="spatial-tools-intro">Two views of the selected model’s predicted responses.</p>
       <div className="spatial-tool-grid">
         <article className="spatial-tool-card">
-          <p className="eyebrow">Where responses are predicted</p>
           <h3>Cortical response map</h3>
-          <p>Browse the 185 reference images or your uploads on the NSD Subject 1 cortical surface.</p>
+          <p>View 185 reference images or your uploads on NSD Subject 1’s cortex.</p>
           <BrainMapDialog
             selectedModel={model}
             session={session}
             focusedStimulusId={focusedStimulusId}
             onFocusStimulus={onFocusStimulus}
           />
-          <small>FFA, EBA, and PPA only. Predictions, not measured fMRI.</small>
+          <small>FFA, EBA, PPA · predictions, not measured fMRI.</small>
         </article>
         <article className="spatial-tool-card">
-          <p className="eyebrow">How voxels respond across images</p>
           <h3>Voxel response profiles</h3>
-          <p>Explore voxels grouped by their predicted response patterns across the reference set.</p>
+          <p>Explore voxel groups from predictions for 185 reference images.</p>
           <VoxelSelectivityAtlasDialog model={model} available={atlasAvailable} />
           <small>
             {atlasError ? 'Voxel selectivity availability could not be loaded.'
               : atlasModels === null ? 'Checking model availability…'
               : !atlasAvailable ? 'Voxel selectivity is not available for this model.'
-              : 'Reference images only; uploads do not refit this atlas.'}
+              : 'Reference only · uploads not included.'}
           </small>
         </article>
       </div>

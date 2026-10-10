@@ -78,7 +78,7 @@ function ClusterProfile({ cluster }: { cluster: SelectivityAtlasCluster | null }
     return (
       <section className="selectivity-cluster-profile selectivity-cluster-profile--empty">
         <strong>Select a cluster</strong>
-        <p>Click a dot or cluster label to see its highest- and lowest-response reference images.</p>
+        <p>Select a voxel or cluster to preview its highest- and lowest-response reference images.</p>
       </section>
     );
   }
@@ -95,7 +95,7 @@ function ClusterProfile({ cluster }: { cluster: SelectivityAtlasCluster | null }
             {cluster.size} voxels · FFA {cluster.roiCounts.ffa} · EBA {cluster.roiCounts.eba} · PPA {cluster.roiCounts.ppa}
           </p>
         </div>
-        <span className="selectivity-cluster-response-label">Mean predicted response (z)</span>
+        <span className="selectivity-cluster-response-label">Mean response (z)</span>
       </header>
       <div className="selectivity-profile-strips">
         <StimulusStrip title="Highest response" stimuli={cluster.preferredImages} />
@@ -252,11 +252,11 @@ function VoxelSelectivityAtlasModal({
                 <details className="selectivity-atlas-method">
                   <summary>Method &amp; quality</summary>
                   <p>
-                    Each voxel’s predictions are z-scored across images, reduced to{' '}
-                    {assetState.assets.summary.method.pcaComponents} PCA dimensions, and L2-normalized.
-                    K-means groups these profiles into {assetState.assets.summary.clusterCount} clusters;
+                    Voxel predictions are z-scored across images, reduced to{' '}
+                    {assetState.assets.summary.method.pcaComponents} PCA dimensions, then L2-normalized.
+                    K-means fits {assetState.assets.summary.clusterCount} clusters;
                     UMAP provides the 3D display only.
-                    Its axes have arbitrary orientation, not anatomical directions or activity units.
+                    Its axes are arbitrary, not anatomical directions or response units.
                   </p>
                   <dl className="selectivity-atlas-diagnostics">
                     <div><dt>Silhouette</dt><dd>{assetState.assets.summary.silhouette.toFixed(3)}</dd></div>
@@ -272,26 +272,24 @@ function VoxelSelectivityAtlasModal({
                     )}
                   </dl>
                   <p>
-                    Silhouette measures cluster separation. ARI measures agreement across{' '}
+                    Silhouette measures separation; ARI measures agreement across{' '}
                     {assetState.assets.summary.splitHalfStability.iterations} stimulus split-half checks.
-                    These describe this fit; the fixed cluster count is exploratory, not a validated optimum.
+                    The fixed cluster count is exploratory, not a validated optimum.
                   </p>
                   <p>
-                    Image scores average each voxel’s standardized prediction within a cluster.
-                    They emphasize relative preference, not absolute activity or inhibition.
-                    These are model predictions, not measured fMRI responses.
+                    Image scores average standardized predictions within a cluster: relative preference,
+                    not absolute activity or inhibition. These are model predictions, not measured fMRI.
                   </p>
                   <p>
-                    The reference set contains 110 places, 50 body parts, and 25 faces.
-                    This imbalance and differences between ROIs can shape the clusters.
-                    Cluster colors and numbers are specific to each model; the groups are not anatomical parcels.
+                    References: 110 places, 50 body parts, 25 faces. This imbalance and ROI differences can
+                    shape clusters. Labels and colors are model-specific, not anatomical parcels.
                   </p>
                 </details>
               </aside>
 
               <div className="selectivity-atlas-stage-column">
                 <div className="selectivity-atlas-stage-heading">
-                  <p>Dots: voxels · colors: response-profile clusters · positions: similarity, not anatomy.</p>
+                  <p>Dots: voxels · colors: clusters · positions: similarity, not anatomy.</p>
                   <span>{visibleCount} / {assetState.assets.summary.voxelCount} voxels visible</span>
                 </div>
                 <div className="selectivity-atlas-stage">
@@ -316,12 +314,12 @@ function VoxelSelectivityAtlasModal({
                 </div>
                 <div className="selectivity-atlas-stage-footer">
                   <div className="selectivity-atlas-interaction-help">
-                    <span>Drag to rotate · scroll to zoom · click a dot to select</span>
+                    <span>Drag to rotate · scroll to zoom · click to select</span>
                     <details className="selectivity-atlas-keyboard-help">
                       <summary>Keyboard controls</summary>
                       <p id="selectivity-atlas-keyboard-instructions">
-                        Focus the plot. Arrow keys rotate; + / − zoom. [ / ] or Page Up / Down browse voxels;
-                        Home / End jump to the first / last. Enter or Space selects the voxel’s cluster.
+                        Focus the plot: arrows rotate, + / − zoom. [ / ] or Page Up / Down browse voxels;
+                        Home / End jump to first / last. Enter or Space selects the voxel’s cluster.
                       </p>
                     </details>
                   </div>
@@ -367,7 +365,7 @@ export function VoxelSelectivityAtlasDialog({
         aria-expanded={isOpen}
         disabled={!available}
         title={available
-          ? 'Explore voxels with similar predicted responses across FFA, EBA, and PPA'
+          ? 'Group voxels by predicted response patterns in FFA, EBA, and PPA'
           : 'Voxel selectivity is not available for this model'}
         onClick={() => setIsOpen(true)}
       >
