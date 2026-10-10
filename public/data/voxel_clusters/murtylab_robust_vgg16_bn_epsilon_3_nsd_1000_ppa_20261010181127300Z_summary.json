@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 116,
+    "1": 69
+  },
+  "explained_variance_ratio_first10": [
+    0.8943300422368694,
+    0.06986200973606531,
+    0.01377674113019739,
+    0.008076502295205604,
+    0.004129608403915883,
+    0.0038016653695826484,
+    0.000986074522286324,
+    0.0007983127242540336,
+    0.000529012209353772,
+    0.00037630631708256574
+  ],
+  "model": "robust_vgg16_bn_epsilon_3",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_robust_vgg16_bn_epsilon_3_nsd_1000_ppa_20261010181127300Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.4991305417408873,
+  "source_file": "murtylab_robust_vgg16_bn_epsilon_3_nsd_1000_ppa_20261010181127300Z.csv"
+}

@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom';
 import { BrainMapTooltip } from './BrainMapTooltip';
 import { loadBrainMapAssets } from '../services/brainMapAssets';
 import { BRAIN_REFERENCE_VERSION, loadBrainMapReferences } from '../services/brainReferenceAssets';
+import { isStochasticReferenceModel, STOCHASTIC_REFERENCE_NOTE } from '../utils/predictionPolicy';
 import type { BrainMapAssets, BrainMapHoverDatum, BrainMapReferenceSet, BrainSurfaceKind } from '../types/brainMap';
 import {
   CANONICAL_ROIS,
@@ -234,6 +235,7 @@ function BrainMapModal({
             <p id="brain-map-modal-description">
               {model} · FFA, PPA, and EBA predictions on subject-native cortex.
             </p>
+            {isStochasticReferenceModel(model) ? <p>{STOCHASTIC_REFERENCE_NOTE}</p> : null}
           </div>
           <button type="button" className="brain-map-close" autoFocus onClick={onClose}>Close</button>
         </header>

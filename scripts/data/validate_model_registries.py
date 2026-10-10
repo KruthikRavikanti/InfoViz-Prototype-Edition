@@ -1,6 +1,7 @@
 """Validate exact model identifiers across InfoViz, Cortex Core, and Cortex App.
 
-The 26 InfoViz raw-data models are the strict supported subset.  Cortex Core and
+The original 26 InfoViz raw-data models remain the default strict subset; an
+expanded exact roster must be supplied explicitly. Cortex Core and
 Cortex App intentionally expose broader registries; their non-reference models
 are reported for review but do not make this check fail.
 """
@@ -31,7 +32,9 @@ class RegistryValidationError(ValueError):
     pass
 
 
-def parse_raw_models(raw_dir: Path) -> tuple[set[str], dict[str, list[str]]]:
+def parse_raw_models(
+    raw_dir: Path, *, expected_models: Sequence[str] | None = None
+) -> tuple[set[str], dict[str, list[str]]]:
     if not raw_dir.is_dir():
         raise RegistryValidationError(f"InfoViz raw directory does not exist: {raw_dir}")
     model_rois: dict[str, set[str]] = {}
@@ -46,7 +49,17 @@ def parse_raw_models(raw_dir: Path) -> tuple[set[str], dict[str, list[str]]]:
         raise RegistryValidationError(
             "Unmatched InfoViz raw CSV filenames: " + ", ".join(unmatched)
         )
-    if len(model_rois) != EXPECTED_MODEL_COUNT:
+    if expected_models is not None:
+        requested = set(expected_models)
+        if not expected_models or len(expected_models) != len(requested):
+            raise RegistryValidationError("Explicit model roster must be non-empty and unique")
+        if set(model_rois) != requested:
+            raise RegistryValidationError(
+                "Raw models differ from the explicit roster: "
+                f"missing={sorted(requested - set(model_rois))}, "
+                f"unexpected={sorted(set(model_rois) - requested)}"
+            )
+    elif len(model_rois) != EXPECTED_MODEL_COUNT:
         raise RegistryValidationError(
             f"Expected {EXPECTED_MODEL_COUNT} InfoViz models, found {len(model_rois)}"
         )
@@ -100,6 +113,29 @@ def parse_core_models(core_registry: Path) -> set[str]:
     if duplicates:
         raise RegistryValidationError(f"Duplicate Cortex Core model names: {duplicates}")
     return set(names)
+
+
+def validate_model_identifiers(
+    models: Sequence[str], *, core_registry: Path, app_constants: Path
+) -> tuple[str, ...]:
+    """Validate an explicit coverage roster without guessing aliases or counts."""
+    requested = tuple(models)
+    if (
+        not requested
+        or len(requested) != len(set(requested))
+        or any(not isinstance(model, str) or not re.fullmatch(r"[a-z0-9_]+(?:\.[0-9]+)?", model) for model in requested)
+    ):
+        raise RegistryValidationError("Explicit model roster must contain unique safe exact identifiers")
+    core_models = parse_core_models(core_registry)
+    app_models = parse_app_models(app_constants)
+    missing_core = sorted(set(requested) - core_models)
+    missing_app = sorted(set(requested) - app_models)
+    if missing_core or missing_app:
+        raise RegistryValidationError(
+            "Explicit reference model identifiers are missing from sibling registries: "
+            f"Core={missing_core or 'none'}, App={missing_app or 'none'}"
+        )
+    return tuple(sorted(requested))
 
 
 def _javascript_array(text: str, variable_name: str, path: Path) -> str:
@@ -160,8 +196,9 @@ def validate_registries(
     raw_dir: Path,
     core_registry: Path,
     app_constants: Path,
+    expected_models: Sequence[str] | None = None,
 ) -> dict[str, Any]:
-    raw_models, triads = parse_raw_models(raw_dir)
+    raw_models, triads = parse_raw_models(raw_dir, expected_models=expected_models)
     core_models = parse_core_models(core_registry)
     app_models = parse_app_models(app_constants)
 
@@ -200,6 +237,10 @@ def validate_registries(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--models", nargs="+",
+        help="Explicit complete reference model roster; omit for the original strict 26-model contract",
+    )
+    parser.add_argument(
         "--raw-dir",
         type=Path,
         default=REPO_ROOT / "data" / "image_by_model",
@@ -225,6 +266,7 @@ def main() -> None:
             raw_dir=args.raw_dir,
             core_registry=args.core_registry,
             app_constants=args.app_constants,
+            expected_models=args.models,
         )
     except RegistryValidationError as exc:
         raise SystemExit(f"Model registry validation failed: {exc}") from exc

@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 115,
+    "1": 70
+  },
+  "explained_variance_ratio_first10": [
+    0.7687538030794937,
+    0.1414669857962574,
+    0.04962812403536091,
+    0.025607248506600674,
+    0.007017042953450871,
+    0.004712071366745941,
+    0.0014895174766793163,
+    0.0007360877119271524,
+    0.00024190001016905345,
+    0.000168449137954424
+  ],
+  "model": "xception",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_xception_nsd_1000_eba_20261010181646345Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.4411794005067047,
+  "source_file": "murtylab_xception_nsd_1000_eba_20261010181646345Z.csv"
+}

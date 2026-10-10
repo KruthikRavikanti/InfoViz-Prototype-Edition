@@ -44,6 +44,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RAW_DIR = REPO_ROOT / "data/image_by_model"
 DEFAULT_REFERENCE_MANIFEST = REPO_ROOT / "artifacts/reference/manifest.json"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "public/data/voxel_selectivity_atlas"
+BASELINE_ATLAS_MANIFEST_SHA256 = "7244cead1cc3a9d6fb0074590eed025889994d23eecce432271cb8b38b28881e"
 
 DATASET = "nsd_1000"
 RESPONSE_SPACE = "nsd_1000_subject1_floc_t7_v1"
@@ -841,6 +842,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--reference-manifest", type=Path, default=DEFAULT_REFERENCE_MANIFEST
     )
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--append-baseline-atlas", type=Path, help="Stage new audited models while copying this pinned baseline atlas unchanged.")
+    parser.add_argument("--baseline-artifact-root", type=Path, default=REPO_ROOT / "artifacts/reference")
+    parser.add_argument("--audit-path", type=Path, default=REPO_ROOT.parent / "cortex-core/cortex/comparison/brain_map_audit.py")
+    parser.add_argument("--image-root", type=Path, default=REPO_ROOT / "public/images")
     parser.add_argument(
         "--models",
         nargs="+",
@@ -849,19 +854,128 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def append_selectivity_atlas_assets(
+    *,
+    raw_root: Path,
+    artifact_root: Path,
+    baseline_artifact_root: Path,
+    audit_path: Path,
+    baseline_atlas_root: Path,
+    output_dir: Path,
+    image_root: Path = REPO_ROOT / "public/images",
+    config: AtlasConfig = AtlasConfig(),
+) -> dict[str, Any]:
+    """Stage only newly audited fits and copy every baseline child unchanged.
+
+    The full pooled order and checkpoint lineage must pass the same independent
+    audit as the anatomical export. UMAP is still display-only; each new model
+    is fit independently using the existing fixed exploratory k=14 method.
+    This stages assets only and never promotes frontend manifest digest pins.
+    """
+    try:
+        from .build_brain_reference_artifacts import validate_spatial_expansion
+    except ImportError:  # pragma: no cover - direct script execution
+        from build_brain_reference_artifacts import validate_spatial_expansion
+    if output_dir.exists():
+        raise SelectivityAtlasValidationError("Expansion output must be a new staging directory.")
+    if config != AtlasConfig():
+        raise SelectivityAtlasValidationError("An append must retain the baseline selectivity method exactly.")
+    if sha256_file(baseline_atlas_root / "manifest.json") != BASELINE_ATLAS_MANIFEST_SHA256:
+        raise SelectivityAtlasValidationError("Baseline atlas manifest does not match the reviewed digest.")
+    baseline = json.loads((baseline_atlas_root / "manifest.json").read_text(encoding="utf-8"))
+    reference, contract, matrices = validate_spatial_expansion(
+        artifact_root=artifact_root, raw_root=raw_root, baseline_artifact_root=baseline_artifact_root,
+        audit_path=audit_path, image_root=image_root,
+    )
+    baseline_models = set(reference["supported_models"]) - set(matrices)
+    if (
+        set(baseline["supportedModels"]) != baseline_models
+        or set(baseline["models"]) != baseline_models
+        or baseline["method"] != method_metadata(config)
+        or baseline["referenceVersion"] != contract["baseline_reference_version"]
+    ):
+        raise SelectivityAtlasValidationError("Baseline atlas coverage or method is incompatible with the spatial audit.")
+    # Verify all old children before creating the output directory.
+    baseline_files: list[tuple[Path, Path]] = []
+    for model in sorted(baseline_models):
+        record = baseline["models"][model]
+        for kind, filename in (("points", "points.csv"), ("summary", "summary.json")):
+            relative = f"{model}/{filename}"
+            if record[f"{kind}Url"] != relative:
+                raise SelectivityAtlasValidationError("Unsafe baseline atlas child path.")
+            path = baseline_atlas_root / relative
+            if sha256_file(path) != record[f"{kind}Sha256"]:
+                raise SelectivityAtlasValidationError(f"{model}: baseline atlas {kind} changed.")
+            baseline_files.append((path, Path(relative)))
+    output_dir.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix=f".{output_dir.name}-append-", dir=output_dir.parent))
+    records = dict(baseline["models"])
+    try:
+        for source, relative in baseline_files:
+            target = staging / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+        for model in sorted(matrices):
+            sources = load_model_sources(
+                model=model, raw_dir=raw_root / model, reference_manifest=reference,
+            )
+            responses, roi_names, roi_indices, image_ids = combine_model_sources(sources)
+            fit = fit_selectivity_atlas(responses, config=config)
+            model_dir = staging / model
+            points_path = model_dir / "points.csv"
+            summary_path = model_dir / "summary.json"
+            write_points_csv(points_path, roi_names=roi_names, roi_indices=roi_indices, fit=fit)
+            write_json(summary_path, build_summary(
+                model=model, image_ids=image_ids, roi_names=roi_names, fit=fit,
+                source_files=[{"roi": roi, "fileName": sources[roi].path.name, "sha256": sources[roi].sha256} for roi in ROI_ORDER],
+                config=config,
+            ))
+            records[model] = {
+                "pointsUrl": f"{model}/points.csv", "summaryUrl": f"{model}/summary.json",
+                "pointsSha256": sha256_file(points_path), "summarySha256": sha256_file(summary_path),
+                "pointsBytes": points_path.stat().st_size, "summaryBytes": summary_path.stat().st_size,
+                "pointCount": len(fit.labels),
+            }
+            print(f"Appended {model}: {len(fit.labels)} voxels, silhouette={fit.silhouette:.4f}", flush=True)
+        manifest = {
+            **baseline,
+            "supportedModels": sorted(reference["supported_models"]),
+            "referenceVersion": reference["reference_version"],
+            "models": records,
+        }
+        write_json(staging / "manifest.json", manifest)
+        # A new directory only: never move or remove an existing user bundle.
+        if output_dir.exists():
+            raise SelectivityAtlasValidationError("Expansion output appeared during generation; nothing was replaced.")
+        os.rename(staging, output_dir)
+        return manifest
+    except BaseException:
+        shutil.rmtree(staging, ignore_errors=True)
+        raise
+
+
 def main() -> None:
     args = build_parser().parse_args()
     try:
-        manifest = build(
-            raw_dir=args.raw_dir,
-            reference_manifest_path=args.reference_manifest,
-            output_dir=args.output_dir,
-            models=args.models,
-        )
+        if args.append_baseline_atlas:
+            if args.models:
+                raise SelectivityAtlasValidationError("An append must cover the exact expanded reference roster, not a separate model subset.")
+            manifest = append_selectivity_atlas_assets(
+                raw_root=args.raw_dir, artifact_root=args.reference_manifest.parent,
+                baseline_artifact_root=args.baseline_artifact_root, audit_path=args.audit_path,
+                baseline_atlas_root=args.append_baseline_atlas, output_dir=args.output_dir, image_root=args.image_root,
+            )
+        else:
+            manifest = build(
+                raw_dir=args.raw_dir,
+                reference_manifest_path=args.reference_manifest,
+                output_dir=args.output_dir,
+                models=args.models,
+            )
     except SelectivityAtlasValidationError as error:
         raise SystemExit(f"Selectivity atlas build failed: {error}") from error
     print(
-        f"Installed {len(manifest['supportedModels'])} model atlas artifacts at "
+        f"{'Staged' if args.append_baseline_atlas else 'Installed'} {len(manifest['supportedModels'])} model atlas artifacts at "
         f"{args.output_dir.resolve()}",
         flush=True,
     )

@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 139,
+    "1": 46
+  },
+  "explained_variance_ratio_first10": [
+    0.7585700649117201,
+    0.06176708104911817,
+    0.031021703278021697,
+    0.01698605850915362,
+    0.009207108687396564,
+    0.007250953697547102,
+    0.006323832303331482,
+    0.005040286039225376,
+    0.004345993544191711,
+    0.004121208726960382
+  ],
+  "model": "nomic",
+  "n_images": 185,
+  "n_voxels": 716,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_nomic_nsd_1000_ffa_20261010180908161Z_clusters.csv",
+  "roi": "ffa",
+  "silhouette": 0.5338419733742176,
+  "source_file": "murtylab_nomic_nsd_1000_ffa_20261010180908161Z.csv"
+}

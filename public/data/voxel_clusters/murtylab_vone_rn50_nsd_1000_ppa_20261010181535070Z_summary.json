@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 74,
+    "1": 111
+  },
+  "explained_variance_ratio_first10": [
+    0.8110134973615645,
+    0.08785781397011257,
+    0.041361066416093294,
+    0.019208807227349196,
+    0.01152672164867881,
+    0.007832719695340523,
+    0.0052333707363890454,
+    0.004711951288194846,
+    0.0033040549603797586,
+    0.00306518832028723
+  ],
+  "model": "vone_rn50",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_vone_rn50_nsd_1000_ppa_20261010181535070Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.4068848133297288,
+  "source_file": "murtylab_vone_rn50_nsd_1000_ppa_20261010181535070Z.csv"
+}

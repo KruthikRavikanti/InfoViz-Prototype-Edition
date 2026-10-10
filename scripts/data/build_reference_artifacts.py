@@ -1,7 +1,8 @@
 """Build deterministic NSD-1000 reference artifacts for Cortex comparison sessions.
 
 The raw voxel CSVs are authoritative, server-side inputs.  This builder validates
-the complete 26 model x 3 ROI source set before writing anything, reproduces the
+the original 26 model x 3 ROI set (or an explicitly supplied complete roster)
+before writing anything, reproduces the
 existing clustering pipelines from :mod:`cluster_runner`, and emits portable NPZ
 files that can transform query stimuli without refitting reference clusters.
 """
@@ -188,6 +189,7 @@ def discover_source_candidates(
     *,
     expected_model_count: int = EXPECTED_MODEL_COUNT,
     required_rois: Sequence[str] = ROIS,
+    expected_models: Sequence[str] | None = None,
 ) -> dict[tuple[str, str], list[SourceCandidate]]:
     """Discover strict filename matches and group timestamped duplicates.
 
@@ -219,7 +221,17 @@ def discover_source_candidates(
         raise ReferenceValidationError(f"No canonical NSD-1000 CSV files found in {input_dir}")
 
     models = sorted({model for model, _ in groups})
-    if len(models) != expected_model_count:
+    if expected_models is not None:
+        requested = list(expected_models)
+        if not requested or len(requested) != len(set(requested)):
+            raise ReferenceValidationError("Explicit model roster must be non-empty and unique")
+        if set(models) != set(requested):
+            raise ReferenceValidationError(
+                "Discovered models do not match the explicit model roster; "
+                f"missing={sorted(set(requested) - set(models))}, "
+                f"unexpected={sorted(set(models) - set(requested))}"
+            )
+    elif len(models) != expected_model_count:
         raise ReferenceValidationError(
             f"Expected exactly {expected_model_count} supported models, found {len(models)}: "
             + ", ".join(models)
@@ -1063,7 +1075,7 @@ def _install_staged_directory(staging: Path, output_dir: Path) -> None:
 
 def public_manifest_from_full(manifest: Mapping[str, Any]) -> dict[str, Any]:
     """Return the browser-safe subset; raw filenames, hashes, and paths stay private."""
-    return {
+    public = {
         "schema_version": manifest["schema_version"],
         "reference_version": manifest["reference_version"],
         "checksum": manifest["checksum"],
@@ -1088,6 +1100,11 @@ def public_manifest_from_full(manifest: Mapping[str, Any]) -> dict[str, Any]:
             "dreamsim": {"available": False},
         },
     }
+    extension = manifest.get("coverage_extension")
+    if isinstance(extension, Mapping) and "model_prediction_policies" in extension:
+        # Only compact scientific interpretation metadata; inference paths/hashes stay private.
+        public["model_prediction_policies"] = extension["model_prediction_policies"]
+    return public
 
 
 def build_reference_bundle(
@@ -1118,9 +1135,10 @@ def build_reference_bundle(
     / "visual_clusters"
     / "visual_features_only.csv",
     generated_at: str | None = None,
+    expected_models: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     """Validate all inputs, build all artifacts in staging, and install atomically."""
-    candidates = discover_source_candidates(input_dir)
+    candidates = discover_source_candidates(input_dir, expected_models=expected_models)
     models = sorted({model for model, _ in candidates})
     combined = load_combined_means(combined_means_path, models)
     selected, selection_decisions = select_newest_valid_sources(candidates, combined)
@@ -1331,6 +1349,11 @@ def build_reference_bundle(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--models",
+        nargs="+",
+        help="Explicit complete model roster; omit for the original strict 26-model contract",
+    )
+    parser.add_argument(
         "--visual-image-dir",
         type=Path,
         default=REPO_ROOT / "public" / "images",
@@ -1429,6 +1452,7 @@ def main() -> None:
             visual_hierarchical_clusters_file=args.visual_hierarchical_clusters_file,
             visual_features_path=args.visual_features,
             generated_at=args.generated_at,
+            expected_models=args.models,
         )
     except ReferenceValidationError as exc:
         raise SystemExit(f"Reference artifact build failed:\n{exc}") from exc

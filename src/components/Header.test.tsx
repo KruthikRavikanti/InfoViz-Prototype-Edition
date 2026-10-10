@@ -7,6 +7,10 @@ import { rawSessionFixture } from '../test/sessionFixture';
 import type { SelectedHeatmapCell } from '../types/data';
 import { Header } from './Header';
 
+vi.mock('../generated/referenceCoverage', () => ({
+  REFERENCE_COVERAGE: { stochasticModels: ['vone_alexnet'] },
+}));
+
 function renderHeader(props: Partial<ComponentProps<typeof Header>> = {}) {
   return renderToStaticMarkup(<Header imageCount={185} modelCount={26} roiCount={3} {...props} />);
 }
@@ -185,5 +189,14 @@ describe('Cortex-Compass masthead', () => {
     expect(pageHtml).toContain('<title>Cortex-Compass — Virtual Cortex</title>');
     expect(pageHtml).toContain('name="description" content="Cortex-Compass compares model alignment');
     expect(pageHtml).not.toContain('Model &amp; Stimulus Explorer');
+  });
+
+  it('discloses saved stochastic predictions only when a stochastic reference model is displayed', () => {
+    const note = 'reference predictions are a seeded sample; repeated predictions may vary';
+    expect(visibleText(renderHeader({ selectedCell: cell('vone_alexnet'), hasImageResponses: true }))).toContain(note);
+    expect(visibleText(renderHeader({ selectedCell: cell('vone_alexnet') }))).not.toContain(note);
+    expect(visibleText(renderHeader({ selectedCell: cell('vone_rn50'), hasImageResponses: true }))).not.toContain(note);
+    expect(visibleText(renderHeader({ selectedCell: cell(), hasImageResponses: true }))).not.toContain(note);
+    expect(visibleText(renderHeader({ compareMode: true, compareCells: [cell(), cell('vone_alexnet')] }))).toContain(note);
   });
 });

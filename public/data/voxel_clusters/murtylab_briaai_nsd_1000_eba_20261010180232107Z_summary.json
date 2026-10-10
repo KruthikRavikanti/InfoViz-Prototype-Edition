@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 102,
+    "1": 83
+  },
+  "explained_variance_ratio_first10": [
+    0.6269162819063457,
+    0.14391530362783847,
+    0.06815560665288763,
+    0.031167045225927708,
+    0.02464066316057492,
+    0.013555472264783675,
+    0.011452944668863603,
+    0.010052512731360765,
+    0.0069584073868400155,
+    0.00611704355830281
+  ],
+  "model": "briaai",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_briaai_nsd_1000_eba_20261010180232107Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.35802951423778434,
+  "source_file": "murtylab_briaai_nsd_1000_eba_20261010180232107Z.csv"
+}

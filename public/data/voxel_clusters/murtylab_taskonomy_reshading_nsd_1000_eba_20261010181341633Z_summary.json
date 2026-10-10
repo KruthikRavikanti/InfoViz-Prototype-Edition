@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 116,
+    "1": 69
+  },
+  "explained_variance_ratio_first10": [
+    0.7544284633916521,
+    0.1659348776498157,
+    0.04317859077756288,
+    0.014993417742146239,
+    0.007329991576823341,
+    0.005361746911576292,
+    0.004372914271301877,
+    0.0020634979248843983,
+    0.0007763295063665586,
+    0.000599897290302546
+  ],
+  "model": "taskonomy_reshading",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_taskonomy_reshading_nsd_1000_eba_20261010181341633Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.4155489424189227,
+  "source_file": "murtylab_taskonomy_reshading_nsd_1000_eba_20261010181341633Z.csv"
+}

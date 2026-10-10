@@ -1,12 +1,12 @@
-import referenceIdentity from '../../public/data/reference_manifest.json';
+import { REFERENCE_COVERAGE } from '../generated/referenceCoverage';
 import type { BrainMapReferenceSet } from '../types/brainMap';
 import { CANONICAL_ROIS, type CanonicalRoi } from '../types/session';
 import { publicPath } from '../utils/publicPath';
 import { BrainMapAssetError, fetchVerifiedBrainAsset } from './brainMapAssets';
 
 export const BRAIN_REFERENCE_MANIFEST_PATH = publicPath('/data/brain/reference/manifest.json');
-export const BRAIN_REFERENCE_VERSION = 'ed023e59bd270e210bb8350d348eaaf223d3992214adeb2163a496cc808cefa7';
-const MANIFEST_SHA256 = '86ac452a2c5badeb436a219be70e10eef47825b749bcf8abdf67b1b9d78b301d';
+export const BRAIN_REFERENCE_VERSION = REFERENCE_COVERAGE.referenceVersion;
+export const BRAIN_REFERENCE_MANIFEST_SHA256 = REFERENCE_COVERAGE.brainManifestSha256;
 const RESPONSE_SPACE = 'nsd_1000_subject1_floc_t7_v1';
 const REFERENCE_COUNT = 185;
 const ROW_WIDTH = 844;
@@ -53,9 +53,6 @@ export function validateBrainReferenceManifest(value: unknown): BrainReferenceMa
   for (const [field, expected] of Object.entries(exactMetadata)) {
     if (raw[field] !== expected) throw new BrainMapAssetError(`Brain reference manifest.${field} is incompatible.`);
   }
-  if (referenceIdentity.reference_version !== BRAIN_REFERENCE_VERSION || referenceIdentity.dataset !== 'nsd_1000') {
-    throw new BrainMapAssetError('The Cortex-Compass reference bundle is incompatible with the brain reference data.');
-  }
   const imageIds = Array.from({ length: REFERENCE_COUNT }, (_, index) => `image_${String(index + 1).padStart(3, '0')}.png`);
   if (!Array.isArray(raw.imageIds) || raw.imageIds.length !== REFERENCE_COUNT || raw.imageIds.some((id, index) => id !== imageIds[index])) {
     throw new BrainMapAssetError('Brain reference image identity/order must match all 185 canonical images.');
@@ -69,8 +66,11 @@ export function validateBrainReferenceManifest(value: unknown): BrainReferenceMa
     }
   }
   const rawModels = record(raw.models, 'Brain reference models');
-  const expectedModels: string[] = referenceIdentity.supported_models;
-  if (Object.keys(rawModels).length !== expectedModels.length || expectedModels.some((model) => !(model in rawModels))) {
+  const expectedModels = REFERENCE_COVERAGE.models;
+  // Exact reviewed roster still governs eligibility; allow the canonical
+  // decimal TopoNets ID without admitting arbitrary dots or path traversal.
+  const safeModelId = (model: string) => /^[a-z0-9]+(?:_[a-z0-9]+)*$/.test(model) || model === 'toponets_rn18_tau_0.5';
+  if (expectedModels.some((model) => !safeModelId(model)) || Object.keys(rawModels).length !== expectedModels.length || expectedModels.some((model) => !(model in rawModels))) {
     throw new BrainMapAssetError('Brain reference models must match the audited model coverage.');
   }
   const models: BrainReferenceManifest['models'] = {};
@@ -137,7 +137,7 @@ export function loadBrainReferenceManifest(fetcher: typeof fetch = fetch, signal
   if (signal?.aborted) return Promise.reject(new DOMException('The request was aborted.', 'AbortError'));
   const cache = cacheFor(fetcher);
   if (!cache.manifest) {
-    cache.manifest = fetchVerifiedBrainAsset(BRAIN_REFERENCE_MANIFEST_PATH, MANIFEST_SHA256, 'Brain reference manifest', fetcher)
+    cache.manifest = fetchVerifiedBrainAsset(BRAIN_REFERENCE_MANIFEST_PATH, BRAIN_REFERENCE_MANIFEST_SHA256, 'Brain reference manifest', fetcher)
       .then((bytes) => {
         let value: unknown;
         try { value = JSON.parse(new TextDecoder().decode(bytes)); }
@@ -151,7 +151,7 @@ export function loadBrainReferenceManifest(fetcher: typeof fetch = fetch, signal
 
 export function loadBrainMapReferences(model: string, fetcher: typeof fetch = fetch, signal?: AbortSignal): Promise<BrainMapReferenceSet> {
   if (signal?.aborted) return Promise.reject(new DOMException('The request was aborted.', 'AbortError'));
-  if (!referenceIdentity.supported_models.includes(model)) {
+  if (!REFERENCE_COVERAGE.models.includes(model)) {
     return Promise.reject(new BrainMapAssetError(`Reference brain predictions are unavailable for ${model}.`));
   }
   const cache = cacheFor(fetcher);

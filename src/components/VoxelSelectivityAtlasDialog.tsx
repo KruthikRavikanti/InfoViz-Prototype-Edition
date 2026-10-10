@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { loadSelectivityAtlasAssets } from '../services/selectivityAtlasAssets';
+import { isStochasticReferenceModel, STOCHASTIC_REFERENCE_NOTE } from '../utils/predictionPolicy';
 import { VoxelSelectivityAtlasTooltip } from './VoxelSelectivityAtlasTooltip';
 import type {
   SelectivityAtlasAssets,
@@ -183,6 +184,7 @@ function VoxelSelectivityAtlasModal({
             <p id="selectivity-atlas-modal-description">
               {model} · 185 Murty reference images · uploads not included
             </p>
+            {isStochasticReferenceModel(model) ? <p>{STOCHASTIC_REFERENCE_NOTE}</p> : null}
           </div>
           <button type="button" autoFocus onClick={onClose}>Close</button>
         </header>

@@ -14,6 +14,11 @@ import { VoxelSelectivityAtlasDialog } from './VoxelSelectivityAtlasDialog';
 
 const dialogState = vi.hoisted(() => ({ open: false, assets: null as SelectivityAtlasAssets | null }));
 
+vi.mock('../generated/referenceCoverage', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../generated/referenceCoverage')>();
+  return { ...original, REFERENCE_COVERAGE: { ...original.REFERENCE_COVERAGE, stochasticModels: ['vone_alexnet'] } };
+});
+
 vi.mock('react', async (importOriginal) => {
   const original = await importOriginal<typeof import('react')>();
   return {
@@ -48,6 +53,12 @@ function referenceAssets(): SelectivityAtlasAssets {
 }
 
 describe('voxel selectivity dialog', () => {
+  it('discloses stochastic reference sampling inside the selectivity dialog', () => {
+    dialogState.open = true;
+    vi.stubGlobal('document', { body: {} });
+    const markup = renderToStaticMarkup(<VoxelSelectivityAtlasDialog model="vone_alexnet" available />);
+    expect(markup).toContain('reference predictions are a seeded sample; repeated predictions may vary');
+  });
   it('keeps the heavy viewer behind its accessible, availability-guarded launcher', () => {
     const markup = renderToStaticMarkup(<VoxelSelectivityAtlasDialog model="clip_rn50" available={false} />);
     expect(markup).toContain('aria-haspopup="dialog"');

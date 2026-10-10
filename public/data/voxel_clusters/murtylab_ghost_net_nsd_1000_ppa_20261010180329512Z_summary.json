@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 126,
+    "1": 59
+  },
+  "explained_variance_ratio_first10": [
+    0.9212995497372447,
+    0.05890889701986612,
+    0.00901252017633462,
+    0.00631581734504788,
+    0.002404125320069233,
+    0.0007660493851195716,
+    0.0007004917634007674,
+    0.0003973966187109326,
+    0.00011872285785664823,
+    5.582006980076147e-05
+  ],
+  "model": "ghost_net",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_ghost_net_nsd_1000_ppa_20261010180329512Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.5286908957933767,
+  "source_file": "murtylab_ghost_net_nsd_1000_ppa_20261010180329512Z.csv"
+}

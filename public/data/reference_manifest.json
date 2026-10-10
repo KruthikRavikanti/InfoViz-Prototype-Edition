@@ -1,5 +1,5 @@
 {
-  "checksum": "ed023e59bd270e210bb8350d348eaaf223d3992214adeb2163a496cc808cefa7",
+  "checksum": "a862bba8496384d80de1b1990152b2b683e4325a52b0880d85783072172246d0",
   "clustering": {
     "hierarchical_out_of_sample_policy": "nearest_medoid_assignment",
     "plot_projection": {
@@ -12,8 +12,514 @@
     }
   },
   "dataset": "nsd_1000",
-  "generated_at": "2026-08-31T00:00:00Z",
+  "generated_at": "2026-10-10T18:35:43.539502Z",
   "image_count": 185,
+  "model_prediction_policies": {
+    "briaai": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "densenet161_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "dinov2": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "dinov2_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "ese_vovnet": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "eva2": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "fbnet": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "ghost_net": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "google_vit": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "google_vit_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "hrnet": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "inception_rn_v2": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "inceptionv3": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "inceptionv4": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "kosmos2": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "mixnet": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "mnasnet": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "mobilenetv2": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "nomic": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "nomic_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "resnet101": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "resnet101_imagenet1kv1": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "resnet101_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "resnet18": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "resnet18_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "resnet50": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "resnet50_places365": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "resnet50_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "resnet50_vggface2": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_densenet161_epsilon_3": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_mnasnet_epsilon_3": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_mobilenetv2_epsilon_3": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn18_blur_strong": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn18_blur_weak": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn18_epsilon_003": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn18_epsilon_01": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn18_epsilon_025": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn18_epsilon_3": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn18_epsilon_5": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn50_blur_strong": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn50_blur_weak": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn50_epsilon_003": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn50_epsilon_01": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn50_epsilon_025": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn50_epsilon_3": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_rn50_epsilon_5": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_vgg16_blur_strong": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_vgg16_blur_weak": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_vgg16_bn_epsilon_3": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_vgg19_blur_strong": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_vgg19_blur_weak": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_wideresnet50_epsilon_003": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_wideresnet50_epsilon_01": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_wideresnet50_epsilon_025": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_wideresnet50_epsilon_3": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "robust_wideresnet50_epsilon_5": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "siglip": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "siglip2": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_autoencoding": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_class_object": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_class_scene": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_curvature": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_denoising": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_depth_euclidean": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_depth_zbuffer": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_edge_occlusion": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_edge_texture": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_inpainting": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_keypoints2d": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_keypoints3d": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_normal": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_reshading": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_segment_semantic": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_segment_unsup25d": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "taskonomy_segment_unsup2d": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "tdann_simclr": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "tdann_simclr_alpha_10": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "tdann_simclr_alpha_100": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "tdann_simclr_alpha_2": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "tdann_simclr_alpha_5": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "toponets_rn18": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "toponets_rn18_tau_0.5": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "toponets_rn18_tau_1": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "toponets_rn18_tau_20": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "toponets_rn18_tau_5": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "toponets_rn18_tau_50": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "toponets_rn50": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "toponets_vit": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "vgg16_imagenet1kv1": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "vgg16_imagenet1kv1_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "vgg19_imagenet1kv1": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "vgg19_imagenet1kv1_random": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "vone_alexnet": {
+      "deterministic_per_stimulus": false,
+      "noise_modes": [
+        "neuronal"
+      ],
+      "response_policy": "seeded_stochastic_sampling"
+    },
+    "vone_cornet_s": {
+      "deterministic_per_stimulus": false,
+      "noise_modes": [
+        "neuronal"
+      ],
+      "response_policy": "seeded_stochastic_sampling"
+    },
+    "vone_rn50": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "webssl_dino300m": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "webssl_mae300m": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "wideresnet101": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "wideresnet50": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    },
+    "xception": {
+      "deterministic_per_stimulus": true,
+      "noise_modes": [],
+      "response_policy": "evaluation_mode"
+    }
+  },
   "optional_artifacts": {
     "dreamsim": {
       "available": false
@@ -24,7 +530,7 @@
     }
   },
   "reference_count": 185,
-  "reference_version": "ed023e59bd270e210bb8350d348eaaf223d3992214adeb2163a496cc808cefa7",
+  "reference_version": "a862bba8496384d80de1b1990152b2b683e4325a52b0880d85783072172246d0",
   "rois": [
     "ffa",
     "ppa",
@@ -39,6 +545,7 @@
     "beit",
     "bit",
     "blip2",
+    "briaai",
     "clip_rn101",
     "clip_rn101_random",
     "clip_rn50",
@@ -52,12 +559,111 @@
     "cross_vit",
     "densenet121",
     "densenet161",
+    "densenet161_random",
     "densenet169",
     "densenet201",
+    "dinov2",
     "dinov2_large",
+    "dinov2_random",
     "dreamsim_vitb16",
     "dreamsim_vitb32",
-    "efficient_net"
+    "efficient_net",
+    "ese_vovnet",
+    "eva2",
+    "fbnet",
+    "ghost_net",
+    "google_vit",
+    "google_vit_random",
+    "hrnet",
+    "inception_rn_v2",
+    "inceptionv3",
+    "inceptionv4",
+    "kosmos2",
+    "mixnet",
+    "mnasnet",
+    "mobilenetv2",
+    "nomic",
+    "nomic_random",
+    "resnet101",
+    "resnet101_imagenet1kv1",
+    "resnet101_random",
+    "resnet18",
+    "resnet18_random",
+    "resnet50",
+    "resnet50_places365",
+    "resnet50_random",
+    "resnet50_vggface2",
+    "robust_densenet161_epsilon_3",
+    "robust_mnasnet_epsilon_3",
+    "robust_mobilenetv2_epsilon_3",
+    "robust_rn18_blur_strong",
+    "robust_rn18_blur_weak",
+    "robust_rn18_epsilon_003",
+    "robust_rn18_epsilon_01",
+    "robust_rn18_epsilon_025",
+    "robust_rn18_epsilon_3",
+    "robust_rn18_epsilon_5",
+    "robust_rn50_blur_strong",
+    "robust_rn50_blur_weak",
+    "robust_rn50_epsilon_003",
+    "robust_rn50_epsilon_01",
+    "robust_rn50_epsilon_025",
+    "robust_rn50_epsilon_3",
+    "robust_rn50_epsilon_5",
+    "robust_vgg16_blur_strong",
+    "robust_vgg16_blur_weak",
+    "robust_vgg16_bn_epsilon_3",
+    "robust_vgg19_blur_strong",
+    "robust_vgg19_blur_weak",
+    "robust_wideresnet50_epsilon_003",
+    "robust_wideresnet50_epsilon_01",
+    "robust_wideresnet50_epsilon_025",
+    "robust_wideresnet50_epsilon_3",
+    "robust_wideresnet50_epsilon_5",
+    "siglip",
+    "siglip2",
+    "taskonomy_autoencoding",
+    "taskonomy_class_object",
+    "taskonomy_class_scene",
+    "taskonomy_curvature",
+    "taskonomy_denoising",
+    "taskonomy_depth_euclidean",
+    "taskonomy_depth_zbuffer",
+    "taskonomy_edge_occlusion",
+    "taskonomy_edge_texture",
+    "taskonomy_inpainting",
+    "taskonomy_keypoints2d",
+    "taskonomy_keypoints3d",
+    "taskonomy_normal",
+    "taskonomy_reshading",
+    "taskonomy_segment_semantic",
+    "taskonomy_segment_unsup25d",
+    "taskonomy_segment_unsup2d",
+    "tdann_simclr",
+    "tdann_simclr_alpha_10",
+    "tdann_simclr_alpha_100",
+    "tdann_simclr_alpha_2",
+    "tdann_simclr_alpha_5",
+    "toponets_rn18",
+    "toponets_rn18_tau_0.5",
+    "toponets_rn18_tau_1",
+    "toponets_rn18_tau_20",
+    "toponets_rn18_tau_5",
+    "toponets_rn18_tau_50",
+    "toponets_rn50",
+    "toponets_vit",
+    "vgg16_imagenet1kv1",
+    "vgg16_imagenet1kv1_random",
+    "vgg19_imagenet1kv1",
+    "vgg19_imagenet1kv1_random",
+    "vone_alexnet",
+    "vone_cornet_s",
+    "vone_rn50",
+    "webssl_dino300m",
+    "webssl_mae300m",
+    "wideresnet101",
+    "wideresnet50",
+    "xception"
   ],
   "voxel_counts": {
     "eba": 2045,

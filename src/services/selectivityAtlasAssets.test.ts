@@ -50,7 +50,7 @@ function rawManifest() {
     method,
     k14StabilityCaveat: caveat,
     supportedModels: modelNames,
-    referenceVersion: 'ed023e59bd270e210bb8350d348eaaf223d3992214adeb2163a496cc808cefa7',
+    referenceVersion: referenceIdentity.reference_version,
     imageIdsSha256: '1057a45119e774b1bd9c3462664d2d8003ca8d6a1b42c1691f084ce10533a7ca',
     models: Object.fromEntries(modelNames.map((model) => [model, {
       pointsUrl: `${model}/points.csv`,
@@ -159,7 +159,7 @@ describe('voxel-selectivity atlas asset contract', () => {
     expect(() => parseSelectivityAtlasPoints(invalid, manifest, summary)).toThrow(/out of range/);
   });
 
-  it('rejects a substituted model even when 26 model records remain internally consistent', () => {
+  it('rejects a substituted model even when model records remain internally consistent', () => {
     const manifest = rawManifest();
     const removed = manifest.supportedModels[0];
     manifest.supportedModels = ['unreviewed_model', ...manifest.supportedModels.slice(1)];

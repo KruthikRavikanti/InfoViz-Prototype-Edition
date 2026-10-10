@@ -1,4 +1,5 @@
 import { csvParse } from 'd3';
+import { REFERENCE_COVERAGE } from '../generated/referenceCoverage';
 import type {
   SelectivityAtlasAssets,
   SelectivityAtlasCluster,
@@ -14,22 +15,16 @@ import { publicPath } from '../utils/publicPath';
 
 export const SELECTIVITY_ATLAS_MANIFEST_PATH = publicPath('/data/voxel_selectivity_atlas/manifest.json');
 
-const MANIFEST_SHA256 = '7244cead1cc3a9d6fb0074590eed025889994d23eecce432271cb8b38b28881e';
-// The reviewed reference bundle's exact roster; public assets are not JS modules in Vite.
-const EXPECTED_MODELS: readonly string[] = [
-  'adversarial_inceptionv3', 'aimv2', 'alexnet', 'alexnet_random', 'beit', 'bit', 'blip2',
-  'clip_rn101', 'clip_rn101_random', 'clip_rn50', 'clip_rn50_random', 'clip_vit_b32',
-  'clip_vit_b32_random', 'convnext', 'cornet_rt', 'cornet_s', 'cornet_z', 'cross_vit',
-  'densenet121', 'densenet161', 'densenet169', 'densenet201', 'dinov2_large',
-  'dreamsim_vitb16', 'dreamsim_vitb32', 'efficient_net',
-];
+const MANIFEST_SHA256 = REFERENCE_COVERAGE.atlasManifestSha256;
+// Exact reviewed release roster, independent of unverified runtime responses.
+const EXPECTED_MODELS = REFERENCE_COVERAGE.models;
 const EXPECTED_ROI_ORDER: SelectivityAtlasRoi[] = ['ffa', 'eba', 'ppa'];
 const EXPECTED_ROIS: Record<SelectivityAtlasRoi, { offset: number; count: number }> = {
   ffa: { offset: 0, count: 156 },
   eba: { offset: 156, count: 518 },
   ppa: { offset: 674, count: 170 },
 };
-const EXPECTED_REFERENCE_VERSION = 'ed023e59bd270e210bb8350d348eaaf223d3992214adeb2163a496cc808cefa7';
+const EXPECTED_REFERENCE_VERSION = REFERENCE_COVERAGE.referenceVersion;
 const EXPECTED_IMAGE_IDS_SHA256 = '1057a45119e774b1bd9c3462664d2d8003ca8d6a1b42c1691f084ce10533a7ca';
 const EXPECTED_POINT_COLUMNS = [
   'voxel_index',
@@ -201,10 +196,9 @@ export function validateSelectivityAtlasManifest(value: unknown): SelectivityAtl
   const supportedModels = array(raw.supportedModels, 'selectivity-atlas manifest.supportedModels')
     .map((entry, index) => string(entry, `selectivity-atlas manifest.supportedModels[${index}]`));
   if (
-    supportedModels.length !== 26
-    || supportedModels.length !== EXPECTED_MODELS.length
+    supportedModels.length !== EXPECTED_MODELS.length
     || raw.subject !== 's1'
-    || supportedModels.some((model) => !/^[a-z0-9_]+$/.test(model))
+    || supportedModels.some((model) => !/^[a-z0-9]+(?:_[a-z0-9]+)*$/.test(model) && model !== 'toponets_rn18_tau_0.5')
     || supportedModels.some((model) => !EXPECTED_MODELS.includes(model))
     || new Set(supportedModels).size !== supportedModels.length
     || supportedModels.some((model) => !models[model])

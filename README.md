@@ -66,10 +66,10 @@ python scripts/data/cluster_runner.py dreamsim-hierarchical \
   --out_dir public/data/dreamsim_clusters_hierarchical_corr
 ```
 
-Regenerate the Subject 1 artifacts for the Voxel Selectivity Explorer:
+Inspect the Subject 1 Voxel Selectivity Explorer builder's explicit staging options:
 
 ```bash
-python scripts/data/build_selectivity_atlas_artifacts.py
+python scripts/data/build_selectivity_atlas_artifacts.py --help
 ```
 
 This artifact builder follows the reviewed mentor pipeline exactly for clustering: per-voxel z-scoring across the
@@ -85,13 +85,88 @@ model predictions for the category-imbalanced Murty-185 stimulus set, not measur
 
 ## Current Evidence Coverage
 
-The evidence pipeline is real, but partial.
+All `126` runnable models in the scoreboard have image-response evidence for all
+`185` Murty reference images across FFA, PPA, and EBA. This includes response rankings,
+both predicted-response clustering methods, Subject 1 brain maps, and voxel-selectivity
+artifacts. The `127`th scoreboard entry is the **noise ceiling**, not a runnable model;
+it remains score-only and is not selectable as prediction evidence in Compare mode.
 
-- Aggregate score matrix coverage: `127` models across `ppa`, `ffa`, `eba`, and `Overall`
-- Image-level evidence coverage: `26` models across `ppa`, `ffa`, and `eba`
-- Image rows: `185`
+The original 26-model bundle is preserved: its source predictions, transforms, cluster
+files, and spatial child assets are copied unchanged. The additional 100 models use
+their registered Cortex Core backbones and existing trained NSD-1000 readouts, evaluated
+on the canonical `public/images/image_001.png` through `image_185.png` files. No model
+is substituted and no readout is retrained. The full pooled readouts contain 716 FFA,
+753 PPA, and 2,045 EBA columns, ordered by NSD subjects 1, 2, 5, and 7; anatomical
+views use only the audited Subject 1 prefixes.
 
-This means the heatmap can show more models than the evidence panel can explain. In compare mode, the UI intentionally restricts selection to cells that have matching CSV evidence.
+The 100 added models use an explicit full-FP32 policy: TF32 and autocasting are
+disabled, with deterministic cuDNN and highest-precision float32 matrix multiplication.
+The same policy is used for reference generation and live upload inference, avoiding
+batch-dependent TF32 rounding differences. The original 26 models retain their saved
+data and legacy inference settings. Core serializes precision-sensitive inference
+and restores settings on exit so concurrent requests cannot mix these policies.
+
+VOne-AlexNet and VOne-CORnet-S retain their configured neuronal noise. Their saved
+reference predictions are seeded samples, not averages, and the UI warns that repeated
+predictions may vary. The registered VOne-RN50 checkpoint has no active neuronal noise
+and is not labeled stochastic. Random-backbone variants remain distinct models and
+use the initialization recorded in their inference provenance.
+The random VGG16/VGG19 constructors set their seed before allocating weights,
+so the first ROI loaded uses the same recorded initialization as subsequent ROIs.
+
+Coverage changes have a new reference version. Reopen Cortex-Compass from the Lab
+to create a fresh comparison after updating the bundle; old-version session tokens
+are not silently mixed with the expanded reference data.
+
+### Maintaining coverage
+
+`scripts/data/generate_model_reference_predictions.py` generates missing triads in
+an ignored staging directory and records image, backbone, readout, preprocessing,
+seed, numerical precision, helper-source hash, and noise-policy provenance. Run GPU inference with `CUDA_VISIBLE_DEVICES=0`
+in this shared local environment. Its default is offline; explicit `--allow-network`
+is needed for an uncached official checkpoint. The local backbone overlay uses
+readable shared weights without writing into the shared research directories.
+
+`extend_reference_coverage.py` requires an explicit complete target roster and
+fits only the added models. Use the spatial builders' `--append-baseline-brain`
+and `--append-baseline-atlas` modes with separate, fresh output directories.
+`verify_coverage_release.py` checks the whole staged release against the saved
+baseline, raw predictions, transforms, model identities, and spatial checksums.
+For the corrected FP32 release, use `artifacts/coverage-expansion/raw-fp32`
+as the raw-input path: pass it via `--new-raw-dir` to the extension builder,
+and via `--raw-root` to both the release verifier and installer.
+Keep the immutable original `artifacts/coverage-expansion/baseline` as the
+append baseline; use fresh output directories for a new candidate.
+Only after review should the frontend coverage pins and Core spatial-audit pin
+be updated and `install_coverage_release.py --servers-stopped` used during local
+maintenance. The installer retains the original directories in a version-specific
+backup and restores them if installation fails. A same-roster correction also
+requires an explicit byte-verified snapshot of the installed candidate; its prior
+added raw sources are moved into the retained backup, never overwritten or deleted.
+`verify_live_coverage.py` then
+tests real upload sessions, rankings, joint clustering, previews, and Subject 1
+responses against the published predictions.
+
+Legacy builders retain their original strict 26-model contract; they are not a
+shortcut for regenerating the expanded release. Consult each script's `--help`
+for explicit staging paths. Cortex Core must use the prepared overlay via
+`CORTEX_BACKBONE_DIR`; its scoped cache helper isolates constructor-specific
+Torch Hub overrides so loading DreamSim cannot redirect later models' caches.
+
+### Moving the expanded release to another machine
+
+Git contains the public 126-model views and their reviewed identity pins.
+The private Core bundle in `artifacts/reference` is intentionally ignored:
+a fresh clone alone cannot create matching upload comparisons. Transfer that
+verified directory separately, use the matching Cortex Core precision/cache/audit
+changes and trained readout resources, and set `CORTEX_REFERENCE_ARTIFACT_DIR`
+to its absolute path. The installed release version is
+`a862bba8496384d80de1b1990152b2b683e4325a52b0880d85783072172246d0`;
+its private `manifest.json` SHA-256 is
+`9258d85bfb911db0a4dc959659d0e8b57e69957fc73f671416fdeea9a96c7475`.
+Retain the immutable baseline and FP32 provenance under
+`artifacts/coverage-expansion` as release audit material. Do not run the legacy
+26-model builder over the expanded inputs to try to reproduce this release.
 
 ## Tech Stack
 
@@ -130,7 +205,7 @@ picker search does not change that scope, and hovering does not select another b
 is used (the least-negative prediction if all are negative), with exact ties flagged and the first image shown.
 This is an in-collection prediction maximum, not measured activation or a maximum of the blended surface value.
 
-The 3D Brain Map supports all 185 reference images for the 26 audited NSD-1000 models, even without an upload
+The 3D Brain Map supports all 185 reference images for the 126 audited NSD-1000 models, even without an upload
 session. `scripts/data/build_brain_reference_artifacts.py` exports the exact raw float32 Subject 1 prefixes
 (156 FFA, 170 PPA, 518 EBA) from the existing prediction bundle; it does not run inference or use normalized
 clustering coordinates. Canonical image identities, source hashes, voxel ordering, model coverage, and response
@@ -146,17 +221,18 @@ ROI visibility changes and resizing preserve the view; **Reset view** restores t
 Focus the plot to rotate with arrow keys, zoom with +/−, inspect individual visible voxels with [ / ] or
 Page Up/Down (Home/End jump to the endpoints), and select their cluster with Enter/Space. Mouse and keyboard
 inspection show the same voxel/cluster/PCA-distance details, with tooltips kept inside the plot.
-The selectivity manifest digest is pinned in `src/services/selectivityAtlasAssets.ts` before either model
+The selectivity manifest digest is pinned in `src/generated/referenceCoverage.ts` before either model
 availability or atlas data are trusted. An intentional artifact regeneration requires reviewing the bundle
 and updating that pin; child summary and point files remain independently checksum-verified.
 
-Regenerate the separate reference-brain assets with the audited private source bundle present:
+Inspect the separate reference-brain builder's staging options (an expanded bundle
+requires append-baseline mode and reviewed new-model provenance):
 
 ```bash
-python scripts/data/build_brain_reference_artifacts.py
+python scripts/data/build_brain_reference_artifacts.py --help
 ```
 
-The generated manifest SHA-256 is pinned in `src/services/brainReferenceAssets.ts`; an intentional source-bundle
+The generated manifest SHA-256 and exact model roster are pinned in `src/generated/referenceCoverage.ts`; an intentional source-bundle
 update requires reviewing and updating that pin. Neither existing anatomy assets nor comparison artifacts are rewritten.
 
 The four-chart layout distinguishes **Predicted-response clusters**, **Visual-feature clusters**,
@@ -203,8 +279,8 @@ Follow these steps to set up and run the project locally:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/audreyzhao75/InfoViz-Prototype.git
-   cd InfoViz-Prototype
+   git clone https://github.com/KruthikRavikanti/InfoViz-Prototype-Edition.git
+   cd InfoViz-Prototype-Edition
    ```
 
 2. **Install dependencies:**

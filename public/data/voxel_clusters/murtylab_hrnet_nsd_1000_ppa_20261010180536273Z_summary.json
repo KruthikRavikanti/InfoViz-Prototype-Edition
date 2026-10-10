@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 120,
+    "1": 65
+  },
+  "explained_variance_ratio_first10": [
+    0.8992577405171598,
+    0.06635409058407642,
+    0.01414242756251007,
+    0.008086220873258576,
+    0.005398024461476017,
+    0.00321714839606874,
+    0.0015589038852866525,
+    0.0008649390633417376,
+    0.0003619163285401796,
+    0.00026177795860741744
+  ],
+  "model": "hrnet",
+  "n_images": 185,
+  "n_voxels": 753,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_hrnet_nsd_1000_ppa_20261010180536273Z_clusters.csv",
+  "roi": "ppa",
+  "silhouette": 0.4873760658428789,
+  "source_file": "murtylab_hrnet_nsd_1000_ppa_20261010180536273Z.csv"
+}

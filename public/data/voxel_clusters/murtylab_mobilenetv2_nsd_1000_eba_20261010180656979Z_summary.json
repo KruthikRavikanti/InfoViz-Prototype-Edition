@@ -1,0 +1,27 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 69,
+    "1": 116
+  },
+  "explained_variance_ratio_first10": [
+    0.7808524906363242,
+    0.13673890746515474,
+    0.04706890671225861,
+    0.022817833356180837,
+    0.0065778121076279245,
+    0.00348773502188263,
+    0.0013527658904022963,
+    0.000619851456858086,
+    0.0002773672568922067,
+    0.00014204470437587636
+  ],
+  "model": "mobilenetv2",
+  "n_images": 185,
+  "n_voxels": 2045,
+  "pca_dim_used": 50,
+  "result_csv": "public/data/voxel_clusters/murtylab_mobilenetv2_nsd_1000_eba_20261010180656979Z_clusters.csv",
+  "roi": "eba",
+  "silhouette": 0.4490857691643363,
+  "source_file": "murtylab_mobilenetv2_nsd_1000_eba_20261010180656979Z.csv"
+}

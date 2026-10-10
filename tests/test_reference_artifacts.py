@@ -190,8 +190,9 @@ class ReferenceArtifactRepositoryTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.raw_dir = REPO_ROOT / "data" / "image_by_model"
         cls.combined_path = REPO_ROOT / "public" / "data" / "combined_image_means.csv"
-        cls.candidates = discover_source_candidates(cls.raw_dir)
-        cls.models = sorted({model for model, _ in cls.candidates})
+        cls.public_manifest = json.loads((REPO_ROOT / "public/data/reference_manifest.json").read_text(encoding="utf-8"))
+        cls.models = cls.public_manifest["supported_models"]
+        cls.candidates = discover_source_candidates(cls.raw_dir, expected_models=cls.models)
         cls.combined = load_combined_means(cls.combined_path, cls.models)
 
         candidate = cls.candidates[("clip_rn50", "ffa")][0]
@@ -202,9 +203,19 @@ class ReferenceArtifactRepositoryTests(unittest.TestCase):
             expected_means=cls.combined["clip_rn50_ffa"].to_numpy(dtype=np.float64),
         )
 
-    def test_complete_26_model_triads_are_discovered(self) -> None:
-        self.assertEqual(len(self.models), 26)
-        self.assertEqual(len(self.candidates), 78)
+    def test_published_roster_has_complete_triads_and_retains_original_26(self) -> None:
+        legacy_models = {
+            "adversarial_inceptionv3", "aimv2", "alexnet", "alexnet_random", "beit", "bit", "blip2",
+            "clip_rn101", "clip_rn101_random", "clip_rn50", "clip_rn50_random", "clip_vit_b32",
+            "clip_vit_b32_random", "convnext", "cornet_rt", "cornet_s", "cornet_z", "cross_vit",
+            "densenet121", "densenet161", "densenet169", "densenet201", "dinov2_large",
+            "dreamsim_vitb16", "dreamsim_vitb32", "efficient_net",
+        }
+        self.assertEqual(len(legacy_models), 26)
+        self.assertTrue(legacy_models.issubset(self.models))
+        self.assertEqual(len(self.models), len(set(self.models)))
+        self.assertEqual(self.models, sorted(self.models))
+        self.assertEqual(len(self.candidates), len(self.models) * len(("ffa", "ppa", "eba")))
         self.assertTrue(all(len(candidates) >= 1 for candidates in self.candidates.values()))
 
     def test_raw_means_match_checked_aggregate(self) -> None:
@@ -290,9 +301,11 @@ class ReferenceArtifactRepositoryTests(unittest.TestCase):
             / "assets"
             / "js"
             / "constants.jsx",
+            expected_models=self.models,
         )
         self.assertTrue(report["valid"])
-        self.assertEqual(report["counts"]["infoviz_reference"], 26)
+        self.assertEqual(report["counts"]["infoviz_reference"], len(self.models))
+        self.assertEqual(report["supported_models"], self.models)
         self.assertEqual(report["strict_subset_errors"]["missing_from_core"], [])
         self.assertEqual(report["strict_subset_errors"]["missing_from_app"], [])
 
@@ -350,7 +363,7 @@ class ReferenceArtifactRepositoryTests(unittest.TestCase):
                     )
                 self.assertIn("plot_axis_signs", entry)
                 checked += 1
-        self.assertEqual(checked, 78)
+        self.assertEqual(checked, len(self.models) * 3)
 
         visual_entry = manifest["optional_artifacts"]["visual"]
         with np.load(artifact_root / visual_entry["path"], allow_pickle=False) as artifact:

@@ -44,7 +44,6 @@
     "supported_models": {
       "type": "array",
       "minItems": 26,
-      "maxItems": 26,
       "uniqueItems": true,
       "items": {
         "type": "string",
@@ -59,6 +58,60 @@
     },
     "image_ids_sha256": {
       "$ref": "#/$defs/sha256"
+    },
+    "coverage_extension": {
+      "type": "object",
+      "required": ["policy", "parent_reference_version", "baseline_models", "added_models", "baseline_manifest_sha256"],
+      "properties": {
+        "policy": {"const": "append_only_preserve_baseline_artifacts_v1"},
+        "parent_reference_version": {"$ref": "#/$defs/sha256"},
+        "baseline_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "baseline_models": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "added_models": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "prediction_policies": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["numeric_policy", "precision_helper_sha256"],
+            "properties": {
+              "precision_helper_sha256": {"$ref": "#/$defs/sha256"},
+              "numeric_policy": {
+                "type": "object",
+                "required": ["policy", "output_dtype", "float32_matmul_precision", "cuda_matmul_allow_tf32", "cudnn_allow_tf32", "cudnn_deterministic", "cudnn_benchmark", "cuda_autocast_enabled", "cpu_autocast_enabled"],
+                "properties": {
+                  "policy": {"const": "fp32_no_tf32_v1"},
+                  "output_dtype": {"const": "float32"},
+                  "float32_matmul_precision": {"const": "highest"},
+                  "cuda_matmul_allow_tf32": {"type": "boolean", "const": false},
+                  "cudnn_allow_tf32": {"type": "boolean", "const": false},
+                  "cudnn_deterministic": {"type": "boolean", "const": true},
+                  "cudnn_benchmark": {"type": "boolean", "const": false},
+                  "cuda_autocast_enabled": {"type": "boolean", "const": false},
+                  "cpu_autocast_enabled": {"type": "boolean", "const": false}
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "model_prediction_policies": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["response_policy", "deterministic_per_stimulus", "noise_modes"],
+            "properties": {
+              "response_policy": {"enum": ["evaluation_mode", "seeded_stochastic_sampling"]},
+              "deterministic_per_stimulus": {"type": "boolean"},
+              "noise_modes": {"enum": [[], ["neuronal"]]}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": true
     },
     "voxel_counts": {
       "type": "object",

@@ -1,0 +1,21 @@
+{
+  "best_k": 2,
+  "cluster_sizes": {
+    "0": 71,
+    "1": 114
+  },
+  "clustering_method": "hierarchical",
+  "dendrogram_png": "public/data/voxel_clusters_hierarchical_corr/murtylab_taskonomy_autoencoding_nsd_1000_ffa_20261010181239726Z_dendrogram.png",
+  "distance_metric": "correlation",
+  "distance_to_cluster_representative": "medoid_correlation_distance",
+  "linkage_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_taskonomy_autoencoding_nsd_1000_ffa_20261010181239726Z_linkage.csv",
+  "linkage_method": "average",
+  "model": "taskonomy_autoencoding",
+  "n_images": 185,
+  "n_voxels": 716,
+  "normalization": "voxel_zscore",
+  "result_csv": "public/data/voxel_clusters_hierarchical_corr/murtylab_taskonomy_autoencoding_nsd_1000_ffa_20261010181239726Z_clusters.csv",
+  "roi": "ffa",
+  "silhouette": 0.3563700516277468,
+  "source_file": "murtylab_taskonomy_autoencoding_nsd_1000_ffa_20261010181239726Z.csv"
+}

@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import manifestJson from '../../public/data/brain/reference/manifest.json';
+import reviewedManifestText from '../../public/data/brain/reference/manifest.json?raw';
+import referenceIdentity from '../../public/data/reference_manifest.json';
 import * as brainAssets from './brainMapAssets';
 import {
   BRAIN_REFERENCE_MANIFEST_PATH,
+  BRAIN_REFERENCE_MANIFEST_SHA256,
   BRAIN_REFERENCE_VERSION,
   decodeBrainMapReferences,
   loadBrainMapReferences,
@@ -36,8 +39,13 @@ describe('Murty-185 Subject 1 reference brain predictions', () => {
     const manifest = validateBrainReferenceManifest(manifestJson);
     expect(manifest.referenceVersion).toBe(BRAIN_REFERENCE_VERSION);
     expect(manifest.imageIds).toHaveLength(185);
-    expect(Object.keys(manifest.models)).toHaveLength(26);
+    expect(Object.keys(manifest.models).sort()).toEqual([...referenceIdentity.supported_models].sort());
     expect(manifest.models.clip_rn50.url).toMatch(/\/data\/brain\/reference\/clip_rn50.f32$/);
+  });
+
+  it('keeps an explicit reviewed digest pin bound to the exact published manifest bytes', async () => {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(reviewedManifestText));
+    expect(BRAIN_REFERENCE_MANIFEST_SHA256).toBe(Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join(''));
   });
 
   it.each([
@@ -104,10 +112,23 @@ describe('Murty-185 Subject 1 reference brain predictions', () => {
     expect(first).toBe(second);
     expect(await loadBrainMapReferences('clip_rn50', fetcher)).toBe(first);
     expect(verified).toHaveBeenCalledTimes(2);
-    expect(verified.mock.calls[0][1]).toBe('86ac452a2c5badeb436a219be70e10eef47825b749bcf8abdf67b1b9d78b301d');
+    expect(verified.mock.calls[0][1]).toBe(BRAIN_REFERENCE_MANIFEST_SHA256);
     expect(verified.mock.calls[1][1]).toBe(manifestJson.models.clip_rn50.sha256);
     expect(await loadBrainReferenceManifest(fetcher)).toHaveProperty('referenceVersion', BRAIN_REFERENCE_VERSION);
     expect(verified).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['resnet18', 'toponets_rn18_tau_0.5'])('loads the exact appended model %s without an alias or replacement', async (model) => {
+    const { fetcher, verified } = fakeAssets();
+    const manifest = validateBrainReferenceManifest(manifestJson);
+    const result = await loadBrainMapReferences(model, fetcher);
+    expect(result.model).toBe(model);
+    expect(result.stimuli).toHaveLength(185);
+    expect(verified.mock.calls[1][0]).toBe(manifest.models[model].url);
+    expect(verified.mock.calls[1][1]).toBe(manifest.models[model].sha256);
+    expect(result.stimuli[1].roiResponses.ffa[0]).toBe(1);
+    expect(result.stimuli[1].roiResponses.ppa[0]).toBe(1 + 156 / 1024);
+    expect(result.stimuli[1].roiResponses.eba[0]).toBe(1 + 326 / 1024);
   });
 
   it('aborts a caller without cancelling another consumer or poisoning cached results', async () => {

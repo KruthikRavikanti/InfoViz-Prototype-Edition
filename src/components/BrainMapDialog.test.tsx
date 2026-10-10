@@ -8,6 +8,11 @@ import { BrainMapDialog } from './BrainMapDialog';
 
 const dialogState = vi.hoisted(() => ({ open: false }));
 
+vi.mock('../generated/referenceCoverage', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../generated/referenceCoverage')>();
+  return { ...original, REFERENCE_COVERAGE: { ...original.REFERENCE_COVERAGE, stochasticModels: ['vone_alexnet'] } };
+});
+
 vi.mock('react', async (importOriginal) => {
   const original = await importOriginal<typeof import('react')>();
   return {
@@ -49,6 +54,12 @@ function brainSession() {
 }
 
 describe('Subject 1 brain-map launcher', () => {
+  it('discloses stochastic reference sampling inside the brain dialog', () => {
+    dialogState.open = true;
+    vi.stubGlobal('document', { body: {} });
+    const markup = renderToStaticMarkup(<BrainMapDialog selectedModel="vone_alexnet" />);
+    expect(markup).toContain('reference predictions are a seeded sample; repeated predictions may vary');
+  });
   it('keeps the 3D experience behind an accessible session-area dialog trigger', () => {
     const session = brainSession();
     const markup = renderToStaticMarkup(

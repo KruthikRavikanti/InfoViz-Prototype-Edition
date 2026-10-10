@@ -1,6 +1,7 @@
 import { publicPath } from '../utils/publicPath';
 import type { SelectedHeatmapCell } from '../types/data';
 import type { CortexComparisonSession } from '../types/session';
+import { isStochasticReferenceModel, STOCHASTIC_REFERENCE_NOTE } from '../utils/predictionPolicy';
 
 type HeaderProps = {
   imageCount: number;
@@ -35,6 +36,10 @@ export function Header({
     && selectedCell.model === session.comparison.model
     && session.comparison.rois.some((roi) => roi === selectedCell.roi));
   const showUploadModelSeparately = session && (compareMode || (selectedCell && !viewingUploadModel));
+  const displayedModels = compareMode
+    ? compareCells.map((cell) => cell.model)
+    : selectedCell && hasImageResponses ? [selectedCell.model] : session ? [session.comparison.model] : [];
+  const showStochasticNote = displayedModels.some(isStochasticReferenceModel);
 
   return (
     <header className="app-header">
@@ -85,6 +90,11 @@ export function Header({
                 {showUploadModelSeparately && (
                   <> · <strong>Uploads:</strong> {session.comparison.model} · {mappingLabel(session.comparison.dataset)}</>
                 )}
+              </p>
+            )}
+            {showStochasticNote && (
+              <p className="lede header-lab-settings">
+                {STOCHASTIC_REFERENCE_NOTE}
               </p>
             )}
           </div>

@@ -5,6 +5,7 @@ import { buildClusterView } from './clustering';
 import { inferClusterProjectionAlignment } from './clusterProjectionAlignment';
 import kmeansVisualCsv from '../../public/data/visual_clusters/visual_clusters.csv?raw';
 import hierarchicalVisualCsv from '../../public/data/visual_clusters_hierarchical_corr/visual_clusters.csv?raw';
+import referenceIdentity from '../../public/data/reference_manifest.json';
 
 const kmeansVoxelCsvs = import.meta.glob<string>('../../public/data/voxel_clusters/*_clusters.csv', {
   query: '?raw', import: 'default', eager: true,
@@ -130,9 +131,20 @@ describe('hierarchical upload PCA axis alignment', () => {
     expect(inferClusterProjectionAlignment(source, source)).toBeNull();
   });
 
-  it('validates all 78 complete published model/ROI reference geometries', () => {
-    expect(Object.keys(kmeansVoxelCsvs)).toHaveLength(78);
-    expect(Object.keys(hierarchicalVoxelCsvs)).toHaveLength(78);
+  it('validates every complete published model/ROI reference geometry', () => {
+    const expectedCount = referenceIdentity.supported_models.length * referenceIdentity.rois.length;
+    expect(Object.keys(kmeansVoxelCsvs)).toHaveLength(expectedCount);
+    expect(Object.keys(hierarchicalVoxelCsvs)).toHaveLength(expectedCount);
+    for (const model of referenceIdentity.supported_models) {
+      for (const roi of referenceIdentity.rois) {
+        // Full basename boundaries distinguish AlexNet/CORnet-S from VOne
+        // variants; suffix matching would incorrectly count both families.
+        const identity = `murtylab_${model}_nsd_1000_${roi}_`;
+        const matches = (path: string) => path.split('/').pop()?.startsWith(identity);
+        expect(Object.keys(kmeansVoxelCsvs).filter(matches)).toHaveLength(1);
+        expect(Object.keys(hierarchicalVoxelCsvs).filter(matches)).toHaveLength(1);
+      }
+    }
     for (const [hierarchicalPath, text] of Object.entries(hierarchicalVoxelCsvs)) {
       const sourcePath = hierarchicalPath.replace('/voxel_clusters_hierarchical_corr/', '/voxel_clusters/');
       const source = csvView(kmeansVoxelCsvs[sourcePath]);
