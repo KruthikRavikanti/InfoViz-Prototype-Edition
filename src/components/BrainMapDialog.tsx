@@ -320,9 +320,9 @@ function BrainMapModal({
           <div className="brain-map-current-image" aria-live="polite">
             {stimulus && <img src={stimulus.imageUrl} alt={stimulus.displayName} />}
             <div>
+              <span className="brain-map-context-label">Shown on brain</span>
               <strong>{stimulus?.displayName ?? 'Choose an image'}</strong>
               <span>{activeSource === 'uploaded' ? 'Uploaded stimulus' : 'Murty-185 reference'}</span>
-              <span>{referenceIsLoading ? 'Preparing shared response scale…' : 'Fixed scale across images and regions'}</span>
             </div>
           </div>
         </div>
@@ -382,7 +382,7 @@ function BrainMapModal({
               ? 'Preparing shared predicted response scale'
               : `Fixed image collection predicted response scale from minus ${formatResponse(maxAbsResponse)} to plus ${formatResponse(maxAbsResponse)}`}>
               <div className="brain-map-scale-heading">
-                <strong>Predicted response</strong>
+                <strong>Selected image response</strong>
                 <span>{referenceIsLoading ? 'preparing scale' : 'model units · fixed scale'}</span>
               </div>
               <div className="brain-map-scale-gradient" aria-hidden="true" />
@@ -442,11 +442,24 @@ function BrainMapModal({
                   <p>{referenceError ?? 'Preparing the verified Subject 1 voxel responses for all 185 reference images.'}</p>
                 </div>
               )}
-              {hovered && stimulus && <BrainMapTooltip hovered={hovered} imagePeaks={imagePeaks} displayedImageName={stimulus.displayName} />}
+              {hovered && stimulus && (
+                <BrainMapTooltip
+                  hovered={hovered}
+                  imagePeaks={imagePeaks}
+                  displayedImage={stimulus}
+                  onDismiss={() => setHovered(null)}
+                />
+              )}
             </div>
             <div className="brain-map-stage-footer">
-              <span>Drag to rotate · scroll to zoom · hover for voxel details and its highest-response image</span>
-              <span>Keyboard: arrow keys rotate · +/− zoom</span>
+              <div>
+                <strong>Hover previews do not change the brain.</strong>
+                <span>Colors show the selected image · hover compares images at a voxel</span>
+              </div>
+              <div>
+                <span>Drag to rotate · scroll to zoom</span>
+                <span>Keyboard: arrow keys rotate · +/− zoom</span>
+              </div>
             </div>
           </div>
         </div>

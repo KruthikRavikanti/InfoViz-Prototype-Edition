@@ -23,11 +23,21 @@ function image(id: string, source: BrainMapImageSource, response: number): Brain
   return { id, source, displayName: `${id}.png`, imageUrl: `/images/${id}.png`, result: { stimulusId: id, roiResponses } };
 }
 
-function render(images: BrainMapImage[], source: BrainMapImageSource) {
+const displayedImage: Pick<BrainMapImage, 'id' | 'displayName' | 'imageUrl'> = {
+  id: 'currently-displayed',
+  displayName: 'currently-displayed.png',
+  imageUrl: '/images/currently-displayed.png',
+};
+
+function render(
+  images: BrainMapImage[],
+  source: BrainMapImageSource,
+  currentImage = displayedImage,
+) {
   return renderToStaticMarkup(<BrainMapTooltip
     hovered={hovered}
     imagePeaks={buildBrainVoxelImagePeaks(images, source)}
-    displayedImageName="currently-displayed.png"
+    displayedImage={currentImage}
   />);
 }
 
@@ -36,7 +46,14 @@ describe('brain voxel highest-response image preview', () => {
     const markup = render([
       image('upload-a', 'uploaded', -0.4), image('upload-b', 'uploaded', 0.7), image('reference', 'reference', 100),
     ], 'uploaded');
-    expect(markup).toContain('Highest-response image for this source voxel');
+    expect(markup).toContain('Shown on brain');
+    expect(markup).toContain('alt="currently-displayed.png"');
+    expect(markup).toContain('src="/images/currently-displayed.png"');
+    expect(markup).toContain('tabindex="0"');
+    expect(markup).toContain('aria-label="Voxel response comparison and anatomical details"');
+    expect(markup).toContain('Highest at this voxel');
+    expect(markup).toContain('Comparison preview · brain unchanged');
+    expect(markup).not.toContain('Same image as brain map');
     expect(markup).toContain('Among 2 uploads');
     expect(markup).toContain('data-peak-image-id="upload-b"');
     expect(markup).toContain('data-peak-image-source="uploaded"');
@@ -44,7 +61,7 @@ describe('brain voxel highest-response image preview', () => {
     expect(markup).toContain('Highest predicted response: 0.700');
     expect(markup).not.toContain('alt="reference.png"');
     for (const detail of [
-      'EBA · RH', 'Displayed image: currently-displayed.png', 'Surface value: 0.456',
+      'EBA · RH', 'currently-displayed.png', 'Selected image surface value: 0.456',
       'Dominant source response: -0.400', 'ROI response index: 5',
       'Volume voxel [z, y, x]: [63, 29, 45]', 'Surface vertex: 47,394', 'ROI overlap: EBA, PPA',
     ]) expect(markup).toContain(detail);
@@ -71,11 +88,37 @@ describe('brain voxel highest-response image preview', () => {
     expect(markup).not.toContain('measured activation');
   });
 
-  it('keeps voxel information but does not invent a preview if ranking is unavailable', () => {
+  it('keeps the displayed-image preview and voxel information when ranking is unavailable', () => {
     const markup = render([], 'uploaded');
     expect(markup).toContain('No valid image ranking is available for this source voxel.');
-    expect(markup).toContain('Surface value: 0.456');
+    expect(markup).toContain('Shown on brain');
+    expect(markup).toContain('alt="currently-displayed.png"');
+    expect(markup).toContain('Selected image surface value: 0.456');
     expect(markup).not.toContain('data-peak-image-id=');
-    expect(markup).not.toContain('<img');
+    expect(markup.match(/<img /g)).toHaveLength(1);
+    expect(markup).not.toContain('Comparison preview · brain unchanged');
+    expect(markup).not.toContain('Same image as brain map');
+  });
+
+  it('clearly identifies when the displayed image also has the highest voxel response', () => {
+    const currentImage = image('displayed-winner', 'uploaded', -0.4);
+    const markup = render([currentImage, image('other', 'uploaded', -0.7)], 'uploaded', currentImage);
+    expect(markup).toContain('Shown on brain');
+    expect(markup).toContain('Highest at this voxel');
+    expect(markup).toContain('data-peak-image-id="displayed-winner"');
+    expect(markup).toContain('Same image as brain map');
+    expect(markup).not.toContain('Comparison preview · brain unchanged');
+    expect(markup).not.toContain('<button');
+  });
+
+  it('distinguishes different images with the same display name by their IDs', () => {
+    const currentImage = { ...image('displayed', 'uploaded', -0.4), displayName: 'duplicate.png' };
+    const winner = { ...image('different-winner', 'uploaded', 0.7), displayName: 'duplicate.png' };
+    const markup = render([currentImage, winner], 'uploaded', currentImage);
+    expect(markup).toContain('src="/images/displayed.png"');
+    expect(markup).toContain('src="/images/different-winner.png"');
+    expect(markup).toContain('data-peak-image-id="different-winner"');
+    expect(markup).toContain('Comparison preview · brain unchanged');
+    expect(markup).not.toContain('Same image as brain map');
   });
 });

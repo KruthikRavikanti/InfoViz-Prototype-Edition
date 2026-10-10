@@ -89,7 +89,7 @@ describe('Subject 1 brain-map launcher', () => {
 
     expect(markup).toContain('role="dialog"');
     expect(markup).toContain('Predicted responses · NSD Subject 1');
-    expect(markup).toContain('Preparing shared response scale');
+    expect(markup).toContain('Preparing shared predicted response scale');
     expect(markup).not.toContain('model units · fixed scale');
     expect(markup).toContain('aria-busy="true"');
     expect(markup).toContain('Model predictions, not measured BOLD signals for these images.');
@@ -99,6 +99,29 @@ describe('Subject 1 brain-map launcher', () => {
     expect(markup).toContain('pooled NSD subjects');
     expect(markup).toContain('Three EBA responses are unmapped and not plotted.');
     expect(markup).toContain('Color between source voxels is not anatomical activation.');
+  });
+
+  it('visibly distinguishes the image coloring the brain from voxel hover comparisons', () => {
+    dialogState.open = true;
+    vi.stubGlobal('document', { body: {} });
+    const markup = renderToStaticMarkup(
+      <BrainMapDialog
+        session={brainSession()}
+        focusedStimulusId="stimulus-a"
+        onFocusStimulus={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('Shown on brain');
+    expect(markup).toContain('Hover previews do not change the brain.');
+    expect(markup).toContain('Selected image response');
+    expect(markup).toContain('Colors show the selected image · hover compares images at a voxel');
+    expect(markup).toContain('class="brain-map-current-image"');
+    expect(markup).toContain('data-image-id="stimulus-a"');
+    // The distinction is visible without opening the technical mapping disclosure.
+    const mappingDetails = markup.indexOf('<details class="brain-map-mapping-details">');
+    expect(markup.indexOf('Shown on brain')).toBeLessThan(mappingDetails);
+    expect(markup.indexOf('Hover previews do not change the brain.')).toBeLessThan(mappingDetails);
   });
 
   it('offers the verified reference brain map without an uploaded session', () => {

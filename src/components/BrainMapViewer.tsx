@@ -149,6 +149,9 @@ export default function BrainMapViewer({
     raycaster.params.Points = { threshold: 2.5 };
     const pointer = new THREE.Vector2();
     function handlePointerMove(event: PointerEvent) {
+      // Keyboard inspection owns this card until focus leaves it; unrelated
+      // pointer movement must not replace its voxel or discard keyboard focus.
+      if (document.activeElement?.closest('.brain-map-tooltip')) return;
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -180,7 +183,11 @@ export default function BrainMapViewer({
         canvasY: event.clientY - rect.top,
       });
     }
-    function clearHover() {
+    function clearHover(event: PointerEvent) {
+      // Keep the current voxel available while its hover card is inspected or
+      // scrolled. Moving into the card must not clear it underneath the pointer.
+      if (event.relatedTarget instanceof Element && event.relatedTarget.closest('.brain-map-tooltip')) return;
+      if (document.activeElement?.closest('.brain-map-tooltip')) return;
       onHoverRef.current(null);
       renderer.domElement.style.cursor = 'grab';
     }
