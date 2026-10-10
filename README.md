@@ -1,6 +1,8 @@
-# Cortex Model & Stimulus Explorer
+# Cortex-Compass
 
-This React/Vite visualization compares model alignment across brain regions and explores image responses for selected model–region pairs.
+Cortex-Compass is Virtual Cortex's model and stimulus visualization. It compares model alignment across brain regions and explores image responses for selected model–region pairs.
+
+Open it directly or choose **Open Cortex-Compass** after generating predictions in the Virtual Cortex Lab. The existing `/infoviz/` route, repository name, and comparison-session protocol are unchanged.
 
 ## What The App Does
 
@@ -11,7 +13,6 @@ This React/Vite visualization compares model alignment across brain regions and 
 - Supports compare mode for two evidence-backed cells.
 - Keeps the four image-cluster charts intact and groups the anatomical Brain Map and non-anatomical Voxel Selectivity Explorer under Brain & voxels.
 - Shows uploaded-stimulus and Murty-185 reference predictions on the NSD Subject 1 surface in the 3D Brain Map.
-- Includes a separate user study tab with an embedded form.
 
 ## Data In This Repo
 
@@ -106,6 +107,12 @@ Source Serif 4 headings, Inter controls, and IBM Plex Mono labels. Shared theme 
 `src/styles/global.css`; chart palettes remain independent so scientific color encodings keep their meaning.
 The Cortex masthead links home and back to the Lab, using `VITE_CORTEX_APP_URL` when configured.
 
+Below the Cortex-Compass title, a compact context summary identifies the Murty-185 reference images,
+the selected model and region, and NSD-1000 predictions where image-response data are available.
+Lab sessions separately show the user's original model, mapping dataset, and ROI. Browsing another
+model or comparing reference-only cells does not relabel the uploaded predictions; score-only models
+are explicitly distinguished from models with image-response data.
+
 Model search, ranking, score labels, and two-selection comparison are grouped in the model browser.
 The selected model–region workspace has **Image responses**, **Image clusters**, and **Brain & voxels**
 tabs; JSON export and metadata copying remain available across all three. The heatmap uses the quantitative
@@ -169,8 +176,8 @@ without hiding the joint tree. The fit is computed once per new upload/model ses
 recalculated on hover or refresh. Cluster labels and reference memberships may change between datasets;
 these exploratory predicted-response groups are not validated neural categories.
 
-Legacy sessions without a joint tree show reference-only hierarchical plots and instructions to reopen
-Explore visualization in Virtual Cortex. They never silently fall back to nearest-medoid assignments.
+Legacy sessions without a joint tree show reference-only hierarchical plots and instructions to choose
+**Open Cortex-Compass** again in Virtual Cortex. They never silently fall back to nearest-medoid assignments.
 k-means remains a fixed-reference overlay. DreamSim and measured-fMRI upload safeguards remain unchanged.
 
 ## Project Structure
@@ -178,7 +185,7 @@ k-means remains a fixed-reference overlay. DreamSim and measured-fMRI upload saf
 - `src/App.tsx`
   - top-level app state and data loading
 - `src/components/`
-  - heatmap, controls, details panel, compare drawer, and user study UI
+  - heatmap, controls, details panel, comparison views, and brain/voxel explorers
 - `src/utils/data.ts`
   - CSV/JSON loading and model/ROI parsing
 - `src/utils/evidence.ts`
@@ -232,10 +239,10 @@ This repo previously tracked generated artifacts and dependency folders. The `.g
 
 If you want the Git history to stop tracking those files, remove them from the index in a cleanup commit.
 
-## Cortex comparison-session mode
+## Cortex-Compass comparison sessions
 
-The standalone visualization remains the default. When Virtual Cortex opens a URL such as
-`http://localhost:5173/infoviz/#session=<opaque-token>`, InfoViz retrieves the temporary comparison from Cortex Core,
+Standalone Cortex-Compass remains the default. When Virtual Cortex opens a URL such as
+`http://localhost:5173/infoviz/#session=<opaque-token>`, Cortex-Compass retrieves the temporary comparison from Cortex Core,
 validates it against the local reference manifest, removes the token from browser history after a successful load,
 and keeps the session only in memory.
 

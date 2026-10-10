@@ -131,7 +131,7 @@ export function extractSessionToken(hash: string): string | null {
   const token = params.get('session')?.trim() ?? '';
   if (!token) return null;
   if (!/^[A-Za-z0-9_-]{16,256}$/.test(token)) {
-    throw new CortexSessionError('invalid', 'The visualization session token is malformed.');
+    throw new CortexSessionError('invalid', 'The Cortex-Compass session token is malformed.');
   }
   return token;
 }
@@ -572,7 +572,7 @@ export function validateComparisonSession(
 ): CortexComparisonSession {
   const raw = object(value, 'session');
   if (raw.schema_version !== 1) {
-    throw new CortexSessionError('invalid', 'This visualization session uses an unsupported schema version.');
+    throw new CortexSessionError('invalid', 'This Cortex-Compass session uses an unsupported schema version.');
   }
 
   const source = object(raw.source_request, 'source_request');
@@ -595,7 +595,7 @@ export function validateComparisonSession(
     throw new CortexSessionError('invalid', 'The session timestamps are invalid.');
   }
   if (Date.parse(expiresAt) <= now.getTime()) {
-    throw new CortexSessionError('expired', 'This visualization session has expired. Return to Cortex to prepare a new one.');
+    throw new CortexSessionError('expired', 'This Cortex-Compass session has expired. Return to Virtual Cortex to prepare a new one.');
   }
 
   const stimuli = array(raw.stimuli, 'stimuli').map((stimulus, index) => parseStimulus(stimulus, index, baseUrl));
@@ -733,7 +733,7 @@ export function assertSessionReferenceCompatible(
     );
   }
   if (manifest.referenceCount !== 185 || !manifest.models.includes(session.comparison.model)) {
-    throw new CortexSessionError('version-mismatch', 'The local visualization data does not support this comparison session.');
+    throw new CortexSessionError('version-mismatch', 'The local Cortex-Compass data does not support this comparison session.');
   }
 }
 
@@ -757,13 +757,13 @@ export async function loadCortexComparisonSession(
       method: 'GET',
     });
   } catch {
-    throw new CortexSessionError('unavailable', 'Cortex Core could not be reached. The standalone visualization remains available without this session.');
+    throw new CortexSessionError('unavailable', 'Cortex Core could not be reached. Cortex-Compass remains available without this session.');
   }
   if (response.status === 410) {
-    throw new CortexSessionError('expired', 'This visualization session has expired. Return to Cortex to prepare a new one.');
+    throw new CortexSessionError('expired', 'This Cortex-Compass session has expired. Return to Virtual Cortex to prepare a new one.');
   }
   if (response.status === 404) {
-    throw new CortexSessionError('invalid', 'This visualization session does not exist or is no longer available.');
+    throw new CortexSessionError('invalid', 'This Cortex-Compass session does not exist or is no longer available.');
   }
   if (!response.ok) {
     throw new CortexSessionError('unavailable', `Cortex Core could not load the session (HTTP ${response.status}).`);

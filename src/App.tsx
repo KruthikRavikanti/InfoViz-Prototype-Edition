@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Header } from './components/Header';
-import { TabNav } from './components/TabNav';
-import type { AppTab } from './components/TabNav';
-import { UserStudyView } from './components/UserStudyView';
 import { VisualizationView } from './components/VisualizationView';
 import type { RankingSystem, Roi, SelectedHeatmapCell, SortDirection, VisualizationData } from './types/data';
 import { loadVisualizationData } from './utils/data';
@@ -40,7 +37,7 @@ function initialSessionState(): SessionLoadState {
     return {
       status: 'error',
       kind: error instanceof CortexSessionError ? error.kind : 'invalid',
-      message: error instanceof Error ? error.message : 'The visualization session token is invalid.',
+      message: error instanceof Error ? error.message : 'The Cortex-Compass session token is invalid.',
     };
   }
 }
@@ -55,7 +52,6 @@ export default function App() {
   const [selectedCell, setSelectedCell] = useState<SelectedHeatmapCell | null>(null);
   const [compareMode, setCompareMode] = useState(false);
   const [compareCells, setCompareCells] = useState<SelectedHeatmapCell[]>([]);
-  const [activeTab, setActiveTab] = useState<AppTab>('visualization');
   const [sessionState, setSessionState] = useState<SessionLoadState>(initialSessionState);
   const [focusedStimulusId, setFocusedStimulusId] = useState<string | null>(null);
   const initializedSessionVersion = useRef<string | null>(null);
@@ -73,7 +69,7 @@ export default function App() {
         if (!ignore) {
           setDataState({
             status: 'error',
-            message: error instanceof Error ? error.message : 'Unable to load visualization data.',
+            message: error instanceof Error ? error.message : 'Unable to load Cortex-Compass data.',
           });
         }
       });
@@ -103,7 +99,7 @@ export default function App() {
         setSessionState({
           status: 'error',
           kind: error instanceof CortexSessionError ? error.kind : 'unavailable',
-          message: error instanceof Error ? error.message : 'The Cortex comparison session could not be loaded.',
+          message: error instanceof Error ? error.message : 'The Cortex-Compass comparison session could not be loaded.',
         });
       });
 
@@ -126,7 +122,6 @@ export default function App() {
       .find((cell) => cell.model === sessionState.session.comparison.model && cell.roi === initialRoi);
     if (initialCell) setSelectedCell(initialCell);
     setSelectedRankingRoi(initialRoi);
-    setActiveTab('visualization');
     initializedSessionVersion.current = version;
   }, [dataState, sessionState]);
 
@@ -173,7 +168,7 @@ export default function App() {
     return (
       <main className="app-shell session-error-shell">
         <div className="status-panel error-panel session-error-panel">
-          <p className="eyebrow">Cortex session unavailable</p>
+          <p className="eyebrow">Cortex-Compass unavailable</p>
           <h1>{sessionState.kind === 'expired' ? 'This comparison session expired' : 'Unable to open this comparison'}</h1>
           <p>{sessionState.message}</p>
           <a className="session-return-link" href={getCortexAppUrl()}>Return to Virtual Cortex</a>
@@ -187,7 +182,7 @@ export default function App() {
       <main className="app-shell">
         <div className="status-panel">
           <p className="eyebrow">Loading</p>
-          <h1>{sessionState.status === 'loading' ? 'Loading your comparison' : 'Loading the explorer'}</h1>
+          <h1>{sessionState.status === 'loading' ? 'Opening Cortex-Compass' : 'Loading Cortex-Compass'}</h1>
           <p>{sessionState.status === 'loading' ? 'Preparing uploaded stimuli and Murty reference images.' : 'Preparing model scores and image responses.'}</p>
         </div>
       </main>
@@ -199,7 +194,7 @@ export default function App() {
       <main className="app-shell">
         <div className="status-panel error-panel">
           <p className="eyebrow">Data error</p>
-          <h1>Unable to load visualization data</h1>
+          <h1>Unable to load Cortex-Compass</h1>
           <p>{dataState.message}</p>
         </div>
       </main>
@@ -230,9 +225,17 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <Header imageCount={data.rows.length} modelCount={aggregateModels.length} roiCount={heatmapRois.length} />
-      <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
-      <section className="tab-panel" hidden={activeTab !== 'visualization'} aria-label="Visualization view">
+      <Header
+        imageCount={data.rows.length}
+        modelCount={aggregateModels.length}
+        roiCount={heatmapRois.length}
+        selectedCell={selectedCell}
+        hasImageResponses={Boolean(selectedCell && hasComparableData(selectedCell.model, selectedCell.roi, data.rows, data.modelRoiColumns))}
+        compareMode={compareMode}
+        compareCells={compareCells}
+        session={session}
+      />
+      <section className="visualization-panel" aria-label="Cortex-Compass workspace">
         <VisualizationView
           rows={data.rows}
           clustering={data.clustering}
@@ -263,9 +266,6 @@ export default function App() {
           onCompareModeChange={handleCompareModeChange}
           onFocusStimulus={setFocusedStimulusId}
         />
-      </section>
-      <section className="tab-panel" hidden={activeTab !== 'user-study'} aria-label="User study view">
-        <UserStudyView />
       </section>
     </main>
   );

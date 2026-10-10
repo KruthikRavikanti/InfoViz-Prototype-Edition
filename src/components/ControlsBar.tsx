@@ -32,7 +32,7 @@ export function ControlsBar({
   onResetControls,
 }: ControlsBarProps) {
   return (
-    <section className="controls-bar" aria-label="Visualization controls">
+    <section className="controls-bar" aria-label="Model controls">
       <label className="model-search-control">
         Search models
         <input

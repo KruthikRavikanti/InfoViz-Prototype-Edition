@@ -54,7 +54,7 @@ export function validateBrainReferenceManifest(value: unknown): BrainReferenceMa
     if (raw[field] !== expected) throw new BrainMapAssetError(`Brain reference manifest.${field} is incompatible.`);
   }
   if (referenceIdentity.reference_version !== BRAIN_REFERENCE_VERSION || referenceIdentity.dataset !== 'nsd_1000') {
-    throw new BrainMapAssetError('The visualization reference bundle is incompatible with the brain reference data.');
+    throw new BrainMapAssetError('The Cortex-Compass reference bundle is incompatible with the brain reference data.');
   }
   const imageIds = Array.from({ length: REFERENCE_COUNT }, (_, index) => `image_${String(index + 1).padStart(3, '0')}.png`);
   if (!Array.isArray(raw.imageIds) || raw.imageIds.length !== REFERENCE_COUNT || raw.imageIds.some((id, index) => id !== imageIds[index])) {

@@ -43,7 +43,7 @@ const ROI_COMPARISON_ORDER: CanonicalRoi[] = ['ffa', 'eba', 'ppa'];
 
 function jointClusteringNote(view: ClusterView | null, hasHierarchy: boolean): string | null {
   if (!hasHierarchy) {
-    return 'This upload session predates joint clustering. Reopen Explore visualization in Virtual Cortex to rebuild it.';
+    return 'This upload session predates joint clustering. Choose Open Cortex-Compass in Virtual Cortex to rebuild it.';
   }
   if (view && !view.jointHierarchy) {
     return 'Joint clustering could not be matched to these reference images. Only the reference clusters are shown.';

@@ -11,7 +11,7 @@ describe('comparison session context', () => {
       <SessionBanner session={session} focusedStimulusId="stimulus-a" onFocusStimulus={vi.fn()} />,
     );
 
-    expect(markup).toContain('aria-label="Cortex comparison session"');
+    expect(markup).toContain('aria-label="Cortex-Compass comparison session"');
     expect(markup).toContain('Comparison active');
     expect(markup).toContain('1 upload');
     expect(markup).toContain('uploaded.png');

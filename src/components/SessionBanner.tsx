@@ -17,7 +17,7 @@ export function SessionBanner({ session, focusedStimulusId, onFocusStimulus }: S
   const uploadLabel = `${session.stimuli.length} upload${session.stimuli.length === 1 ? '' : 's'}`;
 
   return (
-    <section className="session-context" aria-label="Cortex comparison session">
+    <section className="session-context" aria-label="Cortex-Compass comparison session">
       <div className="session-context-status">
         <span className="session-status-indicator" aria-hidden="true" />
         <div>
