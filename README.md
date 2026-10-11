@@ -2,7 +2,7 @@
 
 Cortex-Compass is Virtual Cortex's model and stimulus visualization. It compares model alignment across brain regions and explores image responses for selected model–region pairs.
 
-Open it directly or choose **Open Cortex-Compass** after generating predictions in the Virtual Cortex Lab. The existing `/infoviz/` route, repository name, and comparison-session protocol are unchanged.
+Open it directly or choose **Open Cortex-Compass** after generating predictions in the Virtual Cortex Lab. Virtual Cortex's `/cortex-compass/` workspace keeps its navigation visible and preserves Lab results on return. The existing `/infoviz/` route, repository name, and comparison-session protocol are unchanged.
 
 ## What The App Does
 
@@ -235,6 +235,9 @@ The visualization follows the sibling Virtual Cortex Lab: warm ivory surfaces, a
 Source Serif 4 headings, Inter controls, and IBM Plex Mono labels. Shared theme tokens live in
 `src/styles/global.css`; chart palettes remain independent so scientific color encodings keep their meaning.
 The Cortex masthead links home and back to the Lab, using `VITE_CORTEX_APP_URL` when configured.
+Inside Virtual Cortex's same-origin full-page workspace, `?embedded=1` hides only
+this duplicate masthead; the title, reference/model context, charts, and dialogs
+remain. The flag has no effect outside a frame, so standalone navigation stays intact.
 
 Below the Cortex-Compass title, a compact context summary identifies the Murty-185 reference images,
 the selected model and region, and NSD-1000 predictions where image-response data are available.
@@ -375,6 +378,18 @@ Standalone Cortex-Compass remains the default. When Virtual Cortex opens a URL s
 `http://localhost:5173/infoviz/#session=<opaque-token>`, Cortex-Compass retrieves the temporary comparison from Cortex Core,
 validates it against the local reference manifest, removes the token from browser history after a successful load,
 and keeps the session only in memory.
+
+The integrated host opens `/cortex-compass/` and passes that token to the embedded
+page's fragment. The host retains the opaque token in the current tab's history
+state to support refresh; it does not persist comparison data in browser storage.
+The frame sends only loading/ready/error and return-to-Lab messages to the exact
+same-origin parent. The host validates the message origin and frame identity.
+
+Keep this source repository separate from `cortex-app`. A combined deployment
+can serve this repo's compiled `dist` at `/infoviz/` alongside the host's compiled
+pages, or reverse-proxy that path to the visualization. It must also provide the
+matching Core backend and private reference bundle for upload comparisons; the
+local Vite proxy is not a production deployment setup.
 
 The sibling-repository development defaults are already equivalent to:
 

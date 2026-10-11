@@ -2,6 +2,7 @@ import { publicPath } from '../utils/publicPath';
 import type { SelectedHeatmapCell } from '../types/data';
 import type { CortexComparisonSession } from '../types/session';
 import { isStochasticReferenceModel, STOCHASTIC_REFERENCE_NOTE } from '../utils/predictionPolicy';
+import { getCortexNavigationTarget, requestCortexReturnToLab } from '../services/cortexEmbedding';
 
 type HeaderProps = {
   imageCount: number;
@@ -12,6 +13,7 @@ type HeaderProps = {
   compareMode?: boolean;
   compareCells?: SelectedHeatmapCell[];
   session?: CortexComparisonSession | null;
+  embedded?: boolean;
 };
 
 function mappingLabel(dataset: string): string {
@@ -29,6 +31,7 @@ export function Header({
   compareMode = false,
   compareCells = [],
   session = null,
+  embedded = false,
 }: HeaderProps) {
   const cortexHome = `${(import.meta.env.VITE_CORTEX_APP_URL?.trim() || '/').replace(/\/+$/, '')}/`;
   const cortexLab = `${cortexHome}lab/`;
@@ -47,21 +50,23 @@ export function Header({
 
   return (
     <header className="app-header">
-      <div className="app-masthead">
-        <a className="cortex-brand" href={cortexHome} aria-label="Virtual Visual Cortex home">
+      {!embedded && <div className="app-masthead">
+        <a className="cortex-brand" href={cortexHome} target={getCortexNavigationTarget(embedded)} aria-label="Virtual Visual Cortex home">
           <img src={publicPath('cortex-logo.svg')} alt="" />
           <span>Cortex</span>
         </a>
         <nav className="app-masthead-nav" aria-label="Cortex navigation">
           <span className="app-product-label">Cortex-Compass</span>
-          <a className="back-to-lab" href={cortexLab}>
+          <a className="back-to-lab" href={cortexLab} target={getCortexNavigationTarget(embedded)} onClick={(event) => {
+            if (embedded && requestCortexReturnToLab()) event.preventDefault();
+          }}>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
               <path d="M19 12H5m7-7-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             Back to the Lab
           </a>
         </nav>
-      </div>
+      </div>}
       <div className="app-header-content">
         <div>
           <h1>Cortex-Compass</h1>

@@ -17,6 +17,12 @@ import {
 import { isCanonicalRoi } from './utils/sessionEvidence';
 import { getHeatmapScoreDomain } from './utils/heatmapAppearance';
 import {
+  getCortexNavigationTarget,
+  isCortexEmbedded,
+  notifyCortexStatus,
+  requestCortexReturnToLab,
+} from './services/cortexEmbedding';
+import {
   buildAggregateHeatmapCells,
   filterModelsBySearch,
   getDefaultHeatmapRois,
@@ -43,6 +49,8 @@ function initialSessionState(): SessionLoadState {
 }
 
 export default function App() {
+  const embedded = isCortexEmbedded();
+  const appShellClass = embedded ? 'app-shell app-shell--embedded' : 'app-shell';
   const [dataState, setDataState] = useState<DataState>({ status: 'loading' });
   const [rankingSystem, setRankingSystem] = useState<RankingSystem>('overall');
   const [selectedRankingRoi, setSelectedRankingRoi] = useState<Roi>('ffa');
@@ -125,6 +133,16 @@ export default function App() {
     initializedSessionVersion.current = version;
   }, [dataState, sessionState]);
 
+  useEffect(() => {
+    if (!embedded) return;
+    // Uploaded comparisons are not ready until both the public references and
+    // the comparison session have loaded. Send status only, never a session token.
+    const status = dataState.status === 'error' || sessionState.status === 'error'
+      ? 'error'
+      : dataState.status === 'loading' || sessionState.status === 'loading' ? 'loading' : 'ready';
+    notifyCortexStatus(status);
+  }, [embedded, dataState.status, sessionState.status]);
+
   function handleCompareModeChange(enabled: boolean) {
     setCompareMode(enabled);
     setCompareCells([]);
@@ -166,12 +184,14 @@ export default function App() {
 
   if (sessionState.status === 'error') {
     return (
-      <main className="app-shell session-error-shell">
+      <main className={`${appShellClass} session-error-shell`}>
         <div className="status-panel error-panel session-error-panel">
           <p className="eyebrow">Cortex-Compass unavailable</p>
           <h1>{sessionState.kind === 'expired' ? 'This comparison session expired' : 'Unable to open this comparison'}</h1>
           <p>{sessionState.message}</p>
-          <a className="session-return-link" href={getCortexAppUrl()}>Return to Virtual Cortex</a>
+          <a className="session-return-link" href={getCortexAppUrl()} target={getCortexNavigationTarget(embedded)} onClick={(event) => {
+            if (embedded && requestCortexReturnToLab()) event.preventDefault();
+          }}>Return to Virtual Cortex</a>
         </div>
       </main>
     );
@@ -179,7 +199,7 @@ export default function App() {
 
   if (dataState.status === 'loading' || sessionState.status === 'loading') {
     return (
-      <main className="app-shell">
+      <main className={appShellClass}>
         <div className="status-panel">
           <p className="eyebrow">Loading</p>
           <h1>{sessionState.status === 'loading' ? 'Opening Cortex-Compass' : 'Loading Cortex-Compass'}</h1>
@@ -191,11 +211,14 @@ export default function App() {
 
   if (dataState.status === 'error') {
     return (
-      <main className="app-shell">
+      <main className={appShellClass}>
         <div className="status-panel error-panel">
           <p className="eyebrow">Data error</p>
           <h1>Unable to load Cortex-Compass</h1>
           <p>{dataState.message}</p>
+          {embedded && <a className="session-return-link" href={getCortexAppUrl()} target={getCortexNavigationTarget(embedded)} onClick={(event) => {
+            if (requestCortexReturnToLab()) event.preventDefault();
+          }}>Return to Virtual Cortex</a>}
         </div>
       </main>
     );
@@ -224,8 +247,9 @@ export default function App() {
   );
 
   return (
-    <main className="app-shell">
+    <main className={appShellClass}>
       <Header
+        embedded={embedded}
         imageCount={data.rows.length}
         modelCount={aggregateModels.length}
         roiCount={heatmapRois.length}

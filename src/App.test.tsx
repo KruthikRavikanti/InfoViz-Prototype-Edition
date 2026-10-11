@@ -5,6 +5,7 @@ import type { SelectedHeatmapCell, VisualizationData } from './types/data';
 
 const appState = vi.hoisted(() => ({
   data: null as VisualizationData | null,
+  dataError: null as string | null,
   selectedCell: null as SelectedHeatmapCell | null,
   nullStatesSeen: 0,
 }));
@@ -16,6 +17,10 @@ vi.mock('react', async (importOriginal) => {
   return {
     ...original,
     useState(initialState: unknown) {
+      if (appState.dataError && typeof initialState === 'object' && initialState !== null
+        && 'status' in initialState && initialState.status === 'loading') {
+        return original.useState({ status: 'error', message: appState.dataError });
+      }
       if (appState.data && typeof initialState === 'object' && initialState !== null
         && 'status' in initialState && initialState.status === 'loading') {
         return original.useState({ status: 'ready', data: appState.data });
@@ -63,16 +68,17 @@ function visualizationFixture(): VisualizationData {
   };
 }
 
-function renderExplorer(selectedCell: SelectedHeatmapCell | null = null): string {
+function renderExplorer(selectedCell: SelectedHeatmapCell | null = null, embedded = false): string {
   appState.data = visualizationFixture();
   appState.selectedCell = selectedCell;
   appState.nullStatesSeen = 0;
-  vi.stubGlobal('window', { location: { hash: '' } });
+  vi.stubGlobal('window', { location: { hash: '', search: embedded ? '?embedded=1' : '' }, parent: embedded ? { postMessage: vi.fn() } : undefined });
   return renderToStaticMarkup(<App />);
 }
 
 afterEach(() => {
   appState.data = null;
+  appState.dataError = null;
   appState.selectedCell = null;
   appState.nullStatesSeen = 0;
   vi.unstubAllGlobals();
@@ -108,6 +114,44 @@ describe('Cortex-Compass application', () => {
     expect(markup).not.toContain('aria-label="Primary views"');
     expect(markup).not.toContain('<iframe');
     expect(markup).not.toContain('docs.google.com/forms');
+  });
+
+  it('preserves the explorer under the host header without a second navigation bar', () => {
+    const markup = renderExplorer(null, true);
+
+    expect(markup).toContain('<main class="app-shell app-shell--embedded">');
+    expect(markup).toContain('<h1>Cortex-Compass</h1>');
+    expect(markup).toContain('Murty-185 (2 images)');
+    expect(markup).toContain('aria-label="Model controls"');
+    expect(markup).toContain('aria-label="Heatmap area"');
+    expect(markup).not.toContain('class="app-masthead"');
+    expect(markup).not.toContain('Back to the Lab');
+    expect(markup).not.toContain('<iframe');
+  });
+
+  it('uses the embedded shell while loading without removing standalone navigation based on a flag alone', () => {
+    vi.stubGlobal('window', { location: { hash: '', search: '?embedded=1' }, parent: { postMessage: vi.fn() } });
+    expect(renderToStaticMarkup(<App />)).toContain('<main class="app-shell app-shell--embedded">');
+    vi.stubGlobal('window', { location: { hash: '', search: '?embedded=1' } });
+    expect(renderToStaticMarkup(<App />)).toContain('<main class="app-shell">');
+  });
+
+  it('keeps error-screen return navigation outside the frame', () => {
+    vi.stubGlobal('window', { location: { hash: '#session=bad', search: '?embedded=1' }, parent: { postMessage: vi.fn() } });
+    const markup = renderToStaticMarkup(<App />);
+    expect(markup).toContain('class="app-shell app-shell--embedded session-error-shell"');
+    expect(markup).toContain('target="_top"');
+    expect(markup).toContain('Return to Virtual Cortex');
+  });
+
+  it('offers the same top-level return when embedded public data cannot load', () => {
+    appState.dataError = 'References unavailable';
+    vi.stubGlobal('window', { location: { hash: '', search: '?embedded=1' }, parent: { postMessage: vi.fn() } });
+    const markup = renderToStaticMarkup(<App />);
+    expect(markup).toContain('<main class="app-shell app-shell--embedded">');
+    expect(markup).toContain('References unavailable');
+    expect(markup).toContain('target="_top"');
+    expect(markup).toContain('Return to Virtual Cortex');
   });
 
   it('preserves the three analysis tabs and four cluster views when a model is selected', () => {

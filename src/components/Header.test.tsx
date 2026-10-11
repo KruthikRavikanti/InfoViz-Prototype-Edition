@@ -56,6 +56,19 @@ describe('Cortex-Compass masthead', () => {
     expect(markup).toContain('Back to the Lab');
   });
 
+  it('leaves the host navigation to Virtual Cortex when embedded, preserving all reference and model context', () => {
+    const markup = renderHeader({ embedded: true, selectedCell: cell(), hasImageResponses: true });
+
+    expect(markup).not.toContain('class="app-masthead"');
+    expect(markup).not.toContain('aria-label="Cortex navigation"');
+    expect(markup).not.toContain('Back to the Lab');
+    expect(markup).toContain('class="app-header-content"');
+    expect(markup).toContain('<h1>Cortex-Compass</h1>');
+    expect(markup).toContain('Murty-185 (185 images)');
+    expect(markup).toContain('<strong>Viewing:</strong> clip_rn50 · FFA · NSD-1000 predictions');
+    expect(markup).toContain('aria-label="Dataset summary"');
+  });
+
   it.each([
     ['https://cortex.example', 'https://cortex.example/', 'https://cortex.example/lab/'],
     [' https://cortex.example/research/cortex/ ', 'https://cortex.example/research/cortex/', 'https://cortex.example/research/cortex/lab/'],
