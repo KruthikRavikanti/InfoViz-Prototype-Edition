@@ -1,0 +1,22 @@
+{
+  "sourceRepo": "https://github.com/murtylab/cortex-app",
+  "sourcePath": "assets/data/new/standardized_results_nsd_1000_models_univariate.json",
+  "sourceCommit": "59562f7c6c5680a2781e33ce18b7a4849cf14c80",
+  "sourceSha256": "61d865202dbec497da5432e6f59504f645bf83dfd5b8d9322fdb196ce3667077",
+  "trainingDataset": "nsd_1000",
+  "evaluationDataset": "murty185",
+  "metric": "Univariate Pearson correlation",
+  "roiKeys": [
+    "ffa",
+    "ppa",
+    "eba"
+  ],
+  "scorePair": [
+    "raw Pearson correlation",
+    "stored noise-ceiling-normalized color value"
+  ],
+  "overall": "Arithmetic mean over the available FFA, PPA, and EBA scores",
+  "colorPolicy": "Use stored normalized values, clamped to [0, 1] for the scoreboard palette; never clamp raw scores",
+  "modelCount": 127,
+  "noiseCeilingKey": "ceiling"
+}

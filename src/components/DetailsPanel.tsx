@@ -21,6 +21,7 @@ import { buildEvidenceView } from '../utils/evidence';
 import { inferModelCategory } from '../utils/modelTags';
 import { buildSessionEvidenceView } from '../utils/sessionEvidence';
 import { buildJointClusterView } from '../utils/jointClustering';
+import { getSessionForModel } from '../utils/sessionModels';
 
 type DetailsPanelProps = {
   heatmapCells: AggregateHeatmapCell[];
@@ -124,11 +125,15 @@ export function DetailsPanel({
     () => (selectedCell ? buildEvidenceView(selectedCell, rows, modelRoiColumns, topK) : null),
     [modelRoiColumns, rows, selectedCell, topK],
   );
+  const modelSession = useMemo(
+    () => selectedCell ? getSessionForModel(session, selectedCell.model) : null,
+    [session, selectedCell?.model],
+  );
   const sessionEvidenceView = useMemo(
-    () => (selectedCell && session
-      ? buildSessionEvidenceView(selectedCell, rows, modelRoiColumns, session, focusedStimulusId, topK)
+    () => (selectedCell && modelSession
+      ? buildSessionEvidenceView(selectedCell, rows, modelRoiColumns, modelSession, focusedStimulusId, topK)
       : null),
-    [focusedStimulusId, modelRoiColumns, rows, selectedCell, session, topK],
+    [focusedStimulusId, modelRoiColumns, rows, selectedCell, modelSession, topK],
   );
 
   const activeVoxelSummaries = clustering.voxelSummariesByMethod[clusteringMethod] ?? clustering.voxelSummaries;
@@ -185,7 +190,7 @@ export function DetailsPanel({
 
   function payload() {
     if (!selectedCell) return null;
-    const activeSession = session?.comparison.model === selectedCell.model ? session : null;
+    const activeSession = modelSession;
     const views = Object.fromEntries(voxelRois.map((roi) => {
       const referenceView = voxelRoiStates[roi].view;
       const hierarchy = activeSession?.roiResults[roi].jointHierarchy;
@@ -283,7 +288,7 @@ export function DetailsPanel({
           aria-selected={activeTab === 'evidence'}
           onClick={() => setActiveTab('evidence')}
         >
-          Image responses
+          Predicted responses
         </button>
         <button
           type="button"
@@ -292,7 +297,7 @@ export function DetailsPanel({
           aria-selected={activeTab === 'clustering'}
           onClick={() => setActiveTab('clustering')}
         >
-          Image clusters
+          Image similarity
         </button>
         <button
           type="button"
@@ -301,12 +306,12 @@ export function DetailsPanel({
           aria-selected={activeTab === 'spatial'}
           onClick={() => setActiveTab('spatial')}
         >
-          Brain &amp; voxels
+          Brain &amp; selectivity
         </button>
       </div>
 
       {/* Evidence tab */}
-      <section className="image-evidence-tab" hidden={activeTab !== 'evidence'} aria-label="Image responses">
+      <section className="image-evidence-tab" hidden={activeTab !== 'evidence'} aria-label="Predicted responses">
         <div className="image-evidence-toolbar">
           <label className="evidence-control">
             Images per group
@@ -323,7 +328,7 @@ export function DetailsPanel({
           />
         ) : !evidenceView ? (
           <div className="evidence-empty-state">
-            <h3>Image responses unavailable</h3>
+            <h3>Predicted responses unavailable</h3>
             <p>This selection has alignment scores only.</p>
           </div>
         ) : (
@@ -347,7 +352,7 @@ export function DetailsPanel({
       </section>
 
       {/* Clustering tab */}
-      <section hidden={activeTab !== 'clustering'} aria-label="Image clusters">
+      <section hidden={activeTab !== 'clustering'} aria-label="Image similarity">
         <ClusteringPanel
           voxelRoiStates={voxelRoiStates}
           clusteringMethod={clusteringMethod}
@@ -358,7 +363,7 @@ export function DetailsPanel({
           imageCategories={clustering.imageCategories}
           groundTruthPatients={activeGroundTruthPatients}
           onOpenImage={setModalImage}
-          session={sessionEvidenceView ? session : null}
+          session={sessionEvidenceView ? modelSession : null}
           selectedModel={selectedCell.model}
           selectedRoi={selectedCell.roi}
           selectivityAtlasAvailable={Boolean(voxelSummary)}
@@ -367,11 +372,11 @@ export function DetailsPanel({
         />
       </section>
 
-      <section hidden={activeTab !== 'spatial'} aria-label="Brain and voxels">
+      <section hidden={activeTab !== 'spatial'} aria-label="Brain and selectivity">
         {activeTab === 'spatial' && (
           <SpatialTools
             model={selectedCell.model}
-            session={session}
+            session={modelSession}
             focusedStimulusId={focusedStimulusId}
             onFocusStimulus={onFocusStimulus}
           />

@@ -175,9 +175,39 @@ describe('Subject 1 brain-map launcher', () => {
     );
     expect(markup).toContain('Uploads (0)');
     expect(markup).toContain('data-image-source="reference"');
-    expect(markup).toContain('Select clip_rn50 to view this session');
+    expect(markup).toContain('Uploads are prepared for clip_rn50');
     expect(markup).not.toContain('data-image-id="stimulus-a"');
     expect(markup).toContain('Loading reference predictions');
+  });
+
+  it('offers uploads for a prepared baseline without showing the primary model warning', () => {
+    dialogState.open = true;
+    vi.stubGlobal('document', { body: {} });
+    const session = brainSession();
+    session.modelResults = {
+      efficient_net: { roiResults: structuredClone(session.roiResults), brainMapResults: structuredClone(session.brainMapResults!) },
+    };
+    const markup = renderToStaticMarkup(
+      <BrainMapDialog session={session} selectedModel="efficient_net" focusedStimulusId="stimulus-a" />,
+    );
+    expect(markup).toContain('Uploads (1)');
+    expect(markup).toContain('data-image-source="uploaded"');
+    expect(markup).toContain('data-image-id="stimulus-a"');
+    expect(markup).not.toContain('Uploads are prepared for');
+    expect(markup).not.toContain('Upload brain responses are unavailable');
+  });
+
+  it('does not offer the primary model’s brain predictions when a baseline has no brain vectors', () => {
+    dialogState.open = true;
+    vi.stubGlobal('document', { body: {} });
+    const session = brainSession();
+    session.modelResults = { efficient_net: { roiResults: structuredClone(session.roiResults) } };
+    const markup = renderToStaticMarkup(
+      <BrainMapDialog session={session} selectedModel="efficient_net" focusedStimulusId="stimulus-a" />,
+    );
+    expect(markup).toContain('Uploads (0)');
+    expect(markup).toContain('Upload brain responses are unavailable for this model.');
+    expect(markup).not.toContain('data-image-id="stimulus-a"');
   });
 
   it('rejects incompatible upload bundles immediately, even before reference assets finish loading', () => {

@@ -1,6 +1,7 @@
 import type { BrainMapReferenceSet } from '../types/brainMap';
 import { BRAIN_REFERENCE_VERSION } from '../services/brainReferenceAssets';
 import { CANONICAL_ROIS, SUBJECT_ONE_ROI_VOXEL_COUNTS, type BrainMapStimulusResult, type CortexComparisonSession } from '../types/session';
+import { getSessionForModel } from './sessionModels';
 
 export type BrainMapImageSource = 'uploaded' | 'reference';
 
@@ -14,10 +15,11 @@ export type BrainMapImage = {
 
 /** A session's vectors cannot be displayed under another model or reference bundle. */
 export function brainMapUploadedImages(
-  session: CortexComparisonSession | null | undefined,
+  providedSession: CortexComparisonSession | null | undefined,
   model: string,
   references?: BrainMapReferenceSet,
 ): BrainMapImage[] {
+  const session = getSessionForModel(providedSession, model);
   if (
     !session?.brainMapResults
     || session.comparison.model !== model

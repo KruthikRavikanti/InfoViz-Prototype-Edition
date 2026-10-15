@@ -22,7 +22,6 @@ type VisualizationViewProps = {
   modelRoiColumns: ModelRoiColumn[];
   heatmapRois: Roi[];
   heatmapCells: AggregateHeatmapCell[];
-  heatmapColorDomain: readonly [number, number];
   visibleModels: string[];
   rankingSystem: RankingSystem;
   selectedRankingRoi: Roi;
@@ -45,6 +44,7 @@ type VisualizationViewProps = {
   onSelectCell: (cell: SelectedHeatmapCell) => void;
   onCompareModeChange: (enabled: boolean) => void;
   onFocusStimulus: (stimulusId: string) => void;
+  onSelectSessionModel: (model: string) => void;
 };
 
 export function VisualizationView({
@@ -53,7 +53,6 @@ export function VisualizationView({
   modelRoiColumns,
   heatmapRois,
   heatmapCells,
-  heatmapColorDomain,
   visibleModels,
   rankingSystem,
   selectedRankingRoi,
@@ -76,6 +75,7 @@ export function VisualizationView({
   onSelectCell,
   onCompareModeChange,
   onFocusStimulus,
+  onSelectSessionModel,
 }: VisualizationViewProps) {
   return (
     <>
@@ -84,6 +84,8 @@ export function VisualizationView({
           session={session}
           focusedStimulusId={focusedStimulusId}
           onFocusStimulus={onFocusStimulus}
+          selectedModel={selectedCell?.model ?? null}
+          onSelectModel={onSelectSessionModel}
         />
       )}
       <div className="workspace-grid">
@@ -105,7 +107,6 @@ export function VisualizationView({
           />
           <Heatmap
             cells={heatmapCells}
-            colorDomain={heatmapColorDomain}
             models={visibleModels}
             rois={heatmapRois}
             showScoreLabels={showScoreLabels}

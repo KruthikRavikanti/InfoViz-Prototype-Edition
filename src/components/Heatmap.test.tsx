@@ -9,6 +9,7 @@ const cell: AggregateHeatmapCell = {
   roi: 'ffa',
   model: 'clip_rn50',
   score: 0.812,
+  normalizedScore: 0.99,
   rankWithinRoi: 4,
   overallScore: 0.75,
 };
@@ -55,12 +56,15 @@ describe('session heatmap highlighting', () => {
 });
 
 describe('compact heatmap presentation', () => {
-  it('uses the scoreboard palette and a single compact legend with the real full score domain', () => {
-    const markup = renderToStaticMarkup(<Heatmap {...defaults} colorDomain={[-0.281, 0.86]} />);
+  it('uses stored scoreboard color values and a fixed ceiling-normalized legend while retaining raw labels', () => {
+    const markup = renderToStaticMarkup(<Heatmap {...defaults} />);
     expect(markup.match(/class="heatmap-color-key"/g)).toHaveLength(1);
     expect(markup).toContain('#ede9d8 0%, #c4b4cc 50%, #8966a3 100%');
-    expect(markup).toContain('Alignment score color scale from -0.281 to 0.860');
-    expect(markup).toContain(`fill="${heatmapScoreColor(cell.score!, [-0.281, 0.86])}"`);
+    expect(markup).toContain('Score / noise ceiling color scale from 0 to 1');
+    expect(markup).toContain('NSD-1000 training · Murty185 evaluation · Pearson r');
+    expect(markup).toContain(`fill="${heatmapScoreColor(cell.normalizedScore!)}"`);
+    expect(markup).toContain('data-normalized-score="0.99"');
+    expect(markup).toContain('>0.81</text>');
     expect(markup).not.toContain('heatmap-legend');
   });
 
@@ -113,5 +117,22 @@ describe('compact heatmap presentation', () => {
     const markup = renderToStaticMarkup(<Heatmap {...defaults} cells={[]} models={[]} />);
     expect(markup).toContain('No models match');
     expect(markup).not.toContain('class="heatmap-svg"');
+  });
+
+  it('distinguishes the noise ceiling from model counts and comparison evidence', () => {
+    const ceiling = { ...cell, id: 'ffa__ceiling', model: 'ceiling', rankWithinRoi: null, normalizedScore: 1 };
+    const markup = renderToStaticMarkup(<Heatmap {...defaults} cells={[ceiling, cell]}
+      models={['ceiling', 'clip_rn50']} compareMode />);
+    expect(markup).toContain('1 models + ceiling');
+    expect(markup).toContain('Noise ceiling');
+    expect(markup).toContain('heatmap-ceiling-divider');
+    expect(markup).toContain('heatmap-cell ceiling-reference compare-disabled');
+    expect(markup).toContain('rank unavailable');
+  });
+
+  it('does not substitute a raw correlation when a normalized color is missing', () => {
+    const markup = renderToStaticMarkup(<Heatmap {...defaults} cells={[{ ...cell, normalizedScore: null }]} />);
+    expect(markup).toContain('fill="var(--bg-subtle)"');
+    expect(markup).toContain('data-score="0.812"');
   });
 });

@@ -95,7 +95,7 @@ function CellCard({
           <ImageGrid title="Lowest responses" images={evidenceView.bottomImages} onOpenImage={onOpenImage} compact />
         </>
       ) : (
-        <p className="compare-empty">Image responses unavailable.</p>
+        <p className="compare-empty">Predicted responses unavailable.</p>
       )}
     </article>
   );

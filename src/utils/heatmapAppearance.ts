@@ -1,11 +1,7 @@
 import { scaleLinear } from 'd3';
-import type { AggregateHeatmapCell } from '../types/data';
-
-export type HeatmapScoreDomain = readonly [number, number];
-
 // Matches Cortex's quantitative scoreboard heatmapOverview/heatmapDetail ramp.
-// These are palette stops, not ceiling-normalized scores: the legend always
-// reports the aggregate alignment scores actually supplied by InfoViz.
+// Input is the source file's stored ceiling-normalized value. Raw correlation
+// remains unchanged in labels and rankings; only colors are clipped to [0, 1].
 export const SCOREBOARD_HEATMAP_COLORS = ['#ede9d8', '#c4b4cc', '#8966a3'] as const;
 export const SCOREBOARD_HEATMAP_GRADIENT = `linear-gradient(90deg, ${SCOREBOARD_HEATMAP_COLORS[0]} 0%, ${SCOREBOARD_HEATMAP_COLORS[1]} 50%, ${SCOREBOARD_HEATMAP_COLORS[2]} 100%)`;
 
@@ -14,30 +10,12 @@ const scoreboardRamp = scaleLinear<string>()
   .range([...SCOREBOARD_HEATMAP_COLORS])
   .clamp(true);
 
-export function getHeatmapScoreDomain(cells: readonly AggregateHeatmapCell[]): HeatmapScoreDomain {
-  let minimum = Infinity;
-  let maximum = -Infinity;
-  for (const cell of cells) {
-    if (cell.score === null || !Number.isFinite(cell.score)) continue;
-    minimum = Math.min(minimum, cell.score);
-    maximum = Math.max(maximum, cell.score);
-  }
-  return minimum === Infinity ? [0, 1] : [minimum, maximum];
+export function heatmapScoreColor(normalizedScore: number): string {
+  return scoreboardRamp(normalizedScore);
 }
 
-export function normalizeHeatmapScore(score: number, [minimum, maximum]: HeatmapScoreDomain): number {
-  // A constant data set has no low/high distinction. Do not invent a larger
-  // score for its legend merely to give the color scale a nonzero width.
-  if (minimum === maximum) return 0.5;
-  return Math.max(0, Math.min(1, (score - minimum) / (maximum - minimum)));
-}
-
-export function heatmapScoreColor(score: number, domain: HeatmapScoreDomain): string {
-  return scoreboardRamp(normalizeHeatmapScore(score, domain));
-}
-
-export function heatmapScoreTextColor(score: number, domain: HeatmapScoreDomain): string {
-  const channels = heatmapScoreColor(score, domain).match(/\d+/g)?.map(Number) ?? [237, 233, 216];
+export function heatmapScoreTextColor(normalizedScore: number): string {
+  const channels = heatmapScoreColor(normalizedScore).match(/\d+/g)?.map(Number) ?? [237, 233, 216];
   const linear = channels.map((channel) => {
     const value = channel / 255;
     return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;

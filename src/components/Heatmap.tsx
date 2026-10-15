@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { scaleBand } from 'd3';
@@ -7,13 +7,11 @@ import { inferModelCategory } from '../utils/modelTags';
 import {
   clampHeatmapTooltip,
   getHeatmapLayout,
-  getHeatmapScoreDomain,
   HEATMAP_LAYOUT,
   heatmapScoreColor,
   heatmapScoreTextColor,
   SCOREBOARD_HEATMAP_GRADIENT,
 } from '../utils/heatmapAppearance';
-import type { HeatmapScoreDomain } from '../utils/heatmapAppearance';
 
 type HeatmapProps = {
   cells: AggregateHeatmapCell[];
@@ -29,7 +27,6 @@ type HeatmapProps = {
   onSortDirectionToggle: () => void;
   onSelectCell: (cell: SelectedHeatmapCell) => void;
   selectedRankingRoi?: Roi | null;
-  colorDomain?: HeatmapScoreDomain;
 };
 
 type TooltipState = {
@@ -69,13 +66,10 @@ export function Heatmap({
   onSortDirectionToggle,
   onSelectCell,
   selectedRankingRoi = null,
-  colorDomain,
 }: HeatmapProps) {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const hoveredCell = tooltip?.cell ?? null;
-  const domain = useMemo(() => colorDomain ?? getHeatmapScoreDomain(cells), [colorDomain, cells]);
-  const [minScore, maxScore] = domain;
   const { margin, width, height, innerWidth, innerHeight: heatmapHeight } = getHeatmapLayout(models.length, rois.length);
   const sortToggleX = margin.left - sortToggleBoxSize - 18;
   const sortToggleY = margin.top - sortToggleBoxSize - 4;
@@ -88,7 +82,7 @@ export function Heatmap({
     .paddingInner(HEATMAP_LAYOUT.cellGap / HEATMAP_LAYOUT.rowPitch).align(0);
   const canShowLabels = showScoreLabels && x.bandwidth() >= 23.5 && y.bandwidth() >= 20;
   const labelSize = 9.5;
-  const legendVals = minScore === maxScore ? [minScore] : [minScore, (minScore + maxScore) / 2, maxScore];
+  const legendVals = [0, 0.5, 1];
   const hasTooltip = tooltip !== null;
 
   useLayoutEffect(() => {
@@ -150,12 +144,13 @@ export function Heatmap({
         <div>
           <h2>Model alignment</h2>
         </div>
-        <span>{models.length} models</span>
+        <span>{models.filter((model) => model !== 'ceiling').length} models{models.includes('ceiling') ? ' + ceiling' : ''}</span>
       </div>
 
-      <div className="heatmap-color-key" aria-label={`Alignment score color scale from ${formatScore(minScore)} to ${formatScore(maxScore)}`}>
-        <p className="heatmap-color-key-title">Alignment score</p>
-        <div className="heatmap-color-key-bar" style={{ background: minScore === maxScore ? heatmapScoreColor(minScore, domain) : SCOREBOARD_HEATMAP_GRADIENT }} />
+      <p className="heatmap-benchmark-context">NSD-1000 training · Murty185 evaluation · Pearson r</p>
+      <div className="heatmap-color-key" aria-label="Score / noise ceiling color scale from 0 to 1" title="Numbers and ranks use raw Pearson r. Colors use the scoreboard's stored score / noise ceiling values, clipped to 0–1. The noise ceiling is not ranked as a model.">
+        <p className="heatmap-color-key-title">Color: score / noise ceiling</p>
+        <div className="heatmap-color-key-bar" style={{ background: SCOREBOARD_HEATMAP_GRADIENT }} />
         <div className="heatmap-color-key-values">
           {legendVals.map((value) => <span key={value}>{value.toFixed(2)}</span>)}
         </div>
@@ -237,13 +232,15 @@ export function Heatmap({
                 const isComparable = comparableCellIds.has(cell.id);
                 const isDisabled = compareMode && !isComparable;
                 const hasSessionEvidence = sessionCellIds.has(cell.id);
-                const fill = cell.score === null ? 'var(--bg-subtle)' : heatmapScoreColor(cell.score, domain);
+                const fill = cell.score === null || cell.normalizedScore == null
+                  ? 'var(--bg-subtle)' : heatmapScoreColor(cell.normalizedScore);
 
                 return (
                   <g key={cell.id}>
                     <rect
                       className={[
                         'heatmap-cell',
+                        cell.model === 'ceiling' ? 'ceiling-reference' : '',
                         isSelected ? 'selected' : '',
                         isCompareSelected ? 'compare-selected' : '',
                         isDisabled ? 'compare-disabled' : '',
@@ -251,6 +248,7 @@ export function Heatmap({
                       ].filter(Boolean).join(' ')}
                       data-cell-id={cell.id}
                       data-score={cell.score ?? ''}
+                      data-normalized-score={cell.normalizedScore ?? ''}
                       data-session-evidence={hasSessionEvidence ? 'true' : undefined}
                       role="button"
                       tabIndex={0}
@@ -290,7 +288,7 @@ export function Heatmap({
                         className="cell-score-label"
                         x={xp + x.bandwidth() / 2}
                         y={yp + y.bandwidth() / 2}
-                        fill={heatmapScoreTextColor(cell.score, domain)}
+                        fill={heatmapScoreTextColor(cell.normalizedScore ?? 0)}
                         style={{ fontSize: `${labelSize}px` }}
                       >
                         {cell.score.toFixed(2)}
@@ -301,10 +299,15 @@ export function Heatmap({
               })}
 
               {/* ── Y-axis (model names) ── */}
+              {models.includes('ceiling') && models.length > 1 && (
+                <line className="heatmap-ceiling-divider" x1={-margin.left} x2={innerWidth}
+                  y1={(y('ceiling') ?? 0) + y.bandwidth() + 1}
+                  y2={(y('ceiling') ?? 0) + y.bandwidth() + 1} />
+              )}
               <g className="axis-labels y-axis-labels">
                 {models.map((model) => (
                   <text key={model} x={-14} y={(y(model) ?? 0) + y.bandwidth() / 2} textAnchor="end" dominantBaseline="middle">
-                    {model}
+                    {model === 'ceiling' ? 'Noise ceiling' : model}
                   </text>
                 ))}
               </g>
@@ -335,9 +338,7 @@ export function Heatmap({
             <div>
               <dt>Alignment</dt>
               <dd>
-                {compareMode && !comparableCellIds.has(tooltip.cell.id)
-                  ? 'Image responses unavailable'
-                  : formatScore(tooltip.cell.score)}
+                {formatScore(tooltip.cell.score)}
               </dd>
             </div>
             <div><dt>ROI rank</dt><dd>{tooltip.cell.rankWithinRoi === null ? 'N/A' : `#${tooltip.cell.rankWithinRoi}`}</dd></div>

@@ -101,6 +101,36 @@ describe('session clustering safeguards', () => {
     expect(markup).not.toContain('data-uploaded-marker="true"');
   });
 
+  it('uses a prepared baseline’s own upload projection rather than the primary model projection', () => {
+    const session = validateComparisonSession(rawSessionFixture(), 'http://core.example:5556');
+    const baselineRois = structuredClone(session.roiResults);
+    baselineRois.ffa.stimuli[0].voxelProjection.clusterId = '1';
+    baselineRois.ffa.stimuli[0].voxelProjection.centroidDistance = .123;
+    session.modelResults = { efficient_net: { roiResults: baselineRois } };
+    const markup = renderToStaticMarkup(
+      <ClusteringPanel {...commonProps} selectedModel="efficient_net"
+        voxelRoiStates={populatedVoxelRoiStates} session={session} />,
+    );
+    expect(markup).toContain('data-uploaded-marker="true"');
+    expect(markup).toContain('aria-label="Uploaded stimulus uploaded.png, cluster 1, centroid distance 0.123"');
+    expect(markup).not.toContain('centroid distance 0.420');
+  });
+
+  it('uses the baseline’s joint hierarchy when clustering its reference and uploaded stimuli', () => {
+    const session = validateComparisonSession(rawSessionFixture(), 'http://core.example:5558');
+    const baselineRois = structuredClone(session.roiResults);
+    baselineRois.ffa.jointHierarchy = jointHierarchyFixture();
+    session.modelResults = { efficient_net: { roiResults: baselineRois } };
+    const view = { ...populatedVoxelView, uploadAxisAlignment: { xSign: 1, ySign: -1 } as const };
+    const markup = renderToStaticMarkup(
+      <ClusteringPanel {...commonProps} selectedModel="efficient_net" clusteringMethod="hierarchical_correlation"
+        voxelRoiStates={{ ...populatedVoxelRoiStates, ffa: { view, status: 'idle' } }} session={session} />,
+    );
+    expect(markup).toContain('data-assignment-method="joint hierarchical clustering"');
+    expect(markup).toContain('2 clusters · 3 images (2 reference + 1 uploaded)');
+    expect(session.roiResults.ffa.jointHierarchy).toBeUndefined();
+  });
+
   it('uses fresh joint labels, combined counts, and a new tree without moving reference axes', () => {
     const session = validateComparisonSession(rawSessionFixture(), 'http://core.example:5558');
     session.roiResults.ffa.stimuli[0].hierarchicalAssignment.clusterId = '9';

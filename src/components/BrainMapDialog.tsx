@@ -12,6 +12,7 @@ import { BrainMapTooltip } from './BrainMapTooltip';
 import { loadBrainMapAssets } from '../services/brainMapAssets';
 import { BRAIN_REFERENCE_VERSION, loadBrainMapReferences } from '../services/brainReferenceAssets';
 import { isStochasticReferenceModel, STOCHASTIC_REFERENCE_NOTE } from '../utils/predictionPolicy';
+import { getSessionForModel, getSessionModels } from '../utils/sessionModels';
 import type { BrainMapAssets, BrainMapHoverDatum, BrainMapReferenceSet, BrainSurfaceKind } from '../types/brainMap';
 import {
   CANONICAL_ROIS,
@@ -78,13 +79,17 @@ function keepFocusInsideDialog(event: KeyboardEvent<HTMLElement>) {
 }
 
 function BrainMapModal({
-  session,
+  session: providedSession,
   selectedModel,
   focusedStimulusId,
   onFocusStimulus,
   onClose,
 }: BrainMapDialogProps & { onClose: () => void }) {
-  const model = selectedModel ?? session?.comparison.model ?? '';
+  const model = selectedModel ?? providedSession?.comparison.model ?? '';
+  const session = useMemo(
+    () => getSessionForModel(providedSession, model),
+    [providedSession, model],
+  );
   const [assetState, setAssetState] = useState<AssetState>({ status: 'loading' });
   const [referenceState, setReferenceState] = useState<ReferenceState>({ model, status: 'loading' });
   const [surface, setSurface] = useState<BrainSurfaceKind>('inflated');
@@ -309,10 +314,13 @@ function BrainMapModal({
             {referenceError && (
               <p className="brain-map-reference-error" role="status">Reference predictions unavailable: {referenceError}</p>
             )}
-            {session?.brainMapResults && session.comparison.model !== model && (
-              <p className="brain-map-reference-error">Select {session.comparison.model} to view this session’s uploads.</p>
+            {providedSession && !session && (
+              <p className="brain-map-reference-error">Uploads are prepared for {getSessionModels(providedSession).join(', ')}. Select one of those models to view them.</p>
             )}
-            {session?.brainMapResults && session.comparison.model === model
+            {session && !session.brainMapResults && (
+              <p className="brain-map-reference-error">Upload brain responses are unavailable for this model.</p>
+            )}
+            {session?.brainMapResults
               && BRAIN_REFERENCE_VERSION !== session.comparison.referenceVersion && (
               <p className="brain-map-reference-error">Uploads use a different reference bundle and cannot share this brain map.</p>
             )}

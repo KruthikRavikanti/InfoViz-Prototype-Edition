@@ -119,6 +119,40 @@
   min-width: 0;
 }
 
+.session-model-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.session-model-controls > span {
+  color: var(--text-4);
+  font-size: .65rem;
+  white-space: nowrap;
+}
+
+.session-model-controls button {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 4px 7px;
+  background: var(--bg-subtle);
+  color: var(--text-2);
+  font-size: .67rem;
+  cursor: pointer;
+}
+
+.session-model-controls button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.session-model-controls button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .session-stimuli-label {
   color: var(--text-4);
   font-size: .62rem;
@@ -1117,6 +1151,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
   height: auto;
 }
 
+.heatmap-benchmark-context { color: var(--text-4); font-size: .68rem; line-height: 1.5; margin: -6px 0 10px; }
+.heatmap-ceiling-divider { stroke: var(--border-strong); stroke-dasharray: 3 3; }
 .heatmap-color-key { margin-bottom: 10px; }
 .heatmap-color-key-title { color: var(--text-4); font-size: .68rem; font-weight: 600; margin-bottom: 5px; }
 .heatmap-color-key-bar { width: min(100%, 170px); height: 8px; border-radius: 4px; }

@@ -15,7 +15,7 @@ import {
   loadPublicReferenceManifest,
 } from './services/cortexSession';
 import { isCanonicalRoi } from './utils/sessionEvidence';
-import { getHeatmapScoreDomain } from './utils/heatmapAppearance';
+import { getSessionModels } from './utils/sessionModels';
 import {
   getCortexNavigationTarget,
   isCortexEmbedded,
@@ -119,14 +119,14 @@ export default function App() {
     const version = sessionState.session.comparison.referenceVersion;
     if (initializedSessionVersion.current === version) return;
 
-    const { scores } = dataState.data;
+    const { scores, normalizedScores } = dataState.data;
     const rois = getDefaultHeatmapRois(scores);
     const models = inferAggregateModels(scores, rois);
     const sourceRoi = sessionState.session.sourceRequest.roi.toLowerCase();
     const initialRoi: Roi = isCanonicalRoi(sourceRoi)
       ? sourceRoi
       : 'ffa';
-    const initialCell = buildAggregateHeatmapCells(scores, rois, models)
+    const initialCell = buildAggregateHeatmapCells(scores, rois, models, normalizedScores)
       .find((cell) => cell.model === sessionState.session.comparison.model && cell.roi === initialRoi);
     if (initialCell) setSelectedCell(initialCell);
     setSelectedRankingRoi(initialRoi);
@@ -227,11 +227,10 @@ export default function App() {
   const { data } = dataState;
   const heatmapRois = getDefaultHeatmapRois(data.scores);
   const aggregateModels = inferAggregateModels(data.scores, heatmapRois);
-  const heatmapColorDomain = getHeatmapScoreDomain(buildAggregateHeatmapCells(data.scores, heatmapRois, aggregateModels));
   const rankingRoi: Roi = heatmapRois.includes(selectedRankingRoi) ? selectedRankingRoi : (heatmapRois[0] ?? 'ffa');
   const orderedModels = orderAggregateModels(aggregateModels, data.scores, rankingSystem, rankingRoi, sortDirection);
   const visibleModels = filterModelsBySearch(orderedModels, modelSearch);
-  const heatmapCells = buildAggregateHeatmapCells(data.scores, heatmapRois, visibleModels);
+  const heatmapCells = buildAggregateHeatmapCells(data.scores, heatmapRois, visibleModels, data.normalizedScores);
   const comparableCellIds = new Set(
     heatmapCells
       .filter((cell) => hasComparableData(cell.model, cell.roi, data.rows, data.modelRoiColumns))
@@ -240,18 +239,35 @@ export default function App() {
   const session = sessionState.status === 'ready' ? sessionState.session : null;
   const sessionCellIds = new Set(
     session
-      ? heatmapRois
+      ? getSessionModels(session).flatMap((model) => heatmapRois
           .filter((roi) => isCanonicalRoi(roi))
-          .map((roi) => `${roi}__${session.comparison.model}`)
+          .map((roi) => `${roi}__${model}`))
       : [],
   );
+
+  function handleSelectSessionModel(model: string) {
+    if (!session || !getSessionModels(session).includes(model)) return;
+    const sourceRoi = session.sourceRequest.roi.toLowerCase();
+    const roi = selectedCell && isCanonicalRoi(selectedCell.roi)
+      ? selectedCell.roi : isCanonicalRoi(sourceRoi) ? sourceRoi : 'ffa';
+    // Resolve from all scores, not the search-filtered table. A quick switch
+    // keeps the region and focused image without losing a prepared model.
+    const cell = buildAggregateHeatmapCells(data.scores, heatmapRois, [model], data.normalizedScores)
+      .find((candidate) => candidate.roi === roi);
+    if (!cell) return;
+    setSelectedCell(cell);
+    setSelectedRankingRoi(roi);
+    setModelSearch('');
+    setCompareMode(false);
+    setCompareCells([]);
+  }
 
   return (
     <main className={appShellClass}>
       <Header
         embedded={embedded}
         imageCount={data.rows.length}
-        modelCount={aggregateModels.length}
+        modelCount={aggregateModels.filter((model) => model !== 'ceiling').length}
         roiCount={heatmapRois.length}
         selectedCell={selectedCell}
         hasImageResponses={Boolean(selectedCell && hasComparableData(selectedCell.model, selectedCell.roi, data.rows, data.modelRoiColumns))}
@@ -266,7 +282,6 @@ export default function App() {
           modelRoiColumns={data.modelRoiColumns}
           heatmapRois={heatmapRois}
           heatmapCells={heatmapCells}
-          heatmapColorDomain={heatmapColorDomain}
           visibleModels={visibleModels}
           rankingSystem={rankingSystem}
           selectedRankingRoi={rankingRoi}
@@ -289,6 +304,7 @@ export default function App() {
           onSelectCell={handleHeatmapCellClick}
           onCompareModeChange={handleCompareModeChange}
           onFocusStimulus={setFocusedStimulusId}
+          onSelectSessionModel={handleSelectSessionModel}
         />
       </section>
     </main>

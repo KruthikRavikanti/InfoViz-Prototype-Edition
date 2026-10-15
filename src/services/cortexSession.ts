@@ -14,16 +14,20 @@ import {
   type PublicReferenceManifest,
   type ReferenceNeighbor,
   type SessionLoadErrorKind,
+  type SessionModelResults,
   type SessionRoiResult,
   type SessionStimulus,
   type StimulusRoiResult,
   type VoxelProjection,
 } from '../types/session';
 import { publicPath } from '../utils/publicPath';
+import { getSessionModels } from '../utils/sessionModels';
 
 const DEFAULT_CORTEX_CORE_URL = '/cortex-core';
 const DEFAULT_CORTEX_APP_URL = 'http://localhost:5173';
 const PUBLIC_REFERENCE_MANIFEST_PATH = publicPath('/data/reference_manifest.json');
+const SESSION_TOKEN_PATTERN = /^[A-Za-z0-9_-]{16,256}$/;
+const MULTI_SESSION_PREFIX = 'multi-v1.';
 
 type JsonObject = Record<string, unknown>;
 
@@ -130,10 +134,21 @@ export function extractSessionToken(hash: string): string | null {
   const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
   const token = params.get('session')?.trim() ?? '';
   if (!token) return null;
-  if (!/^[A-Za-z0-9_-]{16,256}$/.test(token)) {
+  parseSessionTokens(token);
+  return token;
+}
+
+function parseSessionTokens(token: string): string[] {
+  if (SESSION_TOKEN_PATTERN.test(token)) return [token];
+  const tokens = token.startsWith(MULTI_SESSION_PREFIX)
+    ? token.slice(MULTI_SESSION_PREFIX.length).split('.')
+    : [];
+  if (tokens.length < 2 || tokens.length > 4
+    || new Set(tokens).size !== tokens.length
+    || tokens.some((part) => !SESSION_TOKEN_PATTERN.test(part))) {
     throw new CortexSessionError('invalid', 'The Cortex-Compass session token is malformed.');
   }
-  return token;
+  return tokens;
 }
 
 export function clearSessionFragment(locationValue = window.location, historyValue = window.history): void {
@@ -604,6 +619,10 @@ export function validateComparisonSession(
   }
 
   const rawRoiResults = object(raw.roi_results, 'roi_results');
+  if (Object.keys(rawRoiResults).length !== CANONICAL_ROIS.length
+    || Object.keys(rawRoiResults).some((roi) => !CANONICAL_ROIS.includes(roi as CanonicalRoi))) {
+    throw new CortexSessionError('invalid', 'ROI results must contain exactly FFA, PPA, and EBA.');
+  }
   const jointContext: JointHierarchyContext = {
     referenceCount: comparison.reference_count,
     uploadedIds: stimuli.map((stimulus) => stimulus.id),
@@ -671,6 +690,59 @@ export function validateComparisonSession(
     }
   }
 
+  const primaryModel = string(comparison.model, 'comparison.model');
+  let modelResults: Record<string, SessionModelResults> | undefined;
+  if (raw.model_results !== undefined && raw.model_results !== null) {
+    const additionalResults = object(raw.model_results, 'model_results');
+    const entries = Object.entries(additionalResults);
+    if (entries.length > 3) {
+      throw new CortexSessionError('invalid', 'A comparison session supports at most three additional models.');
+    }
+    let referenceOrder = firstJointHierarchy?.members.slice(0, 185).map((member) => member.id);
+    modelResults = Object.fromEntries(entries.map(([model, value]) => {
+      string(model, 'model_results model');
+      if (model === primaryModel) {
+        throw new CortexSessionError('invalid', 'Additional model results must not duplicate the primary model.');
+      }
+      const results = object(value, `model_results.${model}`);
+      if (Object.keys(results).some((key) => key !== 'roi_results' && key !== 'brain_map_results')) {
+        throw new CortexSessionError('invalid', `model_results.${model} contains unexpected fields.`);
+      }
+      // Validate with the exact same contracts as the primary model, sharing
+      // image identity, expiration, reference version, and model-independent
+      // visual features. Strip the model map to make this a bounded one-level
+      // validation, never recursively accept nested model-result payloads.
+      const scoped = validateComparisonSession({
+        ...raw,
+        comparison: { ...comparison, model },
+        roi_results: results.roi_results,
+        brain_map_results: results.brain_map_results,
+        model_results: undefined,
+      }, baseUrl, now);
+      for (const roi of CANONICAL_ROIS) {
+        const actualIds = scoped.roiResults[roi].stimuli.map((stimulus) => stimulus.stimulusId);
+        if (actualIds.some((id, index) => id !== stimuli[index].id)) {
+          throw new CortexSessionError('invalid', `model_results.${model}.${roi} must preserve uploaded stimulus order.`);
+        }
+        const hierarchy = scoped.roiResults[roi].jointHierarchy;
+        if (!referenceOrder && hierarchy) {
+          referenceOrder = hierarchy.members.slice(0, 185).map((member) => member.id);
+        }
+        if (referenceOrder && hierarchy
+          && hierarchy.members.slice(0, 185).some((member, index) => member.id !== referenceOrder[index])) {
+          throw new CortexSessionError('invalid', `model_results.${model}.${roi} must preserve reference image order.`);
+        }
+      }
+      if (scoped.brainMapResults?.stimuli.some((stimulus, index) => stimulus.stimulusId !== stimuli[index].id)) {
+        throw new CortexSessionError('invalid', `model_results.${model}.brain_map_results must preserve uploaded stimulus order.`);
+      }
+      return [model, {
+        roiResults: scoped.roiResults,
+        ...(scoped.brainMapResults ? { brainMapResults: scoped.brainMapResults } : {}),
+      }];
+    }));
+  }
+
   return {
     schemaVersion: 1,
     createdAt,
@@ -681,7 +753,7 @@ export function validateComparisonSession(
       roi: string(source.roi, 'source_request.roi'),
     },
     comparison: {
-      model: string(comparison.model, 'comparison.model'),
+      model: primaryModel,
       dataset: 'nsd_1000',
       rois: [...CANONICAL_ROIS],
       referenceVersion: string(comparison.reference_version, 'comparison.reference_version'),
@@ -692,6 +764,7 @@ export function validateComparisonSession(
     ...(visualResults ? { visualResults } : {}),
     ...(dreamsimResults ? { dreamsimResults } : {}),
     ...(brainMapResults ? { brainMapResults } : {}),
+    ...(modelResults && Object.keys(modelResults).length > 0 ? { modelResults } : {}),
   };
 }
 
@@ -732,7 +805,7 @@ export function assertSessionReferenceCompatible(
       'This Cortex session was created from a different historical reference version. Return to Cortex and prepare it again.',
     );
   }
-  if (manifest.referenceCount !== 185 || !manifest.models.includes(session.comparison.model)) {
+  if (manifest.referenceCount !== 185 || getSessionModels(session).some((model) => !manifest.models.includes(model))) {
     throw new CortexSessionError('version-mismatch', 'The local Cortex-Compass data does not support this comparison session.');
   }
 }
@@ -745,9 +818,9 @@ async function readJsonResponse(response: Response): Promise<unknown> {
   }
 }
 
-export async function loadCortexComparisonSession(
+async function loadSingleComparisonSession(
   token: string,
-  fetcher: typeof fetch = fetch,
+  fetcher: typeof fetch,
 ): Promise<CortexComparisonSession> {
   const baseUrl = coreBaseUrl();
   let response: Response;
@@ -769,6 +842,172 @@ export async function loadCortexComparisonSession(
     throw new CortexSessionError('unavailable', `Cortex Core could not load the session (HTTP ${response.status}).`);
   }
   return validateComparisonSession(await readJsonResponse(response), baseUrl);
+}
+
+function sessionHierarchies(session: CortexComparisonSession): JointHierarchy[] {
+  return [
+    ...CANONICAL_ROIS.map((roi) => session.roiResults[roi].jointHierarchy),
+    session.visualResults?.jointHierarchy,
+    session.dreamsimResults?.jointHierarchy,
+  ].filter((hierarchy): hierarchy is JointHierarchy => hierarchy !== undefined);
+}
+
+function assertBundleCompatible(sessions: CortexComparisonSession[]): void {
+  const primary = sessions[0];
+  const models = new Set<string>();
+  let referenceOrder: string[] | undefined;
+  let referenceIds: Set<string> | undefined;
+  for (const session of sessions) {
+    if (session.modelResults) {
+      throw new CortexSessionError('invalid', 'A multi-session handoff must contain single-model sessions only.');
+    }
+    if (models.has(session.comparison.model)) {
+      throw new CortexSessionError('invalid', 'The comparison sessions contain duplicate models.');
+    }
+    models.add(session.comparison.model);
+    if (session.sourceRequest.model !== primary.sourceRequest.model
+      || session.sourceRequest.dataset !== primary.sourceRequest.dataset
+      || session.sourceRequest.roi !== primary.sourceRequest.roi) {
+      throw new CortexSessionError('invalid', 'The comparison sessions do not share the same original Lab settings.');
+    }
+    if (session.comparison.referenceVersion !== primary.comparison.referenceVersion
+      || session.comparison.referenceCount !== primary.comparison.referenceCount
+      || session.comparison.dataset !== primary.comparison.dataset
+      || session.comparison.rois.some((roi, index) => roi !== primary.comparison.rois[index])) {
+      throw new CortexSessionError('version-mismatch', 'The comparison sessions use different historical reference releases.');
+    }
+    if (session.stimuli.length !== primary.stimuli.length
+      || session.stimuli.some((stimulus, index) => stimulus.displayName !== primary.stimuli[index].displayName)) {
+      throw new CortexSessionError('invalid', 'The comparison sessions do not preserve the same image names and order.');
+    }
+    const ids = session.stimuli.map((stimulus) => stimulus.id);
+    const orderedResults = [
+      ...CANONICAL_ROIS.map((roi) => session.roiResults[roi].stimuli),
+      session.brainMapResults?.stimuli,
+      session.visualResults?.stimuli,
+      session.dreamsimResults?.stimuli,
+    ].filter((results) => results !== undefined);
+    if (orderedResults.some((results) => results.some((stimulus, index) => stimulus.stimulusId !== ids[index]))) {
+      throw new CortexSessionError('invalid', 'Each comparison session must preserve uploaded stimulus order in every result.');
+    }
+    for (const roi of CANONICAL_ROIS) {
+      const hierarchy = session.roiResults[roi].jointHierarchy;
+      if (!hierarchy) continue;
+      const order = hierarchy.members.slice(0, hierarchy.referenceCount).map((member) => member.id);
+      referenceOrder ??= order;
+      if (order.some((id, index) => id !== referenceOrder![index])) {
+        throw new CortexSessionError('invalid', 'The model joint hierarchies do not preserve reference image order.');
+      }
+    }
+    for (const hierarchy of sessionHierarchies(session)) {
+      const ids = hierarchy.members.slice(0, hierarchy.referenceCount).map((member) => member.id);
+      referenceIds ??= new Set(ids);
+      if (ids.some((id) => !referenceIds!.has(id))) {
+        throw new CortexSessionError('invalid', 'The comparison sessions do not contain the same canonical reference image IDs.');
+      }
+    }
+  }
+}
+
+async function verifyBundleImages(sessions: CortexComparisonSession[], fetcher: typeof fetch): Promise<void> {
+  if (!globalThis.crypto?.subtle) {
+    throw new CortexSessionError('configuration', 'A secure connection is required to verify comparison image identity.');
+  }
+  // Separate Core requests generate independent temporary IDs. Names alone do
+  // not prove image identity (duplicate filenames are valid), so verify the
+  // deterministic sanitized PNG bytes before aligning any model responses.
+  const jobs = sessions.flatMap((session, sessionIndex) => session.stimuli.map((stimulus, imageIndex) => ({
+    sessionIndex, imageIndex, imageUrl: stimulus.imageUrl,
+  })));
+  const digests = sessions.map((session) => new Array<string>(session.stimuli.length));
+  let nextJob = 0;
+  let verificationError: unknown;
+  const abortController = new AbortController();
+  const worker = async () => {
+    while (!verificationError && nextJob < jobs.length) {
+      const job = jobs[nextJob++];
+      try {
+        const response = await fetcher(job.imageUrl, {
+          method: 'GET', headers: { Accept: 'image/png' }, signal: abortController.signal,
+        });
+        if (!response.ok) {
+          throw new CortexSessionError(response.status === 410 ? 'expired' : 'unavailable',
+            'A comparison image is no longer available. Return to Virtual Cortex to prepare a new comparison.');
+        }
+        const bytes = await response.arrayBuffer();
+        const signature = new Uint8Array(bytes, 0, Math.min(bytes.byteLength, 8));
+        if (signature.length !== 8 || [137, 80, 78, 71, 13, 10, 26, 10].some((byte, index) => signature[index] !== byte)) {
+          throw new CortexSessionError('invalid', 'The server returned an invalid comparison image.');
+        }
+        const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+        digests[job.sessionIndex][job.imageIndex] = Array.from(new Uint8Array(digest),
+          (byte) => byte.toString(16).padStart(2, '0')).join('');
+      } catch (error) {
+        verificationError ??= error instanceof CortexSessionError ? error
+          : new CortexSessionError('unavailable', 'Cortex Core could not verify the comparison images.');
+        abortController.abort();
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(4, jobs.length) }, worker));
+  if (verificationError) throw verificationError;
+  if (digests.slice(1).some((images) => images.some((digest, index) => digest !== digests[0][index]))) {
+    throw new CortexSessionError('invalid', 'The comparison sessions contain different images or image order.');
+  }
+}
+
+function remapJointHierarchy(hierarchy: JointHierarchy | undefined, ids: Map<string, string>): JointHierarchy | undefined {
+  return hierarchy && {
+    ...hierarchy,
+    members: hierarchy.members.map((member) => member.kind === 'uploaded'
+      ? { ...member, id: ids.get(member.id)! }
+      : member),
+  };
+}
+
+function combineSingleModelSessions(sessions: CortexComparisonSession[]): CortexComparisonSession {
+  const primary = sessions[0];
+  const expiresAt = sessions.reduce((earliest, session) => Date.parse(session.expiresAt) < Date.parse(earliest)
+    ? session.expiresAt : earliest, primary.expiresAt);
+  if (Date.parse(expiresAt) <= Date.now()) {
+    throw new CortexSessionError('expired', 'This Cortex-Compass session has expired. Return to Virtual Cortex to prepare a new one.');
+  }
+  return {
+    ...primary,
+    expiresAt,
+    modelResults: Object.fromEntries(sessions.slice(1).map((session) => {
+      const ids = new Map(session.stimuli.map((stimulus, index) => [stimulus.id, primary.stimuli[index].id]));
+      const roiResults = Object.fromEntries(CANONICAL_ROIS.map((roi) => [roi, {
+        ...session.roiResults[roi],
+        stimuli: session.roiResults[roi].stimuli.map((stimulus) => ({ ...stimulus, stimulusId: ids.get(stimulus.stimulusId)! })),
+        ...(session.roiResults[roi].jointHierarchy ? {
+          jointHierarchy: remapJointHierarchy(session.roiResults[roi].jointHierarchy, ids),
+        } : {}),
+      }])) as Record<CanonicalRoi, SessionRoiResult>;
+      return [session.comparison.model, {
+        roiResults,
+        ...(session.brainMapResults ? { brainMapResults: {
+          ...session.brainMapResults,
+          stimuli: session.brainMapResults.stimuli.map((stimulus) => ({ ...stimulus, stimulusId: ids.get(stimulus.stimulusId)! })),
+        } } : {}),
+      }];
+    })),
+  };
+}
+
+export async function loadCortexComparisonSession(
+  token: string,
+  fetcher: typeof fetch = fetch,
+): Promise<CortexComparisonSession> {
+  const tokens = parseSessionTokens(token);
+  // Single opaque tokens include legacy combined sessions and need no extra
+  // image requests. The multi-session transport is only a frontend concern;
+  // no combined endpoint or model_results backend field is required.
+  const sessions = await Promise.all(tokens.map((part) => loadSingleComparisonSession(part, fetcher)));
+  if (sessions.length === 1) return sessions[0];
+  assertBundleCompatible(sessions);
+  await verifyBundleImages(sessions, fetcher);
+  return combineSingleModelSessions(sessions);
 }
 
 export async function loadPublicReferenceManifest(fetcher: typeof fetch = fetch): Promise<PublicReferenceManifest> {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EvidenceImage, JsonScoreObject } from '../types/data';
 import { buildAggregateHeatmapCells } from './heatmap';
-import { buildOptionalSessionOverlays, buildVoxelSessionOverlays, mergeReferenceAndSessionRanks } from './sessionEvidence';
+import { buildOptionalSessionOverlays, buildSessionEvidenceView, buildVoxelSessionOverlays, mergeReferenceAndSessionRanks } from './sessionEvidence';
 import { validateComparisonSession } from '../services/cortexSession';
 import { rawSessionFixture } from '../test/sessionFixture';
 import type { OptionalProjectionResults } from '../types/session';
@@ -62,6 +62,34 @@ describe('session ranking merge', () => {
     const after = buildAggregateHeatmapCells(scores, ['ffa', 'ppa', 'eba'], ['clip_rn50', 'alexnet']);
 
     expect(after).toEqual(before);
+  });
+});
+
+describe('model-specific uploaded response evidence', () => {
+  it('uses the selected baseline’s predictions and references while sharing upload identities', () => {
+    const session = validateComparisonSession(rawSessionFixture(), 'http://core.example:5558');
+    const baselineRois = structuredClone(session.roiResults);
+    baselineRois.ffa.stimuli[0].mean = 0.321;
+    baselineRois.ffa.stimuli[0].referencePercentile = 24;
+    session.modelResults = { efficient_net: { roiResults: baselineRois } };
+    const rows = Array.from({ length: 185 }, (_, index) => ({
+      image_name: `image_${String(index + 1).padStart(3, '0')}.png`,
+      efficient_net_ffa: (185 - index) / 1000,
+      clip_rn50_ffa: index / 100,
+    }));
+    const columns = ['efficient_net', 'clip_rn50'].map((model) => ({ columnName: `${model}_ffa`, model, roi: 'ffa' }));
+    const cell = { id: 'ffa__efficient_net', model: 'efficient_net', roi: 'ffa', score: .8, rankWithinRoi: 1, overallScore: .7 };
+    const before = JSON.stringify(session);
+    const view = buildSessionEvidenceView(cell, rows, columns, session, 'stimulus-a', 6)!;
+    expect(view.focusedResult.mean).toBe(.321);
+    expect(view.focusedResult.referencePercentile).toBe(24);
+    expect(view.focusedStimulus.id).toBe('stimulus-a');
+    expect(view.referenceImages[0].imageName).toBe('image_001.png');
+    expect(view.referenceDomain).toEqual([.001, .185]);
+    expect(view.mergedImages).toHaveLength(186);
+    expect(view.uploadedImages[0].value).toBe(.321);
+    expect(buildSessionEvidenceView({ ...cell, model: 'unprepared' }, rows, columns, session, 'stimulus-a', 6)).toBeNull();
+    expect(JSON.stringify(session)).toBe(before);
   });
 });
 

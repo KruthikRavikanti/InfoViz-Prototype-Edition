@@ -172,10 +172,15 @@ describe('presentation cleanup preserves controls and scientific evidence', () =
 
   it('separates response, clustering, and spatial tools without hiding shared export actions', () => {
     const markup = renderToStaticMarkup(<DetailsPanel {...detailsProps} selectedCell={cells[0]} />);
-    expect(markup).toContain('>Image responses</button>');
-    expect(markup).toContain('>Image clusters</button>');
-    expect(markup).toContain('>Brain &amp; voxels</button>');
-    expect(markup).toContain('aria-label="Brain and voxels"');
+    expect(markup).toContain('>Predicted responses</button>');
+    expect(markup).toContain('>Image similarity</button>');
+    expect(markup).toContain('>Brain &amp; selectivity</button>');
+    expect(markup).toContain('aria-label="Predicted responses"');
+    expect(markup).toContain('aria-label="Image similarity"');
+    expect(markup).toContain('aria-label="Brain and selectivity"');
+    expect(markup).not.toContain('>Image responses</button>');
+    expect(markup).not.toContain('>Image clusters</button>');
+    expect(markup).not.toContain('>Brain &amp; voxels</button>');
     expect(markup).toContain('aria-label="Selection actions"');
     expect(markup.match(/>Export JSON<\/button>/g)).toHaveLength(1);
     expect(markup.match(/>Copy metadata<\/button>/g)).toHaveLength(1);
@@ -214,8 +219,11 @@ describe('presentation cleanup preserves controls and scientific evidence', () =
 
     expect(guide).toContain('Quick guide');
     expect(guide).toContain('rows are models, columns are brain regions');
-    expect(guide).toContain('color shows model alignment');
-    expect(guide).toContain('Image clusters');
+    expect(guide).toContain('Numbers show Pearson r');
+    expect(guide).toContain('colors show score relative to the noise ceiling');
+    expect(guide).toContain('Predicted responses');
+    expect(guide).toContain('Image similarity');
+    expect(guide).toContain('Brain &amp; selectivity');
     expect(guide).toContain('Compare selections');
     expect(guide).toContain('Enter');
     expect(guide).toContain('Escape');

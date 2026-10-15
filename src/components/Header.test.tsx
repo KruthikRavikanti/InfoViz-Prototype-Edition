@@ -170,6 +170,15 @@ describe('Cortex-Compass masthead', () => {
     expect(text).toMatch(/Your Lab settings:.*alexnet.*Murty-185.*EBA/);
   });
 
+  it('recognizes a prepared baseline as upload-backed while preserving the original Lab choices', () => {
+    const session = comparisonSession();
+    session.modelResults = { efficient_net: { roiResults: structuredClone(session.roiResults) } };
+    const text = visibleText(renderHeader({ selectedCell: cell('efficient_net', 'ppa'), hasImageResponses: true, session }));
+    expect(text).toMatch(/Viewing:.*efficient_net.*PPA.*NSD-1000/);
+    expect(text).not.toContain('reference images only');
+    expect(text).toMatch(/Your Lab settings:.*alexnet.*Murty-185.*EBA/);
+  });
+
   it('names both comparison selections and does not imply uploads are part of the reference comparison', () => {
     const text = visibleText(renderHeader({
       compareMode: true,

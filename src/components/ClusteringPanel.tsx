@@ -5,6 +5,7 @@ import { VoxelSelectivityAtlasDialog } from './VoxelSelectivityAtlasDialog';
 import { JointDendrogram } from './JointDendrogram';
 import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringMethod, EvidenceImage, GroundTruthPatient, ImageCategory } from '../types/data';
 import type { CanonicalRoi, CortexComparisonSession, SessionClusterOverlay } from '../types/session';
+import { getSessionForModel } from '../utils/sessionModels';
 import {
   buildOptionalSessionOverlays,
   buildVoxelSessionOverlays,
@@ -1064,7 +1065,10 @@ export function ClusteringPanel({
   const [isRoiComparisonOpen, setIsRoiComparisonOpen] = useState(false);
   const roiComparisonTriggerRef = useRef<HTMLButtonElement | null>(null);
   const roi = isCanonicalRoi(selectedRoi) ? selectedRoi : null;
-  const session = providedSession?.comparison.model === selectedModel ? providedSession : null;
+  const session = useMemo(
+    () => getSessionForModel(providedSession, selectedModel),
+    [providedSession, selectedModel],
+  );
   const displayStates = useMemo(
     () => jointRoiStates(voxelRoiStates, clusteringMethod, session),
     [voxelRoiStates, clusteringMethod, session],

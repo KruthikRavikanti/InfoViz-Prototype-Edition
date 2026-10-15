@@ -130,6 +130,11 @@ export type BrainMapResults = {
   stimuli: BrainMapStimulusResult[];
 };
 
+export type SessionModelResults = {
+  roiResults: Record<CanonicalRoi, SessionRoiResult>;
+  brainMapResults?: BrainMapResults;
+};
+
 export type CortexComparisonSession = {
   schemaVersion: 1;
   createdAt: string;
@@ -151,6 +156,8 @@ export type CortexComparisonSession = {
   visualResults?: OptionalProjectionResults;
   dreamsimResults?: OptionalProjectionResults;
   brainMapResults?: BrainMapResults;
+  /** Additional models evaluated on the identical uploads and reference release. */
+  modelResults?: Record<string, SessionModelResults>;
 };
 
 export type PublicReferenceManifest = {

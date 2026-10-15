@@ -77,6 +77,25 @@ export function rawReferenceManifestFixture() {
   };
 }
 
+/** Distinct predictions catch accidental reuse of the Lab's primary results. */
+export function rawMultiModelSessionFixture() {
+  const raw = rawSessionFixture();
+  const additionalModels = ['efficient_net', 'clip_rn50', 'vgg16_imagenet1kv1'];
+  return {
+    ...raw,
+    source_request: { ...raw.source_request, model: 'alexnet' },
+    comparison: { ...raw.comparison, model: 'alexnet' },
+    model_results: Object.fromEntries(additionalModels.map((model, index) => {
+      const results = rawSessionFixture().roi_results;
+      for (const roi of ['ffa', 'ppa', 'eba'] as const) {
+        results[roi].stimuli[0].mean = -(index + 1) / 10;
+        results[roi].stimuli[0].voxel_projection.x = index + 10;
+      }
+      return [model, { roi_results: results }];
+    })),
+  };
+}
+
 export function rawJointHierarchyFixture(uploadedIds = ['stimulus-a']) {
   const referenceCount = 185;
   const memberCount = referenceCount + uploadedIds.length;

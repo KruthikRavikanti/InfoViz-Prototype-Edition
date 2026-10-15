@@ -54,6 +54,24 @@ describe('brain-map image collection selection', () => {
     expect(brainMapUploadedImages(session, 'clip_rn50', references)).toEqual([]);
   });
 
+  it('uses each prepared baseline’s own brain vectors and does not inherit the primary vectors', () => {
+    const { session, references } = fixture();
+    const baselineBrain = structuredClone(session.brainMapResults!);
+    baselineBrain.stimuli[0].roiResponses.ffa = [42];
+    session.modelResults = {
+      efficient_net: { roiResults: structuredClone(session.roiResults), brainMapResults: baselineBrain },
+      vgg16_imagenet1kv1: { roiResults: structuredClone(session.roiResults) },
+    };
+    const before = JSON.stringify(session);
+    const images = brainMapUploadedImages(session, 'efficient_net', { ...references, model: 'efficient_net' });
+    expect(images[0].id).toBe('stimulus-a');
+    expect(images[0].result.roiResponses.ffa).toEqual([42]);
+    expect(brainMapUploadedImages(session, 'clip_rn50')[0].result.roiResponses.ffa).toEqual([1]);
+    expect(brainMapUploadedImages(session, 'vgg16_imagenet1kv1')).toEqual([]);
+    expect(brainMapUploadedImages(session, 'efficient_net', references)).toEqual([]);
+    expect(JSON.stringify(session)).toBe(before);
+  });
+
   it('matches uploaded vectors by ID rather than assumed array order and leaves session data untouched', () => {
     const { session } = fixture();
     session.stimuli.push({ id: 'missing-vector', displayName: 'missing.png', imageUrl: '/missing.png', color: '#000000' });

@@ -47,6 +47,12 @@ function visualizationFixture(): VisualizationData {
       ppa: { clip_rn50: 0.7 },
       Overall: { clip_rn50: 0.7 },
     },
+    normalizedScores: {
+      ffa: { clip_rn50: 1 },
+      eba: { clip_rn50: 0.75 },
+      ppa: { clip_rn50: 0.875 },
+      Overall: { clip_rn50: 0.875 },
+    },
     modelRoiColumns: ['ffa', 'eba', 'ppa'].map((roi) => ({
       columnName: `clip_rn50_${roi}`, model: 'clip_rn50', roi,
     })),
@@ -162,9 +168,9 @@ describe('Cortex-Compass application', () => {
 
     expect(markup).toContain('<strong>Viewing:</strong> clip_rn50 · FFA · NSD-1000 predictions');
     expect(markup).toContain('class="detail-subtabs"');
-    expect(markup).toContain('Image responses');
-    expect(markup).toContain('Image clusters');
-    expect(markup).toContain('Brain &amp; voxels');
+    expect(markup).toContain('Predicted responses');
+    expect(markup).toContain('Image similarity');
+    expect(markup).toContain('Brain &amp; selectivity');
     expect(markup).toContain('<h3>Predicted-response clusters</h3>');
     expect(markup).toContain('<h3>Visual-feature clusters</h3>');
     expect(markup).toContain('<h3>DreamSim similarity clusters</h3>');

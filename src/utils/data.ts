@@ -1,4 +1,4 @@
-import { csv, json } from 'd3';
+import { csv } from 'd3';
 import type {
   JsonScoreObject,
   LongFormDatum,
@@ -9,11 +9,11 @@ import type {
 } from '../types/data';
 import { loadClusteringData } from './clustering';
 import { publicPath } from './publicPath';
+import { loadScoreboardScores } from '../services/scoreboardScores';
 
 const DEFAULT_ROI_FALLBACK: Roi[] = ['ffa', 'ppa', 'eba'];
 
 export const CSV_PATH = publicPath('/data/combined_image_means.csv');
-export const SCORES_PATH = publicPath('/data/murty185_zero_index.json');
 export const IMAGE_BASE_PATH = publicPath('/images');
 
 function isFiniteNumber(value: unknown): value is number {
@@ -126,23 +126,20 @@ export async function loadCsvRows(path = CSV_PATH): Promise<WideCsvRow[]> {
   });
 }
 
-export async function loadScores(path = SCORES_PATH): Promise<JsonScoreObject> {
-  const result = await json<JsonScoreObject>(path);
-
-  if (!result || typeof result !== 'object') {
-    throw new Error('Score JSON did not contain an object.');
-  }
-
-  return result;
+export async function loadScores(path?: string): Promise<JsonScoreObject> {
+  return (await loadScoreboardScores(path)).scores;
 }
 
 export async function loadVisualizationData(): Promise<VisualizationData> {
-  const [rows, scores, clustering] = await Promise.all([loadCsvRows(), loadScores(), loadClusteringData()]);
+  const [rows, { scores, normalizedScores }, clustering] = await Promise.all([
+    loadCsvRows(), loadScoreboardScores(), loadClusteringData(),
+  ]);
   const modelRoiColumns = inferModelRoiColumns(rows, Object.keys(scores));
 
   return {
     rows,
     scores,
+    normalizedScores,
     modelRoiColumns,
     clustering,
   };

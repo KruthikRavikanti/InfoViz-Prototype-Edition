@@ -24,6 +24,7 @@ export type JsonScoreObject = Record<Roi, Record<string, number>>;
 export type VisualizationData = {
   rows: WideCsvRow[];
   scores: JsonScoreObject;
+  normalizedScores: JsonScoreObject;
   modelRoiColumns: ModelRoiColumn[];
   clustering: ClusteringData;
 };
@@ -38,6 +39,8 @@ export type AggregateHeatmapCell = {
   roi: Roi;
   model: string;
   score: number | null;
+  /** Stored scoreboard color value, not the raw correlation used for ranking. */
+  normalizedScore?: number | null;
   rankWithinRoi: number | null;
   overallScore: number | null;
 };

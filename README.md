@@ -2,7 +2,7 @@
 
 Cortex-Compass is Virtual Cortex's model and stimulus visualization. It compares model alignment across brain regions and explores image responses for selected model–region pairs.
 
-Open it directly or choose **Open Cortex-Compass** after generating predictions in the Virtual Cortex Lab. Virtual Cortex's `/cortex-compass/` workspace keeps its navigation visible and preserves Lab results on return. The existing `/infoviz/` route, repository name, and comparison-session protocol are unchanged.
+Open it directly or choose **Open Cortex-Compass** after generating predictions in the Virtual Cortex Lab. Virtual Cortex's `/cortex-compass/` workspace opens in a separate tab, keeps its navigation visible, and leaves the original Lab results available. The existing `/infoviz/` route, repository name, and comparison-session protocol are unchanged.
 
 ## What The App Does
 
@@ -11,15 +11,24 @@ Open it directly or choose **Open Cortex-Compass** after generating predictions 
 - Opens a details panel for a selected cell.
 - Ranks images by the matching ROI/model evidence column from the CSV.
 - Supports compare mode for two evidence-backed cells.
-- Keeps the four image-cluster charts intact and groups the anatomical Brain Map and non-anatomical Voxel Selectivity Explorer under Brain & voxels.
+- Keeps the four image-cluster charts intact and groups the Brain Map and Voxel Selectivity Explorer under Brain & selectivity.
 - Shows uploaded-stimulus and Murty-185 reference predictions on the NSD Subject 1 surface in the 3D Brain Map.
 
 ## Data In This Repo
 
-The app loads data from `public/data/`:
+The app loads prediction and analysis data from `public/data/`. Model alignment uses the
+Virtual Cortex quantitative scoreboard's **NSD-1000 training → Murty185 evaluation →
+Univariate (Pearson r)** scores, not its broader multi-dataset Global Score:
 
+- `/assets/data/new/standardized_results_nsd_1000_models_univariate.json`
+  - authoritative score source when embedded in Virtual Cortex; uses each
+    `[roi][model].murty185` pair exactly as the scoreboard does
+- `scoreboard/standardized_results_nsd_1000_models_univariate.json`
+  - matching standalone snapshot; `scoreboard/source.json` records source repository,
+    commit, file checksum, training/evaluation datasets, and metric
 - `murty185_zero_index.json`
-  - aggregate ROI x model score matrix
+  - retained historical flattened score matrix for reference-generation and release audits;
+    no longer the browser's alignment source
 - `combined_image_means.csv`
   - image-level evidence table used to rank stimuli for selected cells
 - `voxel_clusters/` and `voxel_clusters_hierarchical_corr/`
@@ -39,6 +48,28 @@ The source DreamSim embedding bundle is stored in `data/dreamsim/dreamsim_embedd
 It is not loaded by the browser directly; it is used by `scripts/data/cluster_runner.py` to generate the public DreamSim cluster CSV/JSON/PNG files.
 
 ## Data Scripts
+
+Check the standalone score snapshot against the Cortex App checkout:
+
+```bash
+node scripts/data/sync_scoreboard_scores.mjs --check
+```
+
+To refresh the snapshot and its provenance, review and apply the generated patch:
+
+```bash
+node scripts/data/sync_scoreboard_scores.mjs --patch | apply_patch
+perl -pi -e 'chomp if eof' public/data/scoreboard/standardized_results_nsd_1000_models_univariate.json
+node scripts/data/sync_scoreboard_scores.mjs --check
+```
+
+The script detects the containing Cortex App checkout when installed at
+`cortex-app/apps/cortex-compass/`; an independent checkout uses sibling
+`../cortex-app`. Use `--source-root /path/to/cortex-app` to select another checkout.
+The EOF formatting command keeps the snapshot byte-identical to the source JSON, which has
+no terminal newline. The embedded view reads the host's score file directly and does not silently fall back to
+an older snapshot when that source is unavailable. This keeps the table and scoreboard
+on the same release. Score updates do not retrain models or regenerate prediction artifacts.
 
 Inspect the DreamSim bundle:
 
@@ -85,11 +116,13 @@ model predictions for the category-imbalanced Murty-185 stimulus set, not measur
 
 ## Current Evidence Coverage
 
-All `126` runnable models in the scoreboard have image-response evidence for all
+The `126` models in the audited reference bundle have image-response evidence for all
 `185` Murty reference images across FFA, PPA, and EBA. This includes response rankings,
 both predicted-response clustering methods, Subject 1 brain maps, and voxel-selectivity
-artifacts. The `127`th scoreboard entry is the **noise ceiling**, not a runnable model;
-it remains score-only and is not selectable as prediction evidence in Compare mode.
+artifacts. The updated scoreboard also includes the score-only `pixels` baseline,
+for `127` scored models plus the **noise ceiling**. Neither `pixels` nor the noise
+ceiling has image-response evidence in this bundle, so both remain unavailable as
+prediction evidence in Compare mode. The noise ceiling is not a runnable model.
 
 All 126 models use their registered Cortex Core backbones and existing trained
 NSD-1000 readouts, evaluated on the canonical `public/images/image_001.png` through
@@ -246,12 +279,20 @@ model or comparing reference-only cells does not relabel the uploaded prediction
 are explicitly distinguished from models with image-response data.
 
 Model search, ranking, score labels, and two-selection comparison are grouped in the model browser.
-The selected model–region workspace has **Image responses**, **Image clusters**, and **Brain & voxels**
+The selected model–region workspace has **Predicted responses**, **Image similarity**, and **Brain & selectivity**
 tabs; JSON export and metadata copying remain available across all three. The heatmap uses the quantitative
-Cortex scoreboard's cream–lavender–purple palette with compact square cells. Its full-data color scale stays
-fixed when searching; score values are unchanged and are not reinterpreted as ceiling-normalized scores.
+Cortex scoreboard's cream–lavender–purple palette with compact square cells. Numbers, comparisons,
+and ranking use the **raw Pearson correlations**. Colors use the scoreboard's **stored
+ceiling-normalized values**, clipped to 0–1, with the same fixed legend; filtering does not
+rescale them. Overall alignment is the arithmetic mean of raw FFA, PPA, and EBA scores for
+this evaluation set. The noise ceiling is kept above the model rows and excluded from model
+ranks and the model count (127 models plus the noise ceiling). These ranks match the scoreboard
+with the same training, evaluation, and metric selected—not its multi-dataset default ranking.
 
-**Brain & voxels** contains the cortical 3D Brain Map and the non-anatomical Voxel Selectivity Explorer.
+**Predicted responses** covers response rankings, distributions, and upload-to-reference comparisons.
+**Image similarity** groups images by predicted-response patterns, visual features, or measured fMRI.
+**Brain & selectivity** contains the cortical 3D Brain Map and the Voxel Selectivity Explorer,
+which offers cortical and non-anatomical similarity views.
 The brain image picker is searchable and bounded regardless of upload count, with previous/next navigation
 and a selected-image preview. Display controls collapse on narrow screens so the cortex stays visible.
 Reference-image selection is local to the brain map; selecting an upload still updates the shared upload focus.
@@ -332,17 +373,49 @@ k-means remains a fixed-reference overlay. DreamSim and measured-fMRI upload saf
 
 ## Local Development
 
-Follow these steps to set up and run the project locally:
+Cortex-Compass remains an independent repository. It can be checked out standalone
+or included in Cortex App as the Git submodule `apps/cortex-compass/`.
+
+### Inside Cortex App
+
+Clone Cortex App with `--recurse-submodules`, or initialize the linked source from
+an existing checkout. Run the following from the Cortex App root:
+
+```bash
+git submodule update --init --recursive
+npm ci
+npm --prefix apps/cortex-compass ci
+npm run build
+```
+
+The parent build builds Cortex-Compass and includes its generated files at
+`dist/infoviz/`, alongside Cortex App's pages. The deployed visualization does not
+need a separate frontend server. Local development still uses two frontend
+processes: run `npm run dev` and `npm run dev:compass` from the Cortex App root.
+
+The parent repository's Git link pins an exact Cortex-Compass commit, not the
+latest commit on `IUI`. To release a child change, commit and push it in this
+repository, then explicitly review and update the parent's pinned commit. Normal
+clones and builds do not automatically advance that pointer.
+
+Developers and deployment checkouts need read access to both repositories. If
+Cortex-Compass is private, its submodule checkout must authenticate too; credentials
+must not be committed. Private reference artifacts and trained models remain on
+the separately configured Cortex Core backend, not inside the submodule.
+
+### Standalone
+
+Follow these steps to run the independent checkout:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/KruthikRavikanti/InfoViz-Prototype-Edition.git
+   git clone --branch IUI https://github.com/KruthikRavikanti/InfoViz-Prototype-Edition.git
    cd InfoViz-Prototype-Edition
    ```
 
 2. **Install dependencies:**
    ```bash
-   npm install
+   npm ci
    ```
 
 3. **Start the development server:**
@@ -385,11 +458,12 @@ state to support refresh; it does not persist comparison data in browser storage
 The frame sends only loading/ready/error and return-to-Lab messages to the exact
 same-origin parent. The host validates the message origin and frame identity.
 
-Keep this source repository separate from `cortex-app`. A combined deployment
-can serve this repo's compiled `dist` at `/infoviz/` alongside the host's compiled
-pages, or reverse-proxy that path to the visualization. It must also provide the
-matching Core backend and private reference bundle for upload comparisons; the
-local Vite proxy is not a production deployment setup.
+The source remains separately versioned even when checked out inside
+`cortex-app/apps/cortex-compass/`. Cortex App's combined build serves this repo's
+compiled output at `/infoviz/` alongside the host's pages. Upload comparisons still
+require the matching Core backend and private reference bundle; linking and
+building the frontend does not deploy those resources, and the local Vite proxy
+is not a production backend configuration.
 
 The sibling-repository development defaults are already equivalent to:
 
@@ -412,3 +486,26 @@ comparison evidence uses NSD-1000 across FFA, PPA, and EBA. Uploaded images are 
 inserted into measured patient/fMRI clusters. Voxel uploads use saved PCA/K-means transforms; static t-SNE remains
 reference-only. DreamSim upload placement is currently disabled because the archived 1,792-feature reference bundle
 is incompatible with the current 768-feature inference path.
+
+New Lab sessions prepare the selected model plus `efficient_net`, `clip_rn50`, and
+`vgg16_imagenet1kv1`, without duplicates (three or four models total). The selected
+model remains the initial view. Buttons in the comparison banner switch the
+same stimuli between these models while preserving the selected ROI and image.
+Each model has its own predicted means, ranks, response-pattern clusters, and
+audited brain vectors. Images and model-independent visual features are shared;
+missing brain vectors are never replaced with another model's responses.
+The Lab prepares one ordinary single-model comparison session per model, using
+the existing `/comparison-sessions` API without `additional_models`. Its fragment
+handoff is `multi-v1.<primary-token>.<companion-token>...` (three or four unique
+tokens); this is browser coordination, not a new backend endpoint. Cortex-Compass
+loads each session, verifies matching Lab settings, reference release, image order,
+and the SHA-256 of the sanitized temporary PNG images, then maps each session's
+independent upload IDs to the primary image IDs. Image verification uses at most
+four concurrent downloads and requires HTTPS or a secure localhost connection.
+The internal `modelResults` view state is unchanged, all models retain their own
+responses and brain vectors, and the combined expiration is the earliest session
+expiration. Model-independent visual and DreamSim evidence stays with the primary
+session. A mismatched, missing, or expired companion fails the whole handoff rather
+than displaying a partial comparison. Legacy single-token sessions, including old
+combined `model_results` payloads, continue to work. Other heatmap models and the
+two-cell Compare view remain reference-only for those uploads.

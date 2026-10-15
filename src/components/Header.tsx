@@ -3,6 +3,7 @@ import type { SelectedHeatmapCell } from '../types/data';
 import type { CortexComparisonSession } from '../types/session';
 import { isStochasticReferenceModel, STOCHASTIC_REFERENCE_NOTE } from '../utils/predictionPolicy';
 import { getCortexNavigationTarget, requestCortexReturnToLab } from '../services/cortexEmbedding';
+import { getSessionModels } from '../utils/sessionModels';
 
 type HeaderProps = {
   imageCount: number;
@@ -35,8 +36,9 @@ export function Header({
 }: HeaderProps) {
   const cortexHome = `${(import.meta.env.VITE_CORTEX_APP_URL?.trim() || '/').replace(/\/+$/, '')}/`;
   const cortexLab = `${cortexHome}lab/`;
+  const uploadModels = session ? getSessionModels(session) : [];
   const viewingUploadModel = Boolean(session && selectedCell
-    && selectedCell.model === session.comparison.model
+    && uploadModels.includes(selectedCell.model)
     && session.comparison.rois.some((roi) => roi === selectedCell.roi));
   const showUploadModelSeparately = session && (compareMode || (selectedCell && !viewingUploadModel));
   const labSettingsMatchView = Boolean(session && selectedCell && hasImageResponses && !compareMode
@@ -97,7 +99,7 @@ export function Header({
               <p className="lede header-lab-settings">
                 <strong>Your Lab settings:</strong> {session.sourceRequest.model} · {mappingLabel(session.sourceRequest.dataset)} · {session.sourceRequest.roi.toUpperCase()}
                 {showUploadModelSeparately && (
-                  <> · <strong>Uploads:</strong> {session.comparison.model} · {mappingLabel(session.comparison.dataset)}</>
+                  <> · <strong>Uploads:</strong> {uploadModels.join(', ')} · {mappingLabel(session.comparison.dataset)}</>
                 )}
               </p>
             )}

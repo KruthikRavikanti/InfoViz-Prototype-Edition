@@ -1,52 +1,32 @@
 import { describe, expect, it } from 'vitest';
-import type { AggregateHeatmapCell } from '../types/data';
 import {
   clampHeatmapTooltip,
   getHeatmapLayout,
-  getHeatmapScoreDomain,
   heatmapScoreColor,
   heatmapScoreTextColor,
-  normalizeHeatmapScore,
   SCOREBOARD_HEATMAP_COLORS,
 } from './heatmapAppearance';
-
-function scoredCell(score: number | null): AggregateHeatmapCell {
-  return { id: `ffa__${score}`, roi: 'ffa', model: `${score}`, score, overallScore: score, rankWithinRoi: null };
-}
 
 describe('scoreboard-aligned heatmap appearance', () => {
   it('matches all three quantitative scoreboard palette stops exactly', () => {
     expect(SCOREBOARD_HEATMAP_COLORS).toEqual(['#ede9d8', '#c4b4cc', '#8966a3']);
-    expect(heatmapScoreColor(-0.28, [-0.28, 0.86])).toBe('rgb(237, 233, 216)');
-    expect(heatmapScoreColor(0.29, [-0.28, 0.86])).toBe('rgb(196, 180, 204)');
-    expect(heatmapScoreColor(0.86, [-0.28, 0.86])).toBe('rgb(137, 102, 163)');
+    expect(heatmapScoreColor(0)).toBe('rgb(237, 233, 216)');
+    expect(heatmapScoreColor(0.5)).toBe('rgb(196, 180, 204)');
+    expect(heatmapScoreColor(1)).toBe('rgb(137, 102, 163)');
   });
 
-  it('derives the actual aggregate score domain without ceiling normalization', () => {
-    expect(getHeatmapScoreDomain([scoredCell(-0.281), scoredCell(0.86), scoredCell(null), scoredCell(NaN)]))
-      .toEqual([-0.281, 0.86]);
-    expect(getHeatmapScoreDomain([])).toEqual([0, 1]);
-  });
-
-  it('can keep the same score color across filtering by using the full domain', () => {
-    const fullDomain = getHeatmapScoreDomain([scoredCell(-0.28), scoredCell(0.29), scoredCell(0.86)]);
-    const beforeFiltering = heatmapScoreColor(0.29, fullDomain);
-    expect(heatmapScoreColor(0.29, fullDomain)).toBe(beforeFiltering);
-    expect(normalizeHeatmapScore(0.29, fullDomain)).toBeCloseTo(0.5);
-  });
-
-  it('handles constant scores without fabricating a higher legend endpoint', () => {
-    const domain = getHeatmapScoreDomain([scoredCell(0.812)]);
-    expect(domain).toEqual([0.812, 0.812]);
-    expect(heatmapScoreColor(0.812, domain)).toBe('rgb(196, 180, 204)');
+  it('uses fixed normalization so searching or sorting cannot recolor a score', () => {
+    expect(heatmapScoreColor(0.5)).toBe('rgb(196, 180, 204)');
+    // No filtered score domain or ratio recalculation enters this function.
+    expect(heatmapScoreColor(0.9)).toBe('rgb(149, 118, 171)');
   });
 
   it('clamps out-of-domain values and chooses readable text for the new ramp', () => {
-    expect(heatmapScoreColor(-3, [0, 1])).toBe(heatmapScoreColor(0, [0, 1]));
-    expect(heatmapScoreColor(3, [0, 1])).toBe(heatmapScoreColor(1, [0, 1]));
-    expect(heatmapScoreTextColor(0, [0, 1])).toBe('#000000');
-    expect(heatmapScoreTextColor(0.5, [0, 1])).toBe('#000000');
-    expect(heatmapScoreTextColor(1, [0, 1])).toBe('#ffffff');
+    expect(heatmapScoreColor(-3)).toBe(heatmapScoreColor(0));
+    expect(heatmapScoreColor(3)).toBe(heatmapScoreColor(1));
+    expect(heatmapScoreTextColor(0)).toBe('#000000');
+    expect(heatmapScoreTextColor(0.5)).toBe('#000000');
+    expect(heatmapScoreTextColor(1)).toBe('#ffffff');
   });
 
   it('uses a narrow intrinsic canvas and fixed square cell geometry regardless of filtering', () => {

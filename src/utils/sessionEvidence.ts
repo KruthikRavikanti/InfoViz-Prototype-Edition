@@ -11,6 +11,7 @@ import type {
 import { CANONICAL_ROIS } from '../types/session';
 import { findModelRoiColumn, rankImagesByColumn } from './evidence';
 import { jointClusterMedoidName } from './jointClustering';
+import { getSessionForModel } from './sessionModels';
 
 export const UPLOADED_STIMULUS_MARKER_COLOR = '#1c1917';
 
@@ -105,11 +106,12 @@ export function buildSessionEvidenceView(
   selectedCell: SelectedHeatmapCell,
   rows: WideCsvRow[],
   modelRoiColumns: ModelRoiColumn[],
-  session: CortexComparisonSession,
+  providedSession: CortexComparisonSession,
   focusedStimulusId: string | null,
   imageLimit: number,
 ): SessionEvidenceView | null {
-  if (selectedCell.model !== session.comparison.model || !isCanonicalRoi(selectedCell.roi)) {
+  const session = getSessionForModel(providedSession, selectedCell.model);
+  if (!session || !isCanonicalRoi(selectedCell.roi)) {
     return null;
   }
   const modelRoiColumn = findModelRoiColumn(modelRoiColumns, session.comparison.model, selectedCell.roi);

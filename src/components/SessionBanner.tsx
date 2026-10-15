@@ -1,20 +1,32 @@
 import type { CSSProperties } from 'react';
 import type { CortexComparisonSession } from '../types/session';
 import { CANONICAL_ROIS } from '../types/session';
+import { getSessionForModel, getSessionModels } from '../utils/sessionModels';
 
 type SessionBannerProps = {
   session: CortexComparisonSession;
   focusedStimulusId: string | null;
   onFocusStimulus: (stimulusId: string) => void;
+  selectedModel?: string | null;
+  onSelectModel?: (model: string) => void;
 };
 
 function formatValue(value: number): string {
   return value.toFixed(3);
 }
 
-export function SessionBanner({ session, focusedStimulusId, onFocusStimulus }: SessionBannerProps) {
+function modelLabel(model: string): string {
+  if (model === 'efficient_net') return 'EfficientNet';
+  if (model === 'clip_rn50') return 'CLIP RN50';
+  if (model === 'vgg16_imagenet1kv1') return 'VGG16 (ImageNet)';
+  return model;
+}
+
+export function SessionBanner({ session, focusedStimulusId, onFocusStimulus, selectedModel, onSelectModel }: SessionBannerProps) {
   const focusedId = focusedStimulusId ?? session.stimuli[0]?.id;
   const uploadLabel = `${session.stimuli.length} upload${session.stimuli.length === 1 ? '' : 's'}`;
+  const models = getSessionModels(session);
+  const activeSession = getSessionForModel(session, selectedModel ?? session.comparison.model);
   const sourceDataset = session.sourceRequest.dataset === 'nsd_1000' ? 'NSD-1000'
     : session.sourceRequest.dataset === 'murty185' ? 'Murty-185' : session.sourceRequest.dataset;
 
@@ -24,7 +36,9 @@ export function SessionBanner({ session, focusedStimulusId, onFocusStimulus }: S
         <span className="session-status-indicator" aria-hidden="true" />
         <div>
           <strong>Comparison active</strong>
-          <span>{session.comparison.model} · NSD-1000 · FFA, PPA, EBA</span>
+          <span>{activeSession
+            ? `${activeSession.comparison.model} · NSD-1000 · FFA, PPA, EBA`
+            : `${selectedModel} · reference images only`}</span>
         </div>
       </div>
 
@@ -47,22 +61,39 @@ export function SessionBanner({ session, focusedStimulusId, onFocusStimulus }: S
         </div>
       </div>
 
+      {models.length > 1 && (
+        <div className="session-model-controls" aria-label="Models prepared for your stimuli">
+          <span>{models.length} models</span>
+          {models.map((model) => (
+            <button
+              key={model}
+              type="button"
+              aria-pressed={activeSession?.comparison.model === model}
+              aria-label={`View uploaded stimuli with ${model}`}
+              title={`${model}${model === session.sourceRequest.model ? ' · Lab selection' : ''}`}
+              disabled={!onSelectModel}
+              onClick={() => onSelectModel?.(model)}
+            >{modelLabel(model)}</button>
+          ))}
+        </div>
+      )}
+
       <details className="session-context-details">
         <summary>Comparison details</summary>
         <div className="session-context-detail-body">
           <p className="session-context-copy">
             Lab result: <strong>{session.sourceRequest.model}</strong> ·{' '}
             <strong>{sourceDataset}</strong> · <strong>{session.sourceRequest.roi.toUpperCase()}</strong>.
-            {' '}Upload comparison: <strong>{session.comparison.model}</strong> · NSD-1000 · FFA, PPA, EBA.
+            {' '}Upload comparison: <strong>{models.join(', ')}</strong> · NSD-1000 · FFA, PPA, EBA.
             {' '}Your original Lab result is unchanged.
           </p>
 
           <div className="session-roi-comparison" aria-label="Uploaded stimulus comparison across ROIs">
             <div className="session-stimuli-heading">
               <strong>Mean predicted response by region</strong>
-              <span>NSD-1000 mapping</span>
+              <span>{activeSession ? `${activeSession.comparison.model} · NSD-1000 mapping` : 'Select a prepared model above'}</span>
             </div>
-            <div className="session-roi-table-wrap">
+            {activeSession ? <div className="session-roi-table-wrap">
               <table className="session-roi-table">
                 <thead>
                   <tr>
@@ -80,7 +111,7 @@ export function SessionBanner({ session, focusedStimulusId, onFocusStimulus }: S
                         </button>
                       </th>
                       {CANONICAL_ROIS.map((roi) => {
-                        const result = session.roiResults[roi].stimuli.find((item) => item.stimulusId === stimulus.id)!;
+                        const result = activeSession.roiResults[roi].stimuli.find((item) => item.stimulusId === stimulus.id)!;
                         return (
                           <td key={roi}>
                             <strong>{formatValue(result.mean)}</strong>
@@ -92,7 +123,7 @@ export function SessionBanner({ session, focusedStimulusId, onFocusStimulus }: S
                   ))}
                 </tbody>
               </table>
-            </div>
+            </div> : <p>Uploads are not predicted for this model. Choose a prepared model to view them.</p>}
             <p className="session-units">Predictions only; no measured fMRI for uploads.</p>
           </div>
         </div>
