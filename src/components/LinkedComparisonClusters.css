@@ -1,0 +1,27 @@
+.linked-comparison-clusters { display: grid; gap: 12px; }
+.linked-cluster-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+.linked-cluster-toolbar h3 { margin: 0; font-size: 1rem; }
+.linked-cluster-toolbar p, .linked-cluster-reference-count, .linked-cluster-axis-note, .linked-cluster-pin-instruction { margin: 4px 0 0; color: var(--text-3); font-size: .76rem; line-height: 1.45; }
+.linked-cluster-toolbar .cluster-method-control { min-width: 240px; }
+.linked-cluster-model-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.linked-cluster-model-card { min-width: 0; border: 1px solid var(--border); border-radius: var(--r-lg); padding: 14px; background: var(--surface-raised); }
+.linked-cluster-model-card > header { display: grid; gap: 3px; }
+.linked-cluster-model-card h4 { margin: 0; font-size: .95rem; overflow-wrap: anywhere; }
+.linked-cluster-model-card > header > span { color: var(--text-3); font-size: .76rem; }
+.linked-cluster-pair-result { padding: 8px 10px; margin: 12px 0 9px; background: var(--accent-wash); border: 1px solid var(--accent-border); border-radius: var(--r-sm); color: var(--text-1); font-size: .81rem; font-weight: 600; }
+.linked-cluster-model-card .cluster-scatter { margin: 0; }
+.linked-cluster-size-list { display: flex; flex-wrap: wrap; gap: 7px 12px; margin: 9px 0 12px; font-size: .73rem; color: var(--text-3); }
+.linked-cluster-pin-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.linked-cluster-pin-card { display: flex; align-items: center; gap: 8px; text-align: left; min-width: 0; padding: 8px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-subtle); color: var(--text-1); }
+.linked-cluster-pin-card:hover { border-color: var(--accent); }
+.linked-cluster-pin-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.linked-cluster-pin-card > img { width: 45px; height: 45px; object-fit: contain; border-radius: 3px; flex-shrink: 0; }
+.linked-cluster-pin-card > span { display: grid; min-width: 0; gap: 4px; }
+.linked-cluster-pin-card strong { display: flex; align-items: center; font-size: .70rem; overflow-wrap: anywhere; line-height: 1.3; }
+.linked-cluster-pin-card strong svg { width: 20px; height: 20px; flex-shrink: 0; margin-left: -3px; margin-right: 2px; }
+.linked-cluster-pin-card > span > span { font-size: .68rem; color: var(--text-3); }
+.linked-cluster-model-note { margin: 10px 0 0; color: var(--text-4); font-size: .69rem; }
+@media (max-width: 850px) {
+  .linked-cluster-toolbar { align-items: stretch; flex-direction: column; }
+  .linked-cluster-model-grid { grid-template-columns: 1fr; }
+}

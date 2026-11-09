@@ -141,12 +141,13 @@ for nearly constant random-control responses. The full pooled readouts contain 7
 753 PPA, and 2,045 EBA columns, ordered by NSD subjects 1, 2, 5, and 7; anatomical
 views use only the audited Subject 1 prefixes.
 
-All 126 models use one explicit full-FP32 policy: TF32 and autocasting are
-disabled, with deterministic cuDNN and highest-precision float32 matrix multiplication.
-The same policy is used for reference generation and live upload inference, avoiding
-batch-dependent TF32 rounding differences. This controls numerical arithmetic;
-it does not establish better biological predictive accuracy. Core serializes precision-sensitive inference
-and restores settings on exit so concurrent requests cannot mix these policies.
+The saved 126-model reference release was generated with an explicit full-FP32
+policy: TF32 and autocasting disabled, deterministic cuDNN, and highest-precision
+float32 matrix multiplication. Live uploads now use Cortex Core's existing
+model/runtime settings without a Compass-specific precision override. References
+and uploads may therefore differ numerically; close rankings, neighbors, and
+cluster assignments are not guaranteed to remain identical. Neither policy
+establishes better biological predictive accuracy.
 The scoreboard retains its historical benchmark scores; those scores are not
 new evaluations under the standardized execution policy.
 
@@ -164,8 +165,8 @@ absolute changes. The release comparison records both response and rank changes.
 For AlexNetRandom specifically, the historical checkpoints contain readout
 weights only, and neither the cached encodings nor the backbone cache records
 the training encoder's initialization. The controlled seed-0 TF32 test does
-not explain the archived response differences. Its current reference/live
-consistency is verified, but its historical training-encoder pairing remains
+not explain the archived response differences. Reference/live consistency was
+verified under that FP32 policy, but its historical training-encoder pairing remains
 unverified; interpret this random control accordingly.
 
 Coverage changes have a new reference version. Reopen Cortex-Compass from the Lab
@@ -241,8 +242,8 @@ Torch Hub overrides so loading DreamSim cannot redirect later models' caches.
 Git contains the public 126-model views and their reviewed identity pins.
 The private Core bundle in `artifacts/reference` is intentionally ignored:
 a fresh clone alone cannot create matching upload comparisons. Transfer that
-verified directory separately, use the matching Cortex Core precision/cache/audit
-changes and trained readout resources, and set `CORTEX_REFERENCE_ARTIFACT_DIR`
+verified directory separately, use the matching Cortex Core comparison/cache/audit
+code and trained readout resources, and set `CORTEX_REFERENCE_ARTIFACT_DIR`
 to its absolute path. The installed release version is
 `3345e5fb332f4046c0b3a76a35f24a027dd0b6de0f62bb5e97eecda62c06b67d`;
 its private `manifest.json` SHA-256 is
@@ -293,6 +294,15 @@ with the same training, evaluation, and metric selected—not its multi-dataset 
 **Image similarity** groups images by predicted-response patterns, visual features, or measured fMRI.
 **Brain & selectivity** contains the cortical 3D Brain Map and the Voxel Selectivity Explorer,
 which offers cortical and non-anatomical similarity views.
+
+**Compare selections** includes a shared-reference predicted-response scatterplot.
+Each model's image means are standardized separately over the same shared image
+IDs, with equal axis scales. Hover or focus previews the image, both response
+ranks, and standardized values. Pin up to two images to carry matching shapes
+and labels into side-by-side hierarchical cluster views. Gap highlights remain
+separate from pins. Closing the dialog keeps the A/B heatmap selections and pins;
+**Open comparison** reopens it, and turning Compare mode off clears the pair.
+
 The brain image picker is searchable and bounded regardless of upload count, with previous/next navigation
 and a selected-image preview. Display controls collapse on narrow screens so the cortex stays visible.
 Reference-image selection is local to the brain map; selecting an upload still updates the shared upload focus.
@@ -322,6 +332,19 @@ inspection show the same voxel/cluster/PCA-distance details, with tooltips kept 
 The selectivity manifest digest is pinned in `src/generated/referenceCoverage.ts` before either model
 availability or atlas data are trusted. An intentional artifact regeneration requires reviewing the bundle
 and updating that pin; child summary and point files remain independently checksum-verified.
+
+The Explorer's Brain view displays **Projected voxel clusters** using the same
+registered Subject 1 voxel-to-surface weights as the response map. Each supported
+vertex takes the cluster with greatest summed positive weight from the visible
+ROIs; exact ties use the lower cluster ID. Crisp vertex-owned surface cells keep
+categorical colors separate and leave unsupported cells gray. Hover inspects a
+winning-cluster contributor; keyboard navigation retains all mapped native voxels.
+For CLIP RN50 with PPA only, all 170 voxels map: 100 in C1 and 70 in C11. This
+does not include C1's other-ROI voxels. The Ventral preset, pale material, lighting,
+and hemisphere separation match Cortex's 3D brain response viewer, while retaining
+the verified Explorer mesh. Selecting a cluster dims the others; clearing emphasis
+keeps its gallery labeled **Last viewed profile** in Brain. Similarity deselection
+is unchanged.
 
 Inspect the separate reference-brain builder's staging options (an expanded bundle
 requires append-baseline mode and reviewed new-model provenance):
@@ -397,6 +420,14 @@ The parent repository's Git link pins an exact Cortex-Compass commit, not the
 latest commit on `IUI`. To release a child change, commit and push it in this
 repository, then explicitly review and update the parent's pinned commit. Normal
 clones and builds do not automatically advance that pointer.
+
+For an existing Cortex App IUI checkout, pull the parent and update its recorded
+submodule revision before restarting the frontend:
+
+```bash
+git pull --ff-only --recurse-submodules origin IUI
+git submodule update --init --recursive
+```
 
 Developers and deployment checkouts need read access to both repositories. If
 Cortex-Compass is private, its submodule checkout must authenticate too; credentials

@@ -12,6 +12,7 @@ import { createPortal } from 'react-dom';
 import { loadSelectivityAtlasAssets } from '../services/selectivityAtlasAssets';
 import { loadBrainMapAssets } from '../services/brainMapAssets';
 import { buildSelectivityBrainAnchors, validateSelectivityBrainCompatibility } from '../utils/selectivityBrainProjection';
+import { BRAIN_SURFACE_VIEWS, type BrainSurfaceView } from '../utils/brainSurfaceLayout';
 import type { BrainMapAssets, BrainSurfaceKind } from '../types/brainMap';
 import { isStochasticReferenceModel, STOCHASTIC_REFERENCE_NOTE } from '../utils/predictionPolicy';
 import { VoxelSelectivityAtlasTooltip } from './VoxelSelectivityAtlasTooltip';
@@ -83,7 +84,7 @@ function StimulusStrip({ title, stimuli }: { title: string; stimuli: Selectivity
   );
 }
 
-function ClusterProfile({ cluster }: { cluster: SelectivityAtlasCluster | null }) {
+function ClusterProfile({ cluster, retained = false }: { cluster: SelectivityAtlasCluster | null; retained?: boolean }) {
   if (!cluster) {
     return (
       <section className="selectivity-cluster-profile selectivity-cluster-profile--empty">
@@ -100,6 +101,7 @@ function ClusterProfile({ cluster }: { cluster: SelectivityAtlasCluster | null }
           style={{ backgroundColor: SELECTIVITY_CLUSTER_COLORS[cluster.label] }}
         />
         <div>
+          {retained && <span className="selectivity-cluster-response-label">Last viewed profile</span>}
           <h3>Cluster C{cluster.label}</h3>
           <p>
             {cluster.size} voxels · FFA {cluster.roiCounts.ffa} · EBA {cluster.roiCounts.eba} · PPA {cluster.roiCounts.ppa}
@@ -125,10 +127,14 @@ function VoxelSelectivityAtlasModal({
     eba: true,
     ppa: true,
   });
-  const [selectedCluster, setSelectedCluster] = useState<number | null>(null);
+  const [clusterSelection, setClusterSelection] = useState<{ selected: number | null; lastViewed: number | null }>({
+    selected: null, lastViewed: null,
+  });
+  const selectedCluster = clusterSelection.selected;
   const [hovered, setHovered] = useState<SelectivityAtlasHoverDatum | SelectivityBrainHoverDatum | null>(null);
   const [viewMode, setViewMode] = useState<AtlasViewMode>('similarity');
   const [surface, setSurface] = useState<BrainSurfaceKind>('inflated');
+  const [cameraView, setCameraView] = useState<BrainSurfaceView>('ventral');
   const [brainState, setBrainState] = useState<BrainAssetState>({ status: 'idle' });
   const brainAssetsRef = useRef<BrainMapAssets | null>(null);
   const [resetKey, setResetKey] = useState(0);
@@ -191,8 +197,9 @@ function VoxelSelectivityAtlasModal({
     return () => { document.body.style.overflow = previousOverflow; };
   }, []);
 
-  const selectedProfile = assetState.status === 'ready' && selectedCluster !== null
-    ? assetState.assets.summary.clusters.find((cluster) => cluster.label === selectedCluster) ?? null
+  const profileCluster = selectedCluster ?? (viewMode === 'brain' ? clusterSelection.lastViewed : null);
+  const selectedProfile = assetState.status === 'ready' && profileCluster !== null
+    ? assetState.assets.summary.clusters.find((cluster) => cluster.label === profileCluster) ?? null
     : null;
   const visibleCount = assetState.status === 'ready'
     ? ROI_ORDER.reduce(
@@ -207,6 +214,13 @@ function VoxelSelectivityAtlasModal({
   function changeView(mode: AtlasViewMode) {
     setHovered(null);
     setViewMode(mode);
+  }
+
+  function selectCluster(cluster: number) {
+    setClusterSelection((current) => ({
+      selected: current.selected === cluster ? null : cluster,
+      lastViewed: cluster,
+    }));
   }
 
   return createPortal(
@@ -296,9 +310,7 @@ function VoxelSelectivityAtlasModal({
                         aria-pressed={selectedCluster === cluster.label}
                         aria-label={`Cluster C${cluster.label}, ${cluster.size} voxels`}
                         style={{ '--cluster-color': SELECTIVITY_CLUSTER_COLORS[cluster.label] } as CSSProperties}
-                        onClick={() => setSelectedCluster((current) => (
-                          current === cluster.label ? null : cluster.label
-                        ))}
+                        onClick={() => selectCluster(cluster.label)}
                       >
                         <span aria-hidden="true" />
                         C{cluster.label}
@@ -345,9 +357,12 @@ function VoxelSelectivityAtlasModal({
                   </p>
                   {viewMode === 'brain' && (
                     <p>
-                      Brain markers use the same Subject 1 fLoc voxels (t &gt; 7) and reviewed cortical mapper
-                      as the response map. Each marker occupies a supported surface vertex; cluster IDs
-                      are never averaged. Three EBA voxels lack surface coverage and remain in Similarity.
+                      Projected voxel clusters use the same Subject 1 fLoc voxels (t &gt; 7) and reviewed
+                      cortical mapper as the response map. At each supported vertex, the cluster with
+                      the greatest summed weight from the visible ROIs wins; exact ties use the lower
+                      cluster ID. Cluster IDs are never averaged. Unsupported surface cells stay gray.
+                      Hover inspects a contributing voxel from the winning cluster; keyboard browsing
+                      retains every mapped voxel. Three EBA voxels lack surface coverage and remain in Similarity.
                       Inflated and pial surfaces retain the same vertex correspondence.
                       The predictor was trained on pooled NSD subjects; this view locates its Subject 1 outputs.
                     </p>
@@ -355,7 +370,7 @@ function VoxelSelectivityAtlasModal({
                 </details>
               </aside>
 
-              <div className="selectivity-atlas-stage-column">
+              <div className={`selectivity-atlas-stage-column${viewMode === 'brain' ? ' selectivity-atlas-stage-column--brain' : ''}`}>
                 <div className="selectivity-atlas-stage-heading">
                   <div className="selectivity-atlas-view-toggle" role="group" aria-label="Voxel view">
                     <button type="button" aria-pressed={viewMode === 'similarity'} onClick={() => changeView('similarity')}>
@@ -366,7 +381,7 @@ function VoxelSelectivityAtlasModal({
                     </button>
                   </div>
                   <p>{viewMode === 'brain'
-                    ? 'Positions: Subject 1 cortex · colors: voxel clusters, not activation.'
+                    ? 'Projected voxel clusters · colors: cluster membership, not activation.'
                     : 'Dots: voxels · colors: clusters · positions: similarity, not anatomy.'}</p>
                   <span>{viewMode === 'brain'
                     ? brainState.status === 'ready' ? `${mappedCount} / ${visibleCount} voxels mapped`
@@ -384,16 +399,17 @@ function VoxelSelectivityAtlasModal({
                       selectedCluster={selectedCluster}
                       resetKey={resetKey}
                       onHover={setHovered}
-                      onSelectCluster={(cluster) => setSelectedCluster((current) => current === cluster ? null : cluster)}
+                      onSelectCluster={selectCluster}
                     /> : brainState.status === 'ready' ? <SelectivityBrainViewer
                       assets={brainState.assets}
                       points={assetState.assets.points}
                       enabledRois={enabledRoiSet}
                       surface={surface}
+                      cameraView={cameraView}
                       selectedCluster={selectedCluster}
                       resetKey={resetKey}
                       onHover={setHovered}
-                      onSelectCluster={(cluster) => setSelectedCluster((current) => current === cluster ? null : cluster)}
+                      onSelectCluster={selectCluster}
                     /> : brainState.status === 'error' ? (
                       <div className="selectivity-atlas-canvas-state error" role="alert">
                         <strong>Brain view unavailable</strong>
@@ -422,18 +438,33 @@ function VoxelSelectivityAtlasModal({
                       </p>
                     </details>
                   </div>
-                  <button
-                    type="button"
-                    className="selectivity-atlas-reset"
-                    onClick={() => setResetKey((key) => key + 1)}
-                  >
-                    Reset view
-                  </button>
+                  <div className="selectivity-atlas-view-actions">
+                    {viewMode === 'brain' && (
+                      <label className="selectivity-brain-view-control">
+                        View
+                        <select
+                          value={cameraView}
+                          onChange={(event) => { setHovered(null); setCameraView(event.target.value as BrainSurfaceView); }}
+                        >
+                          {(Object.keys(BRAIN_SURFACE_VIEWS) as BrainSurfaceView[]).map((view) => (
+                            <option key={view} value={view}>{BRAIN_SURFACE_VIEWS[view].label}</option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
+                    <button
+                      type="button"
+                      className="selectivity-atlas-reset"
+                      onClick={() => setResetKey((key) => key + 1)}
+                    >
+                      Reset view
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <ClusterProfile cluster={selectedProfile} />
+            <ClusterProfile cluster={selectedProfile} retained={viewMode === 'brain' && selectedCluster === null && selectedProfile !== null} />
           </>
         )}
       </section>

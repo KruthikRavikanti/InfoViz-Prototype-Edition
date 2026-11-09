@@ -34,7 +34,7 @@ export function validateSelectivityBrainCompatibility(atlas: SelectivityAtlasAss
   validatePointIdentities(brain, atlas.points);
 }
 
-function validatePointIdentities(assets: BrainMapAssets, points: SelectivityAtlasPoint[]): Map<string, SelectivityAtlasPoint> {
+export function validatePointIdentities(assets: BrainMapAssets, points: SelectivityAtlasPoint[]): Map<string, SelectivityAtlasPoint> {
   const bySource = new Map<string, SelectivityAtlasPoint>();
   for (const point of points) {
     const projectionRoi = assets.projection.rois[point.roi];

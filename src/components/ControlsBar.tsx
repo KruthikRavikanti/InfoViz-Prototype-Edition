@@ -8,6 +8,8 @@ type ControlsBarProps = {
   showScoreLabels: boolean;
   compareMode: boolean;
   compareSelectionCount: number;
+  compareDialogOpen: boolean;
+  onOpenComparison: () => void;
   onRankingSystemChange: (rankingSystem: RankingSystem) => void;
   onSelectedRankingRoiChange: (roi: Roi) => void;
   onModelSearchChange: (searchTerm: string) => void;
@@ -24,6 +26,8 @@ export function ControlsBar({
   showScoreLabels,
   compareMode,
   compareSelectionCount,
+  compareDialogOpen,
+  onOpenComparison,
   onRankingSystemChange,
   onSelectedRankingRoiChange,
   onModelSearchChange,
@@ -88,7 +92,12 @@ export function ControlsBar({
 
       {compareMode && (
         <div className="compare-status active" aria-live="polite">
-          {compareSelectionCount} / 2 selected
+          <span>{compareSelectionCount} / 2 selected</span>
+          {compareSelectionCount === 2 && !compareDialogOpen && (
+            <button className="reopen-comparison-button" type="button" onClick={onOpenComparison}>
+              Open comparison
+            </button>
+          )}
         </div>
       )}
 

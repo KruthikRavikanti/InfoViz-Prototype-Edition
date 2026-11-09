@@ -6,16 +6,19 @@ import type { BrainHemisphere, BrainMapAssets, BrainSurfaceKind } from '../types
 import type { CanonicalRoi } from '../types/session';
 import type { SelectivityAtlasPoint, SelectivityBrainHoverDatum } from '../types/selectivityAtlas';
 import { fetchVerifiedBrainAsset } from '../services/brainMapAssets';
-import { brainSurfaceCameraDistance, inflatedHemisphereTranslations } from '../utils/brainSurfaceLayout';
+import { BRAIN_SURFACE_VIEWS, brainSurfaceCameraDistance, inflatedHemisphereTranslations, type BrainSurfaceView } from '../utils/brainSurfaceLayout';
 import { SELECTIVITY_CLUSTER_COLORS } from '../utils/selectivityAtlas';
 import { projectSelectivityHemisphere } from '../utils/selectivityBrainProjection';
-import { orbitSelectivityCamera, selectivityNavigationIndex } from '../utils/selectivityViewerLayout';
+import { projectVoxelClusters } from '../utils/projectedVoxelClusters';
+import { buildCategoricalSurfaceGeometry } from '../utils/categoricalSurfaceOverlay';
+import { selectivityNavigationIndex } from '../utils/selectivityViewerLayout';
 
 type SelectivityBrainViewerProps = {
   assets: BrainMapAssets;
   points: SelectivityAtlasPoint[];
   enabledRois: ReadonlySet<CanonicalRoi>;
   surface: BrainSurfaceKind;
+  cameraView?: BrainSurfaceView;
   selectedCluster: number | null;
   resetKey: number;
   onHover: (datum: SelectivityBrainHoverDatum | null) => void;
@@ -36,9 +39,10 @@ type SourceAnchor = {
   sourceCount: number;
 };
 
-type PointHitData = {
-  points: THREE.Points;
-  anchors: SourceAnchor[];
+type OverlayHitData = {
+  overlay: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+  sourceVertexIndices: Uint32Array;
+  anchorsByVertex: Map<number, SourceAnchor>;
 };
 
 type Runtime = {
@@ -46,7 +50,6 @@ type Runtime = {
   camera: THREE.PerspectiveCamera;
   controls: OrbitControls;
   surfaceRoot: THREE.Group;
-  pointTexture: THREE.CanvasTexture;
   frameSurface: () => void;
   clearHover: () => void;
 };
@@ -72,12 +75,13 @@ function firstMesh(object: THREE.Object3D): THREE.Mesh | null {
   return result;
 }
 
-/** Cluster labels belong to native voxels, never to interpolated surface values. */
+/** Surface labels are winners of mapped native-voxel support, never averaged cluster IDs. */
 export default function SelectivityBrainViewer({
   assets,
   points,
   enabledRois,
   surface,
+  cameraView = 'ventral',
   selectedCluster,
   resetKey,
   onHover,
@@ -85,9 +89,10 @@ export default function SelectivityBrainViewer({
 }: SelectivityBrainViewerProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const runtimeRef = useRef<Runtime | null>(null);
+  const cameraViewRef = useRef(cameraView);
   const onHoverRef = useRef(onHover);
   const onSelectClusterRef = useRef(onSelectCluster);
-  const hitDataRef = useRef<PointHitData[]>([]);
+  const hitDataRef = useRef<OverlayHitData[]>([]);
   const visibleAnchorsRef = useRef<SourceAnchor[]>([]);
   const [hemisphereMeshes, setHemisphereMeshes] = useState<HemisphereMesh[]>([]);
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -101,18 +106,20 @@ export default function SelectivityBrainViewer({
     if (!mount) return;
     const mountElement = mount;
     const scene = new THREE.Scene();
-    const backgroundColor = getComputedStyle(mountElement).getPropertyValue('--bg-subtle').trim() || '#F1EFE9';
-    scene.background = new THREE.Color(backgroundColor);
+    // Like Cortex's 3D brain response viewer, let the page show through.
+    scene.background = null;
     const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 3000);
+    camera.up.fromArray(BRAIN_SURFACE_VIEWS[cameraViewRef.current].up);
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     } catch (error) {
       setLoadState('error');
       setLoadError(error instanceof Error ? `Brain renderer unavailable: ${error.message}` : 'Brain renderer unavailable: WebGL could not be initialized.');
       return;
     }
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.domElement.className = 'brain-map-webgl-canvas selectivity-brain-webgl-canvas';
     renderer.domElement.tabIndex = 0;
@@ -120,36 +127,30 @@ export default function SelectivityBrainViewer({
     renderer.domElement.setAttribute('aria-describedby', 'selectivity-atlas-keyboard-instructions');
     renderer.domElement.setAttribute(
       'aria-label',
-      'Interactive Subject 1 cortical surface with voxel-cluster markers. Drag or use arrow keys to rotate; scroll or plus and minus to zoom; brackets or Page Up and Page Down to browse mapped voxels; Home and End for first and last; Enter or Space to select a cluster.',
+      'Interactive Subject 1 cortical surface with projected voxel clusters. Drag or use arrow keys to rotate; scroll or plus and minus to zoom; brackets or Page Up and Page Down to browse mapped voxels; Home and End for first and last; Enter or Space to select a cluster.',
     );
     mountElement.appendChild(renderer.domElement);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    let controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.minDistance = 35;
     controls.maxDistance = 850;
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x827a70, 2.4));
+    // The pale ground and warm underside light keep ventral cortex softly lit.
+    // Settings match assets/js/components/UploadBrainViewer.jsx in Cortex.
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xe4dfd6, 2.4));
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
     keyLight.position.set(1, 1.4, 1.8);
     scene.add(keyLight);
     const fillLight = new THREE.DirectionalLight(0xa8b7dc, 1.2);
     fillLight.position.set(-1.5, 0.2, -1);
     scene.add(fillLight);
+    const undersideLight = new THREE.DirectionalLight(0xfff6ee, 2.2);
+    undersideLight.position.set(0.2, -1.6, 0.45);
+    scene.add(undersideLight);
 
     const surfaceRoot = new THREE.Group();
     scene.add(surfaceRoot);
-    const textureCanvas = document.createElement('canvas');
-    textureCanvas.width = 32;
-    textureCanvas.height = 32;
-    const textureContext = textureCanvas.getContext('2d');
-    if (textureContext) {
-      textureContext.fillStyle = '#ffffff';
-      textureContext.beginPath();
-      textureContext.arc(16, 16, 14, 0, Math.PI * 2);
-      textureContext.fill();
-    }
-    const pointTexture = new THREE.CanvasTexture(textureCanvas);
     const focusCanvas = document.createElement('canvas');
     focusCanvas.width = 64;
     focusCanvas.height = 64;
@@ -189,7 +190,6 @@ export default function SelectivityBrainViewer({
     let pointerDragged = false;
     const projectedPoint = new THREE.Vector3();
     const raycaster = new THREE.Raycaster();
-    raycaster.params.Points = { threshold: 2.5 };
     const occlusionRaycaster = new THREE.Raycaster();
     const occlusionTarget = new THREE.Vector3();
     const occlusionDirection = new THREE.Vector3();
@@ -232,12 +232,29 @@ export default function SelectivityBrainViewer({
       framingRadius = box.getBoundingSphere(new THREE.Sphere()).radius;
       const distance = fitDistance();
       framingDistance = distance;
-      camera.position.copy(center).add(new THREE.Vector3(0.9, 0.28, 1.35).normalize().multiplyScalar(distance));
+      const preset = BRAIN_SURFACE_VIEWS[cameraViewRef.current];
+      const nextUp = new THREE.Vector3().fromArray(preset.up);
+      const upChanged = !camera.up.equals(nextUp);
+      camera.up.copy(nextUp);
+      camera.position.copy(center).add(new THREE.Vector3().fromArray(preset.direction).normalize().multiplyScalar(distance));
+      if (upChanged) {
+        // OrbitControls caches its up-to-Y quaternion at construction. Recreate
+        // it when changing basis so native dragging follows the selected view.
+        controls.removeEventListener('change', handleViewChange);
+        controls.dispose();
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.addEventListener('change', handleViewChange);
+        if (runtimeRef.current) runtimeRef.current.controls = controls;
+      }
+      controls.minDistance = Math.max(5, framingRadius * 0.25);
+      controls.maxDistance = Math.max(850, distance * 2);
       controls.target.copy(center);
       controls.update();
     }
 
-    runtimeRef.current = { renderer, camera, controls, surfaceRoot, pointTexture, frameSurface, clearHover };
+    runtimeRef.current = { renderer, camera, controls, surfaceRoot, frameSurface, clearHover };
 
     function anchorWorldPosition(anchor: SourceAnchor, target: THREE.Vector3) {
       const position = anchor.mesh.geometry.getAttribute('position');
@@ -267,7 +284,7 @@ export default function SelectivityBrainViewer({
         cachedSurface = currentSurface;
         corticalMeshes = [];
         surfaceRoot.traverse((child) => {
-          if (child instanceof THREE.Mesh) corticalMeshes.push(child);
+          if (child instanceof THREE.Mesh && !child.userData.selectivityClusterOverlay) corticalMeshes.push(child);
         });
         occlusionCache = null;
       }
@@ -277,7 +294,7 @@ export default function SelectivityBrainViewer({
       surfaceRoot.updateMatrixWorld(true);
       occlusionDirection.subVectors(occlusionTarget, camera.position);
       const distance = occlusionDirection.length();
-      // Only geometry BEFORE the supported marker vertex can hide it. A tiny
+      // Only geometry BEFORE the supported surface vertex can hide it. A tiny
       // display-space tolerance avoids treating the vertex's own face as a hit.
       occlusionRaycaster.set(camera.position, occlusionDirection.normalize());
       occlusionRaycaster.near = 0;
@@ -333,21 +350,29 @@ export default function SelectivityBrainViewer({
       surfaceRoot.updateMatrixWorld(true);
       raycaster.setFromCamera(pointer, camera);
       const hitData = hitDataRef.current;
-      const hits = raycaster.intersectObjects(hitData.map((entry) => entry.points), false);
+      const hits = raycaster.intersectObjects(hitData.map((entry) => entry.overlay), false);
       if (hits.length === 0) return null;
       for (const hit of hits) {
-        if (hit.index === undefined) continue;
-        const data = hitData.find((entry) => entry.points === hit.object);
-        const anchor = data?.anchors[hit.index];
+        if (hit.faceIndex === undefined || hit.faceIndex === null) continue;
+        const data = hitData.find((entry) => entry.overlay === hit.object);
+        const vertexIndex = data?.sourceVertexIndices[hit.faceIndex];
+        const anchor = vertexIndex === undefined ? undefined : data?.anchorsByVertex.get(vertexIndex);
         if (!anchor) continue;
-        anchorWorldPosition(anchor, projectedPoint).project(camera);
-        const screenX = (projectedPoint.x + 1) * rect.width / 2;
-        const screenY = (1 - projectedPoint.y) * rect.height / 2;
-        // Pick the same visible source identity as the depth-tested glyph, not
-        // a back-bank marker that happens to be close to the pointer ray.
-        if (Math.hypot(screenX - (event.clientX - rect.left), screenY - (event.clientY - rect.top)) <= 8 && !isOccluded(anchor)) return anchor;
+        // Inspect any visible projected cell, using a real contributor from its
+        // winning cluster. The gray cortex still occludes cells on a back bank.
+        occlusionRaycaster.setFromCamera(pointer, camera);
+        occlusionRaycaster.far = Math.max(0, hit.distance - 0.08);
+        if (occlusionRaycaster.intersectObjects(hemisphereBaseMeshes(), false).length === 0) return anchor;
       }
       return null;
+    }
+
+    function hemisphereBaseMeshes(): THREE.Mesh[] {
+      const meshes: THREE.Mesh[] = [];
+      surfaceRoot.traverse((child) => {
+        if (child instanceof THREE.Mesh && !child.userData.selectivityClusterOverlay) meshes.push(child);
+      });
+      return meshes;
     }
 
     function handlePointerMove(event: PointerEvent) {
@@ -358,7 +383,7 @@ export default function SelectivityBrainViewer({
       }
       const anchor = hitAt(event);
       if (!anchor) { clearHover(); return; }
-      focusedIndex = visibleAnchorsRef.current.indexOf(anchor);
+      focusedIndex = visibleAnchorsRef.current.findIndex((source) => source.point.voxelIndex === anchor.point.voxelIndex);
       hoverMode = 'pointer';
       showFocusMarker(anchor);
       renderer.domElement.dataset.focusedVoxelOccluded = 'false';
@@ -390,17 +415,20 @@ export default function SelectivityBrainViewer({
         event.preventDefault();
         flushOrbitDamping();
         const step = Math.PI / 36;
-        const azimuth = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0;
-        const polar = event.key === 'ArrowUp' ? -step : event.key === 'ArrowDown' ? step : 0;
-        camera.position.fromArray(orbitSelectivityCamera(camera.position.toArray(), controls.target.toArray(), azimuth, polar));
+        const offset = camera.position.clone().sub(controls.target);
+        const horizontal = event.key === 'ArrowLeft' || event.key === 'ArrowRight';
+        const axis = horizontal ? camera.up.clone().normalize() : offset.clone().cross(camera.up).normalize();
+        const sign = event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 1;
+        offset.applyAxisAngle(axis, sign * step);
+        camera.position.copy(controls.target).add(offset);
         controls.update();
       } else if (event.key === '+' || event.key === '=') {
         event.preventDefault();
-        camera.position.lerp(controls.target, 0.08);
+        camera.position.lerp(controls.target, 0.1);
         controls.update();
       } else if (event.key === '-' || event.key === '_') {
         event.preventDefault();
-        camera.position.sub(controls.target).multiplyScalar(1.08).add(controls.target);
+        camera.position.sub(controls.target).multiplyScalar(1.1).add(controls.target);
         controls.update();
       } else if ((event.key === 'Enter' || event.key === ' ') && focusedIndex !== null) {
         event.preventDefault();
@@ -455,7 +483,6 @@ export default function SelectivityBrainViewer({
       controls.dispose();
       disposeObject(surfaceRoot);
       disposeObject(focusMarker);
-      pointTexture.dispose();
       focusTexture.dispose();
       renderer.dispose();
       renderer.domElement.remove();
@@ -586,9 +613,9 @@ export default function SelectivityBrainViewer({
     runtime.clearHover();
     hitDataRef.current = [];
     const allAnchors: SourceAnchor[] = [];
-    const baseColor = new THREE.Color(CORTEX_COLOR);
+    const labelCounts: Record<number, number> = {};
     for (const { hemisphere, mesh } of hemisphereMeshes) {
-      mesh.children.filter((child) => child.userData.selectivityVoxelPoints).forEach((child) => {
+      mesh.children.filter((child) => child.userData.selectivityClusterOverlay).forEach((child) => {
         mesh.remove(child);
         disposeObject(child);
       });
@@ -596,42 +623,81 @@ export default function SelectivityBrainViewer({
       const projected = projectSelectivityHemisphere({ assets, points, enabledRois, hemisphere, vertexCount: position.count });
       const anchors: SourceAnchor[] = projected.voxelAnchors.map((anchor) => ({ ...anchor, hemisphere, mesh }));
       allAnchors.push(...anchors);
-      if (anchors.length === 0) continue;
-      const positions = new Float32Array(anchors.length * 3);
-      const colors = new Float32Array(anchors.length * 3);
-      anchors.forEach((anchor, index) => {
-        positions[index * 3] = position.getX(anchor.vertexIndex);
-        positions[index * 3 + 1] = position.getY(anchor.vertexIndex);
-        positions[index * 3 + 2] = position.getZ(anchor.vertexIndex);
-        const color = new THREE.Color(SELECTIVITY_CLUSTER_COLORS[anchor.point.clusterLabel]);
-        if (selectedCluster !== null && anchor.point.clusterLabel !== selectedCluster) color.lerp(baseColor, 0.7);
-        color.toArray(colors, index * 3);
+      const clustered = projectVoxelClusters({ assets, points, enabledRois, hemisphere, vertexCount: position.count });
+      const index = mesh.geometry.getIndex();
+      if (!index) throw new Error('Projected voxel clusters require the original indexed cortical mesh.');
+      const cells = buildCategoricalSurfaceGeometry({
+        positions: position.array,
+        normals: mesh.geometry.getAttribute('normal').array,
+        indices: index.array,
+        labels: clustered.labels,
       });
       const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-      const material = new THREE.PointsMaterial({
-        size: 6,
-        sizeAttenuation: false,
+      geometry.setAttribute('position', new THREE.BufferAttribute(cells.positions, 3));
+      if (cells.normals) geometry.setAttribute('normal', new THREE.BufferAttribute(cells.normals, 3));
+      geometry.setAttribute('clusterLabel', new THREE.BufferAttribute(cells.clusterLabels, 1));
+      geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(cells.positions.length), 3));
+      const material = new THREE.MeshStandardMaterial({
+        color: '#ffffff',
         vertexColors: true,
-        map: runtime.pointTexture,
-        alphaTest: 0.3,
-        depthWrite: false,
+        roughness: 0.94,
+        metalness: 0,
+        side: THREE.DoubleSide,
+        polygonOffset: true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1,
       });
-      const voxelPoints = new THREE.Points(geometry, material);
-      voxelPoints.name = `${hemisphere}-selectivity-voxels`;
-      voxelPoints.renderOrder = 3;
-      voxelPoints.userData.selectivityVoxelPoints = true;
-      mesh.add(voxelPoints);
-      hitDataRef.current.push({ points: voxelPoints, anchors });
+      const overlay = new THREE.Mesh(geometry, material);
+      overlay.name = `${hemisphere}-projected-voxel-clusters`;
+      overlay.renderOrder = 3;
+      overlay.userData.selectivityClusterOverlay = true;
+      const anchorsByVertex = new Map<number, SourceAnchor>();
+      clustered.contributors.forEach((contributors, vertexIndex) => {
+        const label = clustered.labels[vertexIndex];
+        // Contributors are sorted by descending weight, then stable source ID.
+        const winner = contributors.find((contributor) => contributor.point.clusterLabel === label);
+        if (!winner) return;
+        labelCounts[label] = (labelCounts[label] ?? 0) + 1;
+        anchorsByVertex.set(vertexIndex, {
+          hemisphere, mesh, point: winner.point, vertexIndex,
+          mappingWeight: winner.weight, sourceCount: contributors.length,
+        });
+      });
+      mesh.add(overlay);
+      hitDataRef.current.push({ overlay, sourceVertexIndices: cells.sourceVertexIndices, anchorsByVertex });
     }
     visibleAnchorsRef.current = allAnchors.sort((a, b) => a.point.voxelIndex - b.point.voxelIndex);
     runtime.renderer.domElement.dataset.visiblePointCount = String(allAnchors.length);
-  }, [assets, enabledRois, hemisphereMeshes, points, selectedCluster]);
+    runtime.renderer.domElement.dataset.projectedClusterVertexCounts = JSON.stringify(labelCounts);
+  }, [assets, enabledRois, hemisphereMeshes, points]);
+
+  useEffect(() => {
+    runtimeRef.current?.clearHover();
+    const baseColor = new THREE.Color(CORTEX_COLOR);
+    for (const { overlay } of hitDataRef.current) {
+      const labels = overlay.geometry.getAttribute('clusterLabel');
+      const colors = overlay.geometry.getAttribute('color');
+      const palette = SELECTIVITY_CLUSTER_COLORS.map((hex, cluster) => {
+        const color = new THREE.Color(hex);
+        if (selectedCluster !== null && cluster !== selectedCluster) color.lerp(baseColor, 0.7);
+        return color;
+      });
+      for (let i = 0; i < labels.count; i += 1) {
+        const color = palette[labels.getX(i)];
+        colors.setXYZ(i, color.r, color.g, color.b);
+      }
+      colors.needsUpdate = true;
+    }
+  }, [enabledRois, hemisphereMeshes, points, selectedCluster]);
 
   useEffect(() => {
     if (resetKey > 0) runtimeRef.current?.frameSurface();
   }, [resetKey]);
+
+  useEffect(() => {
+    cameraViewRef.current = cameraView;
+    runtimeRef.current?.frameSurface();
+  }, [cameraView]);
 
   return (
     <div className="brain-map-viewer-shell selectivity-brain-viewer-shell">

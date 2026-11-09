@@ -1,5 +1,16 @@
 export type AxisBounds = { min: number; max: number };
 
+// Match Cortex's UploadBrainViewer display presets. These affect only the
+// camera, never the registered mesh or its voxel-to-vertex correspondence.
+export const BRAIN_SURFACE_VIEWS = {
+  overview: { label: 'Overview', direction: [0.9, 0.28, 1.35], up: [0, 1, 0] },
+  lateral: { label: 'Right side', direction: [1, 0, 0], up: [0, 1, 0] },
+  medial: { label: 'Left side', direction: [-1, 0, 0], up: [0, 1, 0] },
+  ventral: { label: 'Ventral', direction: [0, -1, 0], up: [0, 0, -1] },
+  dorsal: { label: 'Dorsal', direction: [0, 1, 0], up: [0, 0, -1] },
+} as const;
+export type BrainSurfaceView = keyof typeof BRAIN_SURFACE_VIEWS;
+
 /** Fit the entire cortical bounding sphere along the narrower camera dimension. */
 export function brainSurfaceCameraDistance(radius: number, aspect: number, verticalFovDegrees = 34): number {
   if (

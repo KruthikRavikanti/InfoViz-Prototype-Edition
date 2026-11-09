@@ -1037,6 +1037,11 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
   color: var(--compare);
   font-weight: 600;
 }
+.reopen-comparison-button {
+  margin-left: auto; padding: 4px 8px; border: 1px solid var(--accent-border);
+  border-radius: var(--r-sm); background: var(--surface-raised); color: var(--accent-strong);
+  font-size: .7rem; font-weight: 600; cursor: pointer;
+}
 
 /* Reset button */
 .reset-controls-button {
@@ -1944,6 +1949,95 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 }
 
 .compare-overlap-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 11px; }
+
+/* Linked reference-image comparison: gap color and pin shape encode different things. */
+.compare-response-galleries { min-width: 0; }
+.compare-response-galleries > summary,
+.compare-agreement-details > summary {
+  cursor: pointer; color: var(--text-3); font-size: .76rem; font-weight: 600;
+}
+.compare-response-galleries[open] { display: grid; gap: 10px; }
+.compare-agreement-details[open] > summary { margin-bottom: 12px; }
+.compare-response-tools { display: grid; gap: 12px; min-width: 0; }
+.compare-linked-tabs { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+.compare-linked-tabs button {
+  padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--r-sm);
+  background: var(--bg-subtle); color: var(--text-3); font-size: .8rem; font-weight: 650; cursor: pointer;
+}
+.compare-linked-tabs button[aria-selected="true"] {
+  background: var(--accent-light); color: var(--accent-strong); border-color: var(--accent-border);
+}
+.compare-pin-heading { display: flex; gap: 12px; justify-content: space-between; align-items: baseline; }
+.compare-pin-heading h3 { font-size: .82rem; white-space: nowrap; }
+.compare-pin-heading p { font-size: .7rem; color: var(--text-3); }
+.compare-pins { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.compare-pin-card {
+  display: flex; align-items: center; gap: 9px; padding: 10px; min-width: 0;
+  border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-subtle);
+}
+.compare-pin-card > svg { width: 28px; height: 28px; flex: 0 0 28px; overflow: visible; }
+.compare-pin-card > img { width: 62px; height: 62px; object-fit: contain; border-radius: 4px; }
+.compare-pin-content { flex: 1; min-width: 0; }
+.compare-pin-content label { display: grid; gap: 3px; font-size: .67rem; color: var(--text-3); }
+.compare-pin-content select {
+  width: 100%; min-width: 0; padding: 5px 8px; border: 1px solid var(--border);
+  border-radius: var(--r-sm); background: var(--surface-raised); color: var(--text); font-size: .76rem;
+}
+.compare-pin-ranks { display: flex; flex-wrap: wrap; column-gap: 14px; row-gap: 2px; margin-top: 5px; font-size: .68rem; color: var(--text-3); }
+.compare-pin-ranks strong { color: var(--text); }
+.compare-unpin { padding: 2px 6px; color: var(--text-3); background: transparent; border: 0; font-size: 1.15rem; cursor: pointer; }
+.compare-pin-notice { margin: 0; color: var(--accent-strong); font-size: .73rem; }
+.compare-pin-notice:empty { display: none; }
+.compare-response-section { display: grid; gap: 6px; }
+.compare-response-intro { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.compare-response-intro h3 { font-size: .87rem; }
+.compare-response-intro > span { font-size: .72rem; color: var(--text-3); }
+.compare-response-layout { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(280px,1fr); gap: 22px; align-items: start; }
+.compare-response-figure { min-width: 0; margin: 0; }
+.compare-response-figure svg { width: 100%; max-width: 560px; display: block; margin: 0 auto; overflow: visible; }
+.compare-response-frame { fill: var(--surface-raised); stroke: var(--border-strong); stroke-width: .8; }
+.compare-response-axis line { stroke: var(--border); stroke-width: .6; }
+.compare-response-axis text { fill: var(--text-3); font-size: 12px; }
+.compare-response-identity { stroke: var(--text-4); stroke-width: 1.3; stroke-dasharray: 6 5; }
+.compare-response-identity-label { fill: var(--text-3); font-size: 11px; }
+.compare-response-axis-title { fill: var(--text-2); font-size: 12px; }
+.compare-response-hit { fill: transparent; pointer-events: all; cursor: pointer; }
+.compare-response-point { stroke: var(--surface-raised); stroke-width: .8; cursor: pointer; }
+.compare-response-figure [data-response-image]:focus { outline: none; }
+.compare-response-figure [data-response-image]:focus .compare-response-point { stroke: var(--text); stroke-width: 2; }
+.compare-response-figure figcaption { font-size: .68rem; color: var(--text-3); text-align: center; margin-top: 2px; }
+.compare-gap-examples { display: grid; gap: 15px; padding-top: 15px; min-width: 0; }
+.compare-gap-group h4 { margin-bottom: 8px; font-size: .76rem; }
+.compare-gap-group--b h4 { color: #2468A0; }
+.compare-gap-group--a h4 { color: #C33C3C; }
+.compare-gap-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.compare-gap-example {
+  display: grid; justify-items: center; gap: 3px; padding: 9px 6px; min-width: 0; cursor: pointer;
+  border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface-raised); color: var(--text);
+}
+.compare-gap-example img { width: 76px; height: 76px; object-fit: contain; border-radius: 3px; }
+.compare-gap-example strong { font-size: .72rem; }
+.compare-gap-example span { font-size: .67rem; color: var(--text-3); }
+.compare-gap-example[aria-pressed="true"] { outline: 2px solid var(--text-2); outline-offset: 2px; }
+.compare-gap-examples > p { margin: 0; color: var(--text-3); font-size: .68rem; }
+.compare-response-tooltip {
+  position: fixed; z-index: 100; width: 270px; padding: 12px; display: grid; justify-items: center; gap: 7px;
+  pointer-events: none; border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  background: var(--surface-raised); color: var(--text); box-shadow: var(--shadow-lg); font-size: .75rem;
+}
+.compare-response-tooltip > img { width: 104px; height: 104px; object-fit: contain; border-radius: 4px; }
+.compare-response-tooltip table { width: 100%; border-collapse: collapse; font-size: .69rem; }
+.compare-response-tooltip th { font-weight: 600; text-align: left; }
+.compare-response-tooltip td, .compare-response-tooltip th { padding: 3px 4px; }
+.compare-response-tooltip thead { color: var(--text-3); border-bottom: 1px solid var(--border); }
+.compare-response-tooltip > span { font-size: .66rem; color: var(--text-3); }
+@media (max-width: 820px) {
+  .compare-response-layout { grid-template-columns: 1fr; }
+  .compare-pins { grid-template-columns: 1fr; }
+  .compare-pin-heading { display: block; }
+  .compare-response-intro { flex-wrap: wrap; }
+  .compare-pin-card > img { width: 48px; height: 48px; }
+}
 
 /* ─────────────────────────────────────────────
    CLUSTERING PANEL
@@ -3284,6 +3378,8 @@ button.cluster-size-chip:hover {
   background: var(--bg-subtle);
 }
 
+.selectivity-atlas-stage-column--brain { background: var(--surface-raised); }
+
 .selectivity-atlas-stage-heading {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -3378,6 +3474,12 @@ button.cluster-size-chip:hover {
 .selectivity-atlas-keyboard-help summary { cursor: pointer; width: fit-content; }
 .selectivity-atlas-keyboard-help p { max-width: 620px; margin-top: 5px; line-height: 1.5; }
 .selectivity-atlas-stage-footer > button { flex-shrink: 0; }
+.selectivity-atlas-view-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.selectivity-brain-view-control { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); }
+.selectivity-brain-view-control select {
+  padding: 5px 8px; border: 1px solid var(--border); border-radius: var(--r-sm);
+  background: var(--surface-raised); color: var(--text-2); font: inherit;
+}
 
 .selectivity-cluster-profile {
   display: grid;
@@ -3411,7 +3513,6 @@ button.cluster-size-chip:hover {
 .selectivity-cluster-profile--empty {
   grid-template-columns: 1fr;
   gap: 4px;
-  min-height: 72px;
   place-content: center;
   justify-items: center;
   text-align: center;
@@ -3430,6 +3531,11 @@ button.cluster-size-chip:hover {
 
 @media (max-height: 780px) and (min-width: 901px) {
   .selectivity-cluster-profile { padding-top: 7px; padding-bottom: 7px; }
+}
+
+/* Keep the cortical camera viewport stable when a cluster profile opens. */
+@media (min-width: 901px) {
+  .selectivity-cluster-profile { height: 156px; min-height: 156px; overflow-y: auto; }
 }
 
 @media (max-height: 650px) and (min-width: 901px) {

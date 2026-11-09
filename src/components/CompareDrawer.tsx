@@ -16,16 +16,18 @@ import { CLUSTERING_METHODS, loadVoxelClusterView } from '../utils/clustering';
 import { findSharedCompareNeighbors } from '../utils/discovery';
 import { buildEvidenceView } from '../utils/evidence';
 import { inferModelCategory } from '../utils/modelTags';
+import { CompareResponseTools } from './CompareResponseTools';
 
 type CompareDrawerProps = {
   compareMode: boolean;
   compareCells: SelectedHeatmapCell[];
+  isOpen: boolean;
   clustering: ClusteringData;
   heatmapCells: AggregateHeatmapCell[];
   rows: WideCsvRow[];
   modelRoiColumns: ModelRoiColumn[];
   topK: number;
-  onCompareModeChange: (enabled: boolean) => void;
+  onDismiss: () => void;
 };
 
 type ClusterComparisonStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -90,10 +92,11 @@ function CellCard({
         <div><dt>ROI rank</dt><dd>{cell.rankWithinRoi === null ? '—' : `#${cell.rankWithinRoi}`}</dd></div>
       </dl>
       {evidenceView ? (
-        <>
+        <details className="compare-response-galleries">
+          <summary>Highest &amp; lowest responses</summary>
           <ImageGrid title="Highest responses" images={evidenceView.topImages} onOpenImage={onOpenImage} compact />
           <ImageGrid title="Lowest responses" images={evidenceView.bottomImages} onOpenImage={onOpenImage} compact />
-        </>
+        </details>
       ) : (
         <p className="compare-empty">Predicted responses unavailable.</p>
       )}
@@ -224,7 +227,7 @@ function ClusterComparisonSection({
 }
 
 export function CompareDrawer({
-  compareMode, compareCells, clustering, heatmapCells, rows, modelRoiColumns, topK, onCompareModeChange,
+  compareMode, compareCells, isOpen, clustering, heatmapCells, rows, modelRoiColumns, topK, onDismiss,
 }: CompareDrawerProps) {
   const [modalImage, setModalImage] = useState<EvidenceImage | null>(null);
   const [clusterComparisonStatus, setClusterComparisonStatus] = useState<ClusterComparisonStatus>('idle');
@@ -248,11 +251,11 @@ export function CompareDrawer({
   );
 
   useEffect(() => {
-    if (!cellA || !cellB) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onCompareModeChange(false); };
+    if (!isOpen || !cellA || !cellB) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onDismiss(); };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [cellA, cellB, onCompareModeChange]);
+  }, [isOpen, cellA, cellB, onDismiss]);
 
   useEffect(() => {
     let ignore = false;
@@ -311,7 +314,8 @@ export function CompareDrawer({
   if (!compareMode || !cellA || !cellB) return null;
 
   return (
-    <div className="compare-modal-backdrop" role="presentation" onClick={() => onCompareModeChange(false)}>
+    <div className="compare-dialog-host" hidden={!isOpen}>
+    <div className="compare-modal-backdrop" role="presentation" onClick={onDismiss}>
       <section
         className="compare-drawer compare-modal"
         role="dialog"
@@ -325,7 +329,7 @@ export function CompareDrawer({
             <h2>Compare selections</h2>
             <p>Predicted image responses for A and B.</p>
           </div>
-          <button className="compare-close-button" type="button" onClick={() => onCompareModeChange(false)}>
+          <button className="compare-close-button" type="button" onClick={onDismiss}>
             Close &thinsp; <kbd style={{ fontFamily: 'inherit', fontSize: '.72rem', opacity: .7 }}>Esc</kbd>
           </button>
         </div>
@@ -337,8 +341,13 @@ export function CompareDrawer({
             <CellCard label="B" cell={cellB} evidenceView={evidenceB} onOpenImage={setModalImage} />
           </div>
 
+          <CompareResponseTools key={`${cellA.id}:${cellB.id}`} cellA={cellA} cellB={cellB}
+            evidenceA={evidenceA} evidenceB={evidenceB} clustering={clustering} onOpenImage={setModalImage} />
+
           {/* Overlap section */}
           {summary ? (
+            <details className="compare-agreement-details">
+              <summary>Agreement details &amp; image overlap</summary>
             <section className="compare-overlap-section">
               <div className="compare-badge-row">
                 <span className="compare-rank-similarity" title="Spearman correlation between the two image-response rankings">
@@ -378,6 +387,7 @@ export function CompareDrawer({
                 </div>
               </details>
             </section>
+            </details>
           ) : (
             <p className="compare-empty">
               Responses unavailable for one or both selections.
@@ -387,6 +397,7 @@ export function CompareDrawer({
 
         {modalImage && <ImageModal image={modalImage} onClose={() => setModalImage(null)} />}
       </section>
+    </div>
     </div>
   );
 }

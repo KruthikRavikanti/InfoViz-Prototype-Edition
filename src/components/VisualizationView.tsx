@@ -31,6 +31,7 @@ type VisualizationViewProps = {
   selectedCell: SelectedHeatmapCell | null;
   compareMode: boolean;
   compareCells: SelectedHeatmapCell[];
+  compareDialogOpen: boolean;
   comparableCellIds: Set<string>;
   session: CortexComparisonSession | null;
   focusedStimulusId: string | null;
@@ -43,6 +44,7 @@ type VisualizationViewProps = {
   onResetControls: () => void;
   onSelectCell: (cell: SelectedHeatmapCell) => void;
   onCompareModeChange: (enabled: boolean) => void;
+  onCompareDialogOpenChange: (open: boolean) => void;
   onFocusStimulus: (stimulusId: string) => void;
   onSelectSessionModel: (model: string) => void;
 };
@@ -62,6 +64,7 @@ export function VisualizationView({
   selectedCell,
   compareMode,
   compareCells,
+  compareDialogOpen,
   comparableCellIds,
   session,
   focusedStimulusId,
@@ -74,6 +77,7 @@ export function VisualizationView({
   onResetControls,
   onSelectCell,
   onCompareModeChange,
+  onCompareDialogOpenChange,
   onFocusStimulus,
   onSelectSessionModel,
 }: VisualizationViewProps) {
@@ -98,6 +102,8 @@ export function VisualizationView({
             showScoreLabels={showScoreLabels}
             compareMode={compareMode}
             compareSelectionCount={compareCells.length}
+            compareDialogOpen={compareDialogOpen}
+            onOpenComparison={() => onCompareDialogOpenChange(true)}
             onRankingSystemChange={onRankingSystemChange}
             onSelectedRankingRoiChange={onSelectedRankingRoiChange}
             onModelSearchChange={onModelSearchChange}
@@ -139,11 +145,12 @@ export function VisualizationView({
         heatmapCells={heatmapCells}
         compareMode={compareMode}
         compareCells={compareCells}
+        isOpen={compareDialogOpen}
         clustering={clustering}
         rows={rows}
         modelRoiColumns={modelRoiColumns}
         topK={6}
-        onCompareModeChange={onCompareModeChange}
+        onDismiss={() => onCompareDialogOpenChange(false)}
       />
     </>
   );

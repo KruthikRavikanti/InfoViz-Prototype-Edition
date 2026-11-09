@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { ImageGrid } from './ImageGrid';
 import { VoxelSelectivityAtlasDialog } from './VoxelSelectivityAtlasDialog';
 import { JointDendrogram } from './JointDendrogram';
+import { ComparisonPinMarker } from './ComparisonPinMarker';
 import type { ClusterPoint, ClusterSummary, ClusterView, ClusteringMethod, EvidenceImage, GroundTruthPatient, ImageCategory } from '../types/data';
 import type { CanonicalRoi, CortexComparisonSession, SessionClusterOverlay } from '../types/session';
 import { getSessionForModel } from '../utils/sessionModels';
@@ -164,7 +165,7 @@ function tooltipAnchor(target: SVGGraphicsElement): { anchorX: number; anchorY: 
   return { anchorX: bounds.left + bounds.width / 2, anchorY: bounds.top + bounds.height / 2 };
 }
 
-function ClusterScatter({
+export function ClusterScatter({
   view,
   onOpenImage,
   searchQuery,
@@ -175,6 +176,7 @@ function ClusterScatter({
   linkedItem = null,
   onLinkedItemChange,
   roi,
+  pinnedImages = [],
 }: {
   view: ClusterView;
   onOpenImage: (i: EvidenceImage) => void;
@@ -186,6 +188,7 @@ function ClusterScatter({
   linkedItem?: LinkedPlotItem | null;
   onLinkedItemChange?: (item: LinkedPlotItem | null) => void;
   roi?: CanonicalRoi;
+  pinnedImages?: Array<{ imageName: string; index: number }>;
 }) {
   const [dotTooltip, setDotTooltip] = useState<DotTooltip | null>(null);
   const tooltipId = useId();
@@ -420,6 +423,24 @@ function ClusterScatter({
                 <circle className="session-cluster-marker-glow" r="7" fill={overlay.color} />
                 <circle className="session-cluster-marker-focus" r="8.5" />
                 <circle className="session-cluster-marker-core" r="4.6" fill={overlay.color} />
+              </g>
+            );
+          })}
+          {pinnedImages.map(({ imageName, index }) => {
+            const item = pts.find(({ p }) => p.imageName === imageName);
+            if (!item) return null;
+            const x = pad + ((item.x - minX) / xSpan) * (W - pad * 2);
+            const y = H - pad - ((item.y - minY) / ySpan) * (H - pad * 2);
+            const clusterIndex = Number(item.p.clusterLabel);
+            const color = CLUSTER_COLORS[Number.isFinite(clusterIndex) ? clusterIndex % CLUSTER_COLORS.length : 0];
+            return (
+              <g key={`pin-${imageName}`} data-pinned-image={imageName} data-pinned-cluster={item.p.clusterLabel}>
+                <ComparisonPinMarker
+                  index={index} x={x} y={y} color={color}
+                  label={`${index + 1} · ${imageName.replace(/\.png$/i, '')}`}
+                  labelSide={x > W * .65 ? 'left' : 'right'}
+                  labelDy={y < 35 ? 21 : index === 1 ? 20 : -12}
+                />
               </g>
             );
           })}
